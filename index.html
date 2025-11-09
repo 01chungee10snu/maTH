@@ -1,4 +1,110 @@
-{
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>태희 나눗셈 · 티니핑 캔버스</title>
+<style>
+  html,body { margin:0; padding:0; height:100%; background:#f7f8fc; }
+  #app { display:block; margin:0 auto; background:#ffffff; max-width:1024px; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
+  .wrap { padding:12px; }
+  canvas { width:100%; height:auto; display:block; }
+  /* 폰트는 시스템 폰트 사용 */
+</style>
+</head>
+<body>
+<div class="wrap">
+  <canvas id="app" width="1024" height="640"></canvas>
+</div>
+
+<script>
+/* =========================================================================
+   0) 공통 유틸
+   ========================================================================= */
+const DPR = Math.min(2, window.devicePixelRatio || 1);
+const CANVAS = document.getElementById('app');
+const CTX = CANVAS.getContext('2d');
+
+function setHiDPI() {
+  const cssW = CANVAS.clientWidth || 1024;
+  const cssH = Math.round(cssW * (640/1024));
+  CANVAS.style.width = cssW + 'px';
+  CANVAS.style.height = cssH + 'px';
+  CANVAS.width = Math.round(cssW * DPR);
+  CANVAS.height = Math.round(cssH * DPR);
+  CTX.setTransform(DPR,0,0,DPR,0,0);
+}
+setHiDPI();
+window.addEventListener('resize', setHiDPI);
+
+function roundRect(ctx, x, y, w, h, r) {
+  const rr = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+rr, y);
+  ctx.arcTo(x+w, y,   x+w, y+h, rr);
+  ctx.arcTo(x+w, y+h, x,   y+h, rr);
+  ctx.arcTo(x,   y+h, x,   y,   rr);
+  ctx.arcTo(x,   y,   x+w, y,   rr);
+  ctx.closePath();
+}
+function fillTextWrap(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = (text||'').toString().split(/\s+/);
+  let line = '', outY = y;
+  for (let n=0; n<words.length; n++) {
+    const testLine = line + words[n] + ' ';
+    const m = ctx.measureText(testLine);
+    if (m.width > maxWidth && n>0) {
+      ctx.fillText(line, x, outY);
+      line = words[n] + ' ';
+      outY += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line, x, outY);
+  return outY;
+}
+function now() { return performance.now(); }
+
+/* =========================================================================
+   1) 데이터: 티니핑 메타(이름·유형·설명) + 이미지 JSON 매핑
+   ========================================================================= */
+const baseTinipings = [
+  { id:1,  name:"하츄핑",   type:"로열", desc:"사랑의 티니핑" },
+  { id:2,  name:"사뿐핑",   type:"로열", desc:"우아함의 티니핑" },
+  { id:3,  name:"아름핑",   type:"로열", desc:"아름다움의 티니핑" },
+  { id:4,  name:"뽀니핑",   type:"로열", desc:"자신감의 티니핑" },
+  { id:5,  name:"이클립스핑", type:"전설", desc:"어둠을 지배하는 전설의 티니핑" },
+  { id:6,  name:"다이아나핑", type:"전설", desc:"밤과 달의 여신" },
+  { id:7,  name:"해핑",     type:"서포팅", desc:"행복의 티니핑" },
+  { id:8,  name:"포실핑",   type:"서포팅", desc:"순수의 티니핑" },
+  { id:9,  name:"깡총핑",   type:"서포팅", desc:"투지의 티니핑" },
+  { id:10, name:"뽀득핑",   type:"일반", desc:"상쾌함의 티니핑" },
+  { id:11, name:"차밍핑",   type:"일반", desc:"매력과 장난기의 티니핑" },
+  { id:12, name:"나비핑",   type:"일반", desc:"가벼움의 티니핑" },
+  { id:13, name:"실크핑",   type:"일반", desc:"모험의 티니핑" },
+  { id:14, name:"샤를핑",   type:"일반", desc:"명예의 티니핑" },
+  { id:15, name:"트롯핑",   type:"일반", desc:"흥겨움의 티니핑" },
+  { id:16, name:"깨굴핑",   type:"일반", desc:"교활함의 티니핑" },
+  { id:17, name:"스노우핑", type:"일반", desc:"빙결의 티니핑" },
+  { id:18, name:"이슬핑",   type:"일반", desc:"순수함의 티니핑" },
+  { id:19, name:"쿨쿨핑",   type:"일반", desc:"잠의 티니핑" },
+  { id:20, name:"슈슈핑",   type:"일반", desc:"성실의 티니핑" },
+  { id:21, name:"큐핑",     type:"일반", desc:"짝사랑의 티니핑" },
+  { id:22, name:"롱롱핑",   type:"일반", desc:"성장의 티니핑" },
+  { id:23, name:"야옹핑",   type:"일반", desc:"도도함의 티니핑" },
+  { id:24, name:"젠틀핑",   type:"일반", desc:"정중함의 티니핑" }
+];
+
+// [필수] 여기에 이미지 JSON 그대로 붙여넣기
+// 예시 구조:
+// const tinipingImagesByGroup = {
+//   "로열 프린세스 티니핑": [ { "이름":"하츄핑","특징":"사랑","이미지":"<BASE64 or data:...>" }, ... ],
+//   "전설 티니핑": [ ... ],
+//   "서포팅 티니핑": [ ... ],
+//   "일반 프린세스 티니핑": [ ... ]
+// };
+const tinipingImagesByGroup = {
   "로열 프린세스 티니핑": [
     {
       "이름": "하츄핑",
@@ -127,114 +233,7 @@
       "이미지": "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"
     }
   ]
-}
-<!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>태희 나눗셈 · 티니핑 캔버스</title>
-<style>
-  html,body { margin:0; padding:0; height:100%; background:#f7f8fc; }
-  #app { display:block; margin:0 auto; background:#ffffff; max-width:1024px; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
-  .wrap { padding:12px; }
-  canvas { width:100%; height:auto; display:block; }
-  /* 폰트는 시스템 폰트 사용 */
-</style>
-</head>
-<body>
-<div class="wrap">
-  <canvas id="app" width="1024" height="640"></canvas>
-</div>
-
-<script>
-/* =========================================================================
-   0) 공통 유틸
-   ========================================================================= */
-const DPR = Math.min(2, window.devicePixelRatio || 1);
-const CANVAS = document.getElementById('app');
-const CTX = CANVAS.getContext('2d');
-
-function setHiDPI() {
-  const cssW = CANVAS.clientWidth || 1024;
-  const cssH = Math.round(cssW * (640/1024));
-  CANVAS.style.width = cssW + 'px';
-  CANVAS.style.height = cssH + 'px';
-  CANVAS.width = Math.round(cssW * DPR);
-  CANVAS.height = Math.round(cssH * DPR);
-  CTX.setTransform(DPR,0,0,DPR,0,0);
-}
-setHiDPI();
-window.addEventListener('resize', setHiDPI);
-
-function roundRect(ctx, x, y, w, h, r) {
-  const rr = Math.min(r, w/2, h/2);
-  ctx.beginPath();
-  ctx.moveTo(x+rr, y);
-  ctx.arcTo(x+w, y,   x+w, y+h, rr);
-  ctx.arcTo(x+w, y+h, x,   y+h, rr);
-  ctx.arcTo(x,   y+h, x,   y,   rr);
-  ctx.arcTo(x,   y,   x+w, y,   rr);
-  ctx.closePath();
-}
-function fillTextWrap(ctx, text, x, y, maxWidth, lineHeight) {
-  const words = (text||'').toString().split(/\s+/);
-  let line = '', outY = y;
-  for (let n=0; n<words.length; n++) {
-    const testLine = line + words[n] + ' ';
-    const m = ctx.measureText(testLine);
-    if (m.width > maxWidth && n>0) {
-      ctx.fillText(line, x, outY);
-      line = words[n] + ' ';
-      outY += lineHeight;
-    } else {
-      line = testLine;
-    }
-  }
-  ctx.fillText(line, x, outY);
-  return outY;
-}
-function now() { return performance.now(); }
-
-/* =========================================================================
-   1) 데이터: 티니핑 메타(이름·유형·설명) + 이미지 JSON 매핑
-   ========================================================================= */
-const baseTinipings = [
-  { id:1,  name:"하츄핑",   type:"로열", desc:"사랑의 티니핑" },
-  { id:2,  name:"사뿐핑",   type:"로열", desc:"우아함의 티니핑" },
-  { id:3,  name:"아름핑",   type:"로열", desc:"아름다움의 티니핑" },
-  { id:4,  name:"뽀니핑",   type:"로열", desc:"자신감의 티니핑" },
-  { id:5,  name:"이클립스핑", type:"전설", desc:"어둠을 지배하는 전설의 티니핑" },
-  { id:6,  name:"다이아나핑", type:"전설", desc:"밤과 달의 여신" },
-  { id:7,  name:"해핑",     type:"서포팅", desc:"행복의 티니핑" },
-  { id:8,  name:"포실핑",   type:"서포팅", desc:"순수의 티니핑" },
-  { id:9,  name:"깡총핑",   type:"서포팅", desc:"투지의 티니핑" },
-  { id:10, name:"뽀득핑",   type:"일반", desc:"상쾌함의 티니핑" },
-  { id:11, name:"차밍핑",   type:"일반", desc:"매력과 장난기의 티니핑" },
-  { id:12, name:"나비핑",   type:"일반", desc:"가벼움의 티니핑" },
-  { id:13, name:"실크핑",   type:"일반", desc:"모험의 티니핑" },
-  { id:14, name:"샤를핑",   type:"일반", desc:"명예의 티니핑" },
-  { id:15, name:"트롯핑",   type:"일반", desc:"흥겨움의 티니핑" },
-  { id:16, name:"깨굴핑",   type:"일반", desc:"교활함의 티니핑" },
-  { id:17, name:"스노우핑", type:"일반", desc:"빙결의 티니핑" },
-  { id:18, name:"이슬핑",   type:"일반", desc:"순수함의 티니핑" },
-  { id:19, name:"쿨쿨핑",   type:"일반", desc:"잠의 티니핑" },
-  { id:20, name:"슈슈핑",   type:"일반", desc:"성실의 티니핑" },
-  { id:21, name:"큐핑",     type:"일반", desc:"짝사랑의 티니핑" },
-  { id:22, name:"롱롱핑",   type:"일반", desc:"성장의 티니핑" },
-  { id:23, name:"야옹핑",   type:"일반", desc:"도도함의 티니핑" },
-  { id:24, name:"젠틀핑",   type:"일반", desc:"정중함의 티니핑" }
-];
-
-// [필수] 여기에 이미지 JSON 그대로 붙여넣기
-// 예시 구조:
-// const tinipingImagesByGroup = {
-//   "로열 프린세스 티니핑": [ { "이름":"하츄핑","특징":"사랑","이미지":"<BASE64 or data:...>" }, ... ],
-//   "전설 티니핑": [ ... ],
-//   "서포팅 티니핑": [ ... ],
-//   "일반 프린세스 티니핑": [ ... ]
-// };
-const tinipingImagesByGroup = {}; // ← 붙여넣은 후 이 줄 삭제
+};
 
 function buildNameToImageMap() {
   const map = new Map();
@@ -259,6 +258,22 @@ function buildNameToImageMap() {
 }
 const NAME2IMG = buildNameToImageMap();
 const TINIPINGS = baseTinipings.map(t => ({ ...t, image: NAME2IMG.get(t.name) || null }));
+
+// 이미지 캐시: 동일한 이미지를 매 프레임마다 다시 로드하지 않도록 관리
+const IMAGE_CACHE = new Map();
+function getCachedImage(url) {
+  if (!url) return null;
+  let entry = IMAGE_CACHE.get(url);
+  if (!entry) {
+    const img = new Image();
+    entry = { img, loaded: false, error: false };
+    img.onload = () => { entry.loaded = true; };
+    img.onerror = () => { entry.error = true; };
+    img.src = url;
+    IMAGE_CACHE.set(url, entry);
+  }
+  return entry;
+}
 
 /* =========================================================================
    2) 상태
@@ -564,42 +579,45 @@ function drawCatch(ts) {
   CTX.fill();
   CTX.restore();
 
-  // 이미지
   const tgt = STATE.newTiniping;
-  if (tgt && tgt.image) {
-    const img = new Image();
-    img.onload = () => {
-      const size = 200*scale;
-      CTX.drawImage(img, cx-size/2, cy-size/2, size, size);
-      // 안내 텍스트
-      CTX.fillStyle='#9333ea';
-      CTX.font='bold 24px system-ui';
-      CTX.textAlign='center';
-      CTX.fillText('캐치 성공!', cx, H - 100);
-      // 버튼
-      const bw=240, bh=52, bx=cx-bw/2, by=H-80;
-      roundRect(CTX, bx, by, bw, bh, 14);
-      const gr = CTX.createLinearGradient(bx,by,bx+bw,by+bh);
-      gr.addColorStop(0,'#f472b6'); gr.addColorStop(1,'#8b5cf6');
-      CTX.fillStyle=gr; CTX.fill();
-      CTX.fillStyle='#fff'; CTX.font='bold 18px system-ui';
-      CTX.fillText('컬렉션에 담기', cx, by+34);
-      STATE.hitboxes.push({ id:'btn_catch_ok', x:bx, y:by, w:bw, h:bh });
-    };
-    img.src = tgt.image;
-  } else {
-    // 이미지 없는 경우 텍스트만
-    CTX.fillStyle='#9333ea';
-    CTX.font='bold 24px system-ui';
-    CTX.textAlign='center';
-    CTX.fillText('새 티니핑을 획득했어요!', cx, H - 100);
-    const bw=240, bh=52, bx=cx-bw/2, by=H-80;
-    roundRect(CTX, bx, by, bw, bh, 14);
-    CTX.fillStyle='#8b5cf6'; CTX.fill();
-    CTX.fillStyle='#fff'; CTX.font='bold 18px system-ui';
-    CTX.fillText('컬렉션에 담기', cx, by+34);
-    STATE.hitboxes.push({ id:'btn_catch_ok', x:bx, y:by, w:240, h:52 });
+  const cached = tgt?.image ? getCachedImage(tgt.image) : null;
+  const hasImage = Boolean(cached?.loaded && !cached.error);
+
+  if (hasImage) {
+    const size = 200*scale;
+    CTX.drawImage(cached.img, cx-size/2, cy-size/2, size, size);
+  } else if (tgt) {
+    // 이미지 로딩 중 또는 실패 시 플레이스홀더
+    const placeholderR = 90 * scale;
+    CTX.beginPath();
+    CTX.arc(cx, cy, placeholderR, 0, Math.PI*2);
+    CTX.fillStyle = '#fbcfe8';
+    CTX.fill();
+    CTX.fillStyle = '#9333ea';
+    CTX.font = '16px system-ui';
+    CTX.textAlign = 'center';
+    CTX.fillText(cached?.error ? '이미지를 불러올 수 없어요' : '이미지를 불러오는 중...', cx, cy+6);
   }
+
+  const message = hasImage ? '캐치 성공!' : '새 티니핑을 획득했어요!';
+  CTX.fillStyle='#9333ea';
+  CTX.font='bold 24px system-ui';
+  CTX.textAlign='center';
+  CTX.fillText(message, cx, H - 100);
+
+  const bw=240, bh=52, bx=cx-bw/2, by=H-80;
+  roundRect(CTX, bx, by, bw, bh, 14);
+  if (hasImage) {
+    const gr = CTX.createLinearGradient(bx,by,bx+bw,by+bh);
+    gr.addColorStop(0,'#f472b6'); gr.addColorStop(1,'#8b5cf6');
+    CTX.fillStyle=gr;
+  } else {
+    CTX.fillStyle='#8b5cf6';
+  }
+  CTX.fill();
+  CTX.fillStyle='#fff'; CTX.font='bold 18px system-ui';
+  CTX.fillText('컬렉션에 담기', cx, by+34);
+  STATE.hitboxes.push({ id:'btn_catch_ok', x:bx, y:by, w:bw, h:bh });
 }
 
 function drawCollection() {
@@ -641,10 +659,20 @@ function drawCollection() {
     const centerY = y + 52;
     const size = 58;
 
-    if (STATE.caughtIds.includes(t.id) && t.image) {
-      const img = new Image();
-      img.onload = ()=> { CTX.drawImage(img, centerX-size/2, centerY-size/2, size, size); };
-      img.src = t.image;
+    const owned = STATE.caughtIds.includes(t.id);
+    const cached = owned && t.image ? getCachedImage(t.image) : null;
+    if (owned && cached && cached.loaded && !cached.error) {
+      CTX.drawImage(cached.img, centerX-size/2, centerY-size/2, size, size);
+      CTX.fillStyle='#374151'; CTX.font='12px system-ui';
+      CTX.fillText(t.name, centerX, y+h-16);
+    } else if (owned && cached && cached.error) {
+      CTX.fillStyle='#f87171'; CTX.font='12px system-ui';
+      CTX.fillText('이미지 오류', centerX, centerY+4);
+      CTX.fillStyle='#374151'; CTX.font='12px system-ui';
+      CTX.fillText(t.name, centerX, y+h-16);
+    } else if (owned && cached) {
+      CTX.fillStyle='#9ca3af'; CTX.font='12px system-ui';
+      CTX.fillText('로딩 중...', centerX, centerY+4);
       CTX.fillStyle='#374151'; CTX.font='12px system-ui';
       CTX.fillText(t.name, centerX, y+h-16);
     } else {
