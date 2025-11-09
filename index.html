@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>태희 나눗셈 · 티니핑 캔버스</title>
+<title>태희의 도전! 나눗셈을 성공하고 티니핑 캐치!</title>
 <style>
   html,body { margin:0; padding:0; height:100%; background:#f7f8fc; }
   #app { display:block; margin:0 auto; background:#ffffff; max-width:1024px; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
@@ -335,9 +335,9 @@ function genProblem(diff) {
     else              { question = `${dividend} ÷ ${divisor} = ( )`; answer = quotient; }
   } else {
     const templates = [
-      `케이크 ${dividend}개를 ${divisor}명에게 똑같이 나누어 주면 한 명은 몇 개를 받을까요?`,
-      `티니핑 스티커 ${dividend}개를 ${divisor}개씩 묶으면 몇 묶음이 될까요?`,
-      `색연필 ${dividend}자루를 ${divisor}명이 똑같이 나누면 한 명은 몇 자루를 받을까요?`
+      `태희야, 케이크 ${dividend}개를 ${divisor}명에게 똑같이 나누어 주면 한 명은 몇 개를 받을까?`,
+      `태희야, 티니핑 스티커 ${dividend}개를 ${divisor}개씩 묶으면 몇 묶음이 될까?`,
+      `태희야, 색연필 ${dividend}자루를 ${divisor}명이 똑같이 나누면 한 명은 몇 자루를 받을까?`
     ];
     question = templates[Math.floor(Math.random()*templates.length)];
     answer = quotient;
@@ -491,7 +491,7 @@ function drawExplain() {
   CTX.textAlign='left';
   CTX.fillStyle = STATE.isCorrect? '#065f46' : '#7f1d1d';
   CTX.font='bold 22px system-ui';
-  CTX.fillText(STATE.isCorrect? '정답입니다!' : '다시 생각해봐요', cardX+24, cardY+42);
+  CTX.fillText(STATE.isCorrect? '태희야, 정답이야!' : '태희야, 다시 생각해봐!', cardX+24, cardY+42);
 
   CTX.fillStyle='#111827';
   CTX.font='16px system-ui';
@@ -539,7 +539,7 @@ function drawExplain() {
   CTX.fillStyle = canNext ? '#8b5cf6' : '#d1d5db';
   CTX.fill();
   CTX.fillStyle='#fff'; CTX.font='bold 18px system-ui'; CTX.textAlign='center';
-  CTX.fillText('다음 문제 →', nxX+nxW/2, nxY+34);
+  CTX.fillText('태희야, 다음 문제로!', nxX+nxW/2, nxY+34);
   STATE.hitboxes.push({ id:'btn_next', x:nxX, y:nxY, w:nxW, h:nxH, disabled:!canNext });
 }
 
@@ -574,7 +574,7 @@ function drawCatch(ts) {
       CTX.fillStyle='#9333ea';
       CTX.font='bold 24px system-ui';
       CTX.textAlign='center';
-      CTX.fillText('캐치 성공!', cx, H - 100);
+      CTX.fillText('태희가 캐치 성공!', cx, H - 100);
       // 버튼
       const bw=240, bh=52, bx=cx-bw/2, by=H-80;
       roundRect(CTX, bx, by, bw, bh, 14);
@@ -591,7 +591,7 @@ function drawCatch(ts) {
     CTX.fillStyle='#9333ea';
     CTX.font='bold 24px system-ui';
     CTX.textAlign='center';
-    CTX.fillText('새 티니핑을 획득했어요!', cx, H - 100);
+    CTX.fillText('태희가 새 티니핑을 획득했어!', cx, H - 100);
     const bw=240, bh=52, bx=cx-bw/2, by=H-80;
     roundRect(CTX, bx, by, bw, bh, 14);
     CTX.fillStyle='#8b5cf6'; CTX.fill();
@@ -606,7 +606,7 @@ function drawCollection() {
   // 제목
   CTX.fillStyle='#ec4899';
   CTX.font='bold 26px system-ui';
-  CTX.fillText('티니핑 컬렉션', 24, 46);
+  CTX.fillText('태희의 티니핑 컬렉션', 24, 46);
   CTX.fillStyle='#6b7280';
   CTX.font='14px system-ui';
   CTX.fillText(`수집: ${STATE.caughtIds.length} / ${TINIPINGS.length}`, 24, 70);
@@ -664,16 +664,16 @@ function drawComplete() {
   CTX.fill();
 
   CTX.fillStyle='#10b981'; CTX.font='bold 32px system-ui'; CTX.textAlign='center';
-  CTX.fillText('축하합니다! 100문제 완료', cx+cw/2, cy+60);
+  CTX.fillText('축하해 태희야! 100문제 완료!', cx+cw/2, cy+60);
   CTX.fillStyle='#111827'; CTX.font='20px system-ui';
-  CTX.fillText(`최종 점수: ${STATE.score}점`, cx+cw/2, cy+110);
-  CTX.fillText(`획득 티니핑: ${STATE.caughtIds.length}개`, cx+cw/2, cy+146);
+  CTX.fillText(`태희의 최종 점수: ${STATE.score}점`, cx+cw/2, cy+110);
+  CTX.fillText(`태희가 획득한 티니핑: ${STATE.caughtIds.length}개`, cx+cw/2, cy+146);
 
   const bw=240, bh=52, bx=cx+(cw-bw)/2, by=cy+ch-84;
   roundRect(CTX, bx, by, bw, bh, 14);
   CTX.fillStyle='#ef4444'; CTX.fill();
   CTX.fillStyle='#fff'; CTX.font='bold 18px system-ui';
-  CTX.fillText('처음부터 다시', bx+bw/2, by+34);
+  CTX.fillText('태희야, 처음부터 다시 도전!', bx+bw/2, by+34);
   STATE.hitboxes.push({ id:'btn_reset', x:bx, y:by, w:bw, h:bh });
 }
 
