@@ -690,8 +690,9 @@ function drawQuiz() {
     STATE.hitboxes.push({ id:`opt_${i}`, x:ox, y:oy, w:ow, h:oh, value:options[i] });
   }
 
-  // 정답 확인 버튼
-  const btnW=240, btnH=52, btnX=cardX + (cardW-btnW)/2, btnY=cardY+cardH- btnH-16;
+  // 정답 확인 버튼 (선택지 아래에 배치)
+  const lastOptionY = baseY + (options.length-1)*(oh+12) + oh;
+  const btnW=240, btnH=52, btnX=cardX + (cardW-btnW)/2, btnY=lastOptionY + 24;
   roundRect(CTX, btnX, btnY, btnW, btnH, 14);
   if (STATE.selected==null) {
     CTX.fillStyle='#d1d5db';
