@@ -467,6 +467,62 @@ function drawHeader(W,H) {
   STATE.hitboxes.push({ id:'btn_collection', x:bx, y:by, w:bw, h:bh });
 }
 
+function drawBackgroundTiles(W, H, opacity = 0.15) {
+  // 배경에 반투명한 티니핑 타일들 그리기
+  const tileSize = 60;
+  const gap = 10;
+  const cols = Math.floor(W / (tileSize + gap)) + 1;
+  const rows = Math.floor(H / (tileSize + gap)) + 1;
+
+  CTX.globalAlpha = opacity;
+
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const idx = (row * cols + col) % TINIPINGS.length;
+      const tp = TINIPINGS[idx];
+      const x = col * (tileSize + gap);
+      const y = row * (tileSize + gap);
+
+      // 타일 배경
+      CTX.save();
+      roundRect(CTX, x, y, tileSize, tileSize, 10);
+
+      // 그라데이션 배경
+      const g = CTX.createLinearGradient(x, y, x + tileSize, y + tileSize);
+      if (tp.type === '로열') {
+        g.addColorStop(0, '#fce7f3');
+        g.addColorStop(1, '#fbcfe8');
+      } else if (tp.type === '전설') {
+        g.addColorStop(0, '#fef3c7');
+        g.addColorStop(1, '#fde68a');
+      } else if (tp.type === '서포팅') {
+        g.addColorStop(0, '#ddd6fe');
+        g.addColorStop(1, '#c4b5fd');
+      } else {
+        g.addColorStop(0, '#e0f2fe');
+        g.addColorStop(1, '#bae6fd');
+      }
+      CTX.fillStyle = g;
+      CTX.fill();
+      CTX.restore();
+
+      // 티니핑 이미지 그리기
+      if (tp.image) {
+        const img = new Image();
+        img.onload = () => {
+          CTX.globalAlpha = opacity;
+          const imgSize = tileSize * 0.7;
+          CTX.drawImage(img, x + (tileSize - imgSize) / 2, y + (tileSize - imgSize) / 2, imgSize, imgSize);
+          CTX.globalAlpha = 1.0;
+        };
+        img.src = tp.image;
+      }
+    }
+  }
+
+  CTX.globalAlpha = 1.0;
+}
+
 function drawHome() {
   const {W,H} = clear();
 
@@ -586,6 +642,7 @@ function drawHome() {
 
 function drawQuiz() {
   const {W,H} = clear();
+  drawBackgroundTiles(W, H, 0.15);
   drawHeader(W,H);
 
   // 카드
@@ -653,6 +710,7 @@ function drawQuiz() {
 
 function drawExplain() {
   const {W,H} = clear();
+  drawBackgroundTiles(W, H, 0.12);
   drawHeader(W,H);
 
   const cardX=24, cardY=96, cardW=W-48, cardH=H-140;
@@ -720,6 +778,7 @@ function drawExplain() {
 
 function drawCatch(ts) {
   const {W,H} = clear();
+  drawBackgroundTiles(W, H, 0.1);
   const t0 = STATE.catchStart || (STATE.catchStart = ts);
   const elapsed = Math.min(1, (ts - t0) / 1200); // 1.2s
 
@@ -778,6 +837,7 @@ function drawCatch(ts) {
 
 function drawCollection() {
   const {W,H} = clear();
+  drawBackgroundTiles(W, H, 0.1);
   // 제목
   CTX.fillStyle='#ec4899';
   CTX.font='bold 26px system-ui';
@@ -832,6 +892,7 @@ function drawCollection() {
 
 function drawComplete() {
   const {W,H} = clear();
+  drawBackgroundTiles(W, H, 0.1);
   // 축하 카드
   const cw= Math.min(600, W-48), ch=320, cx=(W-cw)/2, cy=(H-ch)/2;
   roundRect(CTX, cx, cy, cw, ch, 24);
