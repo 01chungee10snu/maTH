@@ -264,7 +264,7 @@ const TINIPINGS = baseTinipings.map(t => ({ ...t, image: NAME2IMG.get(t.name) ||
    ========================================================================= */
 const LS_KEY = 'taehee-math-division-canvas';
 let STATE = {
-  mode: 'quiz', // quiz | explain | catch | collection | complete
+  mode: 'home', // home | quiz | explain | catch | collection | complete
   questionIndex: 0,
   totalQuestions: 0,
   score: 0,
@@ -467,8 +467,182 @@ function drawHeader(W,H) {
   STATE.hitboxes.push({ id:'btn_collection', x:bx, y:by, w:bw, h:bh });
 }
 
+function drawBackgroundTiles(W, H, opacity = 0.15) {
+  // 배경에 반투명한 티니핑 타일들 그리기
+  const tileSize = 60;
+  const gap = 10;
+  const cols = Math.floor(W / (tileSize + gap)) + 1;
+  const rows = Math.floor(H / (tileSize + gap)) + 1;
+
+  CTX.globalAlpha = opacity;
+
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const idx = (row * cols + col) % TINIPINGS.length;
+      const tp = TINIPINGS[idx];
+      const x = col * (tileSize + gap);
+      const y = row * (tileSize + gap);
+
+      // 타일 배경
+      CTX.save();
+      roundRect(CTX, x, y, tileSize, tileSize, 10);
+
+      // 그라데이션 배경
+      const g = CTX.createLinearGradient(x, y, x + tileSize, y + tileSize);
+      if (tp.type === '로열') {
+        g.addColorStop(0, '#fce7f3');
+        g.addColorStop(1, '#fbcfe8');
+      } else if (tp.type === '전설') {
+        g.addColorStop(0, '#fef3c7');
+        g.addColorStop(1, '#fde68a');
+      } else if (tp.type === '서포팅') {
+        g.addColorStop(0, '#ddd6fe');
+        g.addColorStop(1, '#c4b5fd');
+      } else {
+        g.addColorStop(0, '#e0f2fe');
+        g.addColorStop(1, '#bae6fd');
+      }
+      CTX.fillStyle = g;
+      CTX.fill();
+      CTX.restore();
+
+      // 티니핑 이미지 그리기
+      if (tp.image) {
+        const img = new Image();
+        img.onload = () => {
+          CTX.globalAlpha = opacity;
+          const imgSize = tileSize * 0.7;
+          CTX.drawImage(img, x + (tileSize - imgSize) / 2, y + (tileSize - imgSize) / 2, imgSize, imgSize);
+          CTX.globalAlpha = 1.0;
+        };
+        img.src = tp.image;
+      }
+    }
+  }
+
+  CTX.globalAlpha = 1.0;
+}
+
+function drawHome() {
+  const {W,H} = clear();
+
+  // 타이틀
+  CTX.fillStyle = '#ec4899';
+  CTX.font = 'bold 36px system-ui, -apple-system, Segoe UI, Roboto';
+  CTX.textAlign = 'center';
+  CTX.fillText('태희의 티니핑 나눗셈 도전!', W/2, 60);
+  CTX.textAlign = 'left';
+
+  // 서브타이틀
+  CTX.fillStyle = '#6b7280';
+  CTX.font = '18px system-ui, -apple-system, Segoe UI, Roboto';
+  CTX.textAlign = 'center';
+  CTX.fillText('나눗셈 문제를 풀고 귀여운 티니핑들을 모아보세요!', W/2, 90);
+  CTX.textAlign = 'left';
+
+  // 티니핑 타일 그리드
+  const tileSize = 80;
+  const gap = 12;
+  const startY = 120;
+  const cols = Math.floor((W - 40) / (tileSize + gap));
+  const startX = (W - (cols * (tileSize + gap) - gap)) / 2;
+
+  // 배경 카드
+  const cardPadding = 20;
+  const gridWidth = cols * (tileSize + gap) - gap + cardPadding * 2;
+  const rows = Math.ceil(TINIPINGS.length / cols);
+  const gridHeight = rows * (tileSize + gap) - gap + cardPadding * 2;
+
+  CTX.save();
+  roundRect(CTX, (W - gridWidth) / 2, startY - 10, gridWidth, gridHeight + 20, 20);
+  CTX.fillStyle = '#ffffff';
+  CTX.fill();
+  CTX.shadowColor='rgba(0,0,0,0.08)';
+  CTX.shadowBlur=12;
+  CTX.restore();
+
+  // 티니핑 타일들 그리기
+  for (let i = 0; i < TINIPINGS.length; i++) {
+    const row = Math.floor(i / cols);
+    const col = i % cols;
+    const x = startX + col * (tileSize + gap);
+    const y = startY + row * (tileSize + gap);
+
+    const tp = TINIPINGS[i];
+
+    // 타일 배경
+    CTX.save();
+    roundRect(CTX, x, y, tileSize, tileSize, 12);
+
+    // 그라데이션 배경
+    const g = CTX.createLinearGradient(x, y, x + tileSize, y + tileSize);
+    if (tp.type === '로열') {
+      g.addColorStop(0, '#fce7f3');
+      g.addColorStop(1, '#fbcfe8');
+    } else if (tp.type === '전설') {
+      g.addColorStop(0, '#fef3c7');
+      g.addColorStop(1, '#fde68a');
+    } else if (tp.type === '서포팅') {
+      g.addColorStop(0, '#ddd6fe');
+      g.addColorStop(1, '#c4b5fd');
+    } else {
+      g.addColorStop(0, '#e0f2fe');
+      g.addColorStop(1, '#bae6fd');
+    }
+    CTX.fillStyle = g;
+    CTX.fill();
+    CTX.strokeStyle = '#e5e7eb';
+    CTX.lineWidth = 2;
+    CTX.stroke();
+    CTX.restore();
+
+    // 티니핑 이미지 그리기
+    if (tp.image) {
+      const img = new Image();
+      img.onload = () => {
+        const imgSize = tileSize * 0.65;
+        CTX.drawImage(img, x + (tileSize - imgSize) / 2, y + (tileSize - imgSize) / 2 - 5, imgSize, imgSize);
+      };
+      img.src = tp.image;
+    }
+
+    // 티니핑 이름
+    CTX.fillStyle = '#111827';
+    CTX.font = 'bold 11px system-ui, -apple-system';
+    CTX.textAlign = 'center';
+    CTX.fillText(tp.name, x + tileSize / 2, y + tileSize - 8);
+    CTX.textAlign = 'left';
+  }
+
+  // 게임 시작 버튼
+  const btnY = startY + gridHeight + 40;
+  const btnW = 200;
+  const btnH = 50;
+  const btnX = (W - btnW) / 2;
+
+  CTX.save();
+  roundRect(CTX, btnX, btnY, btnW, btnH, 12);
+  const btnG = CTX.createLinearGradient(btnX, btnY, btnX, btnY + btnH);
+  btnG.addColorStop(0, '#ec4899');
+  btnG.addColorStop(1, '#db2777');
+  CTX.fillStyle = btnG;
+  CTX.fill();
+  CTX.shadowColor='rgba(236,72,153,0.4)';
+  CTX.shadowBlur=10;
+  CTX.restore();
+
+  CTX.fillStyle = '#ffffff';
+  CTX.font = 'bold 20px system-ui, -apple-system';
+  CTX.textAlign = 'center';
+  CTX.fillText('게임 시작하기', btnX + btnW / 2, btnY + btnH / 2 + 7);
+  CTX.textAlign = 'left';
+
+  STATE.hitboxes.push({ id: 'btn_start_game', x: btnX, y: btnY, w: btnW, h: btnH });
+}
+
 function drawQuiz() {
   const {W,H} = clear();
+  drawBackgroundTiles(W, H, 0.15);
   drawHeader(W,H);
 
   // 카드
@@ -536,6 +710,7 @@ function drawQuiz() {
 
 function drawExplain() {
   const {W,H} = clear();
+  drawBackgroundTiles(W, H, 0.12);
   drawHeader(W,H);
 
   const cardX=24, cardY=96, cardW=W-48, cardH=H-140;
@@ -603,6 +778,7 @@ function drawExplain() {
 
 function drawCatch(ts) {
   const {W,H} = clear();
+  drawBackgroundTiles(W, H, 0.1);
   const t0 = STATE.catchStart || (STATE.catchStart = ts);
   const elapsed = Math.min(1, (ts - t0) / 1200); // 1.2s
 
@@ -661,6 +837,7 @@ function drawCatch(ts) {
 
 function drawCollection() {
   const {W,H} = clear();
+  drawBackgroundTiles(W, H, 0.1);
   // 제목
   CTX.fillStyle='#ec4899';
   CTX.font='bold 26px system-ui';
@@ -715,6 +892,7 @@ function drawCollection() {
 
 function drawComplete() {
   const {W,H} = clear();
+  drawBackgroundTiles(W, H, 0.1);
   // 축하 카드
   const cw= Math.min(600, W-48), ch=320, cx=(W-cw)/2, cy=(H-ch)/2;
   roundRect(CTX, cx, cy, cw, ch, 24);
@@ -852,6 +1030,10 @@ function onPointer(evt) {
     if (hit(x,y,b)) {
       if (b.disabled) return;
       switch (b.id) {
+        case 'btn_start_game':
+          STATE.mode = 'quiz';
+          ensureProblem();
+          break;
         case 'btn_collection':
           STATE.mode = 'collection'; break;
         case 'btn_close_collection':
@@ -885,7 +1067,8 @@ CANVAS.addEventListener('click', onPointer);
 function frame(ts) {
   if (!STATE.problem && STATE.mode==='quiz') ensureProblem();
 
-  if (STATE.mode==='quiz')       drawQuiz();
+  if (STATE.mode==='home')       drawHome();
+  else if (STATE.mode==='quiz')       drawQuiz();
   else if (STATE.mode==='explain') drawExplain();
   else if (STATE.mode==='catch')   drawCatch(ts);
   else if (STATE.mode==='collection') drawCollection();
