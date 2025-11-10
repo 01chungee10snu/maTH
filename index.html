@@ -280,6 +280,39 @@ function buildNameToImageMap() {
 const NAME2IMG = buildNameToImageMap();
 const TINIPINGS = baseTinipings.map(t => ({ ...t, image: NAME2IMG.get(t.name) || null }));
 
+// 이미지 프리로드 (모바일 호환성 개선)
+const PRELOADED_IMAGES = new Map();
+let imagesLoaded = false;
+
+function preloadImages() {
+  return new Promise((resolve) => {
+    const imagesToLoad = [];
+
+    TINIPINGS.forEach(tp => {
+      if (tp.image && !PRELOADED_IMAGES.has(tp.name)) {
+        const img = new Image();
+        const promise = new Promise((imgResolve) => {
+          img.onload = () => imgResolve();
+          img.onerror = () => imgResolve(); // 에러도 처리하여 진행
+        });
+        img.src = tp.image;
+        PRELOADED_IMAGES.set(tp.name, img);
+        imagesToLoad.push(promise);
+      }
+    });
+
+    if (imagesToLoad.length === 0) {
+      imagesLoaded = true;
+      resolve();
+    } else {
+      Promise.all(imagesToLoad).then(() => {
+        imagesLoaded = true;
+        resolve();
+      });
+    }
+  });
+}
+
 /* =========================================================================
    2) 상태
    ========================================================================= */
@@ -527,18 +560,13 @@ function drawBackgroundTiles(W, H, opacity = 0.15) {
       CTX.fill();
       CTX.restore();
 
-      // 티니핑 이미지 그리기 (클로저 문제 해결)
-      if (tp.image) {
-        ((currentX, currentY, currentOpacity, imgSrc) => {
-          const img = new Image();
-          img.onload = () => {
-            CTX.globalAlpha = currentOpacity;
-            const imgSize = tileSize * 0.7;
-            CTX.drawImage(img, currentX + (tileSize - imgSize) / 2, currentY + (tileSize - imgSize) / 2, imgSize, imgSize);
-            CTX.globalAlpha = 1.0;
-          };
-          img.src = imgSrc;
-        })(x, y, opacity, tp.image);
+      // 티니핑 이미지 그리기 (프리로드된 이미지 사용)
+      if (tp.image && PRELOADED_IMAGES.has(tp.name)) {
+        const img = PRELOADED_IMAGES.get(tp.name);
+        CTX.globalAlpha = opacity;
+        const imgSize = tileSize * 0.7;
+        CTX.drawImage(img, x + (tileSize - imgSize) / 2, y + (tileSize - imgSize) / 2, imgSize, imgSize);
+        CTX.globalAlpha = 1.0;
       }
     }
   }
@@ -619,17 +647,12 @@ function drawHome() {
     CTX.stroke();
     CTX.restore();
 
-    // 티니핑 이미지 그리기 (클로저 문제 해결)
-    if (tp.image) {
-      ((currentX, currentY, currentImage) => {
-        const img = new Image();
-        img.onload = () => {
-          const imgSize = tileSize * 0.65;
-          // 이미지를 타일 상단에서 적절한 간격으로 배치
-          CTX.drawImage(img, currentX + (tileSize - imgSize) / 2, currentY + 8, imgSize, imgSize);
-        };
-        img.src = currentImage;
-      })(x, y, tp.image);
+    // 티니핑 이미지 그리기 (프리로드된 이미지 사용)
+    if (tp.image && PRELOADED_IMAGES.has(tp.name)) {
+      const img = PRELOADED_IMAGES.get(tp.name);
+      const imgSize = tileSize * 0.65;
+      // 이미지를 타일 상단에서 적절한 간격으로 배치
+      CTX.drawImage(img, x + (tileSize - imgSize) / 2, y + 8, imgSize, imgSize);
     }
 
     // 티니핑 이름
@@ -825,18 +848,12 @@ function drawCatch(ts) {
   CTX.fill();
   CTX.restore();
 
-  // 이미지
+  // 이미지 (프리로드된 이미지 사용)
   const tgt = STATE.newTiniping;
-  if (tgt && tgt.image) {
-    // 클로저 문제 해결 및 이미지와 UI 분리
-    ((centerX, centerY, currentScale, imgSrc) => {
-      const img = new Image();
-      img.onload = () => {
-        const size = 200*currentScale;
-        CTX.drawImage(img, centerX-size/2, centerY-size/2, size, size);
-      };
-      img.src = imgSrc;
-    })(cx, cy, scale, tgt.image);
+  if (tgt && tgt.image && PRELOADED_IMAGES.has(tgt.name)) {
+    const img = PRELOADED_IMAGES.get(tgt.name);
+    const size = 200*scale;
+    CTX.drawImage(img, cx-size/2, cy-size/2, size, size);
   }
 
   // UI 요소는 이미지 로드와 별도로 표시
@@ -910,13 +927,10 @@ function drawCollection() {
     const centerY = y + 45; // 이미지 중심 위치 조정
     const size = 58;
 
-    if (STATE.caughtIds.includes(t.id) && t.image) {
-      // 클로저 문제 해결
-      ((cx, cy, sz, imgSrc) => {
-        const img = new Image();
-        img.onload = ()=> { CTX.drawImage(img, cx-sz/2, cy-sz/2, sz, sz); };
-        img.src = imgSrc;
-      })(centerX, centerY, size, t.image);
+    if (STATE.caughtIds.includes(t.id) && t.image && PRELOADED_IMAGES.has(t.name)) {
+      // 프리로드된 이미지 사용
+      const img = PRELOADED_IMAGES.get(t.name);
+      CTX.drawImage(img, centerX-size/2, centerY-size/2, size, size);
       CTX.fillStyle='#374151'; CTX.font='12px system-ui';
       CTX.fillText(t.name, centerX, y+h-20); // 텍스트 위치 조정하여 여백 확보
     } else {
@@ -1126,8 +1140,12 @@ function frame(ts) {
 
   requestAnimationFrame(frame);
 }
-ensureProblem();
-requestAnimationFrame(frame);
+
+// 이미지 프리로드 후 앱 시작
+preloadImages().then(() => {
+  ensureProblem();
+  requestAnimationFrame(frame);
+});
 </script>
 </body>
 </html>
