@@ -2,13 +2,13 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
 <title>태희의 도전! 나눗셈을 성공하고 티니핑 캐치!</title>
 <style>
   html,body { margin:0; padding:0; height:100%; background:#f7f8fc; }
   #app { display:block; margin:0 auto; background:#ffffff; max-width:1024px; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
   .wrap { padding:12px; }
-  canvas { width:100%; height:auto; display:block; }
+  canvas { width:100%; height:auto; display:block; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
   /* 폰트는 시스템 폰트 사용 */
 </style>
 </head>
@@ -25,14 +25,35 @@ const DPR = Math.min(2, window.devicePixelRatio || 1);
 const CANVAS = document.getElementById('app');
 const CTX = CANVAS.getContext('2d');
 
+let SCALE = 1; // 반응형 스케일 팩터 (모바일 터치 최적화)
+
 function setHiDPI() {
-  const cssW = CANVAS.clientWidth || 1024;
-  const cssH = Math.round(cssW * (640/1024));
+  const viewportW = window.innerWidth;
+  const viewportH = window.innerHeight;
+  const isPortrait = viewportH > viewportW;
+  
+  let cssW = CANVAS.clientWidth || Math.min(viewportW - 24, 1024);
+  let cssH;
+  
+  if (isPortrait) {
+    // 세로 모드: 뷰포트 높이를 최대한 활용하되 적절한 비율 유지
+    const maxH = viewportH - 48; // padding 고려
+    cssH = Math.min(maxH, Math.round(cssW * 1.5)); // 최대 2:3 비율
+  } else {
+    // 가로 모드: 기존 16:10 비율 유지
+    cssH = Math.round(cssW * (640/1024));
+  }
+  
   CANVAS.style.width = cssW + 'px';
   CANVAS.style.height = cssH + 'px';
   CANVAS.width = Math.round(cssW * DPR);
   CANVAS.height = Math.round(cssH * DPR);
   CTX.setTransform(DPR,0,0,DPR,0,0);
+  
+  // 스케일 팩터 계산 (모바일 터치 최적화)
+  const baseW = 1024;
+  const currentW = CANVAS.width / DPR;
+  SCALE = Math.max(0.8, Math.min(1.5, currentW / baseW));
 }
 setHiDPI();
 window.addEventListener('resize', setHiDPI);
@@ -530,7 +551,7 @@ function drawHome() {
 
   // 타이틀
   CTX.fillStyle = '#ec4899';
-  CTX.font = 'bold 36px system-ui, -apple-system, Segoe UI, Roboto';
+  CTX.font = `bold ${Math.round(36 * SCALE)}px system-ui, -apple-system, Segoe UI, Roboto`;
   CTX.textAlign = 'center';
   CTX.fillText('태희의 티니핑 나눗셈 도전!', W/2, 60);
   CTX.textAlign = 'left';
@@ -618,10 +639,10 @@ function drawHome() {
     CTX.textAlign = 'left';
   }
 
-  // 게임 시작 버튼
   const btnY = startY + gridHeight + 40;
-  const btnW = 200;
-  const btnH = 50;
+  // 게임 시작 버튼
+  const btnW = Math.round(200 * SCALE);
+  const btnH = Math.max(48, Math.round(50 * SCALE)); // 최소 48px 터치 타겟
   const btnX = (W - btnW) / 2;
 
   CTX.save();
@@ -637,7 +658,7 @@ function drawHome() {
 
   CTX.fillStyle = '#ffffff';
   CTX.font = 'bold 20px system-ui, -apple-system';
-  CTX.textAlign = 'center';
+  CTX.font = `bold ${Math.round(20 * SCALE)}px system-ui, -apple-system`;
   CTX.fillText('게임 시작하기', btnX + btnW / 2, btnY + btnH / 2 + 7);
   CTX.textAlign = 'left';
 
@@ -661,7 +682,7 @@ function drawQuiz() {
 
   // 문제 텍스트
   CTX.fillStyle = '#111827';
-  CTX.font = 'bold 24px system-ui, -apple-system';
+  CTX.font = `bold ${Math.round(24 * SCALE)}px system-ui, -apple-system`;
   const qx = cardX+24, qy = cardY+40;
   fillTextWrap(CTX, STATE.problem.question, qx, qy, cardW-48, 32);
 
@@ -695,8 +716,7 @@ function drawQuiz() {
   }
 
   // 정답 확인 버튼 (선택지 아래에 배치)
-  const lastOptionY = baseY + (options.length-1)*(oh+12) + oh;
-  const btnW=240, btnH=52, btnX=cardX + (cardW-btnW)/2, btnY=lastOptionY + 24;
+  const btnW=Math.round(240*SCALE), btnH=Math.max(48,Math.round(52*SCALE)), btnX=cardX + (cardW-btnW)/2, btnY=lastOptionY + 24;
   roundRect(CTX, btnX, btnY, btnW, btnH, 14);
   if (STATE.selected==null) {
     CTX.fillStyle='#d1d5db';
@@ -868,7 +888,7 @@ function drawCollection() {
   STATE.hitboxes.push({ id:'btn_close_collection', x:bx, y:by, w:bw, h:bh });
 
   // 그리드
-  const gridX=24, gridY=96, cols=8, cellW=Math.floor((W-48)/cols), cellH=120, pad=10;
+  const gridX=24, gridY=96, minCellW=80, cols=Math.max(3, Math.min(8, Math.floor((W-48)/minCellW))), cellW=Math.floor((W-48)/cols), cellH=120, pad=10;
   CTX.textAlign='center';
   TINIPINGS.forEach((t, idx)=>{
     const col = idx % cols;
@@ -1074,7 +1094,19 @@ function onPointer(evt) {
     }
   }
 }
+// 터치 이벤트 핸들러
+function onTouch(evt) {
+  evt.preventDefault(); // 기본 동작 방지 (스크롤, 더블탭 줌 등)
+  if (evt.type === 'touchend' && evt.changedTouches.length > 0) {
+    const touch = evt.changedTouches[0];
+    const fakeEvt = { clientX: touch.clientX, clientY: touch.clientY };
+    onPointer(fakeEvt);
+  }
+}
+
 CANVAS.addEventListener('click', onPointer);
+CANVAS.addEventListener('touchend', onTouch);
+CANVAS.addEventListener('touchstart', function(e) { e.preventDefault(); }); // 터치 시작 시 스크롤 방지
 
 /* =========================================================================
    7) 루프
