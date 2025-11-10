@@ -6,7 +6,7 @@
 <title>태희의 도전! 나눗셈을 성공하고 티니핑 캐치!</title>
 <style>
   html,body { margin:0; padding:0; height:100%; background:#f7f8fc; }
-  #app { display:block; margin:0 auto; background:#ffffff; max-width:1024px; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
+  #app { display:block; margin:0 auto; background:#ffffff; max-width:720px; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
   .wrap { padding:12px; }
   canvas { width:100%; height:auto; display:block; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
   /* 폰트는 시스템 폰트 사용 */
@@ -14,7 +14,7 @@
 </head>
 <body>
 <div class="wrap">
-  <canvas id="app" width="1024" height="640"></canvas>
+  <canvas id="app" width="720" height="1280"></canvas>
 </div>
 
 <script>
@@ -32,16 +32,16 @@ function setHiDPI() {
   const viewportH = window.innerHeight;
   const isPortrait = viewportH > viewportW;
   
-  let cssW = CANVAS.clientWidth || Math.min(viewportW - 24, 1024);
+  let cssW = CANVAS.clientWidth || Math.min(viewportW - 24, 720);
   let cssH;
-  
+
   if (isPortrait) {
-    // 세로 모드: 뷰포트 높이를 최대한 활용하되 적절한 비율 유지
+    // 세로 모드: 9:16 비율 유지 (세로 모바일 최적화)
     const maxH = viewportH - 48; // padding 고려
-    cssH = Math.min(maxH, Math.round(cssW * 1.5)); // 최대 2:3 비율
+    cssH = Math.min(maxH, Math.round(cssW * (16/9))); // 9:16 비율
   } else {
-    // 가로 모드: 기존 16:10 비율 유지
-    cssH = Math.round(cssW * (640/1024));
+    // 가로 모드: 16:9 비율 유지
+    cssH = Math.round(cssW * (9/16));
   }
   
   CANVAS.style.width = cssW + 'px';
@@ -51,7 +51,7 @@ function setHiDPI() {
   CTX.setTransform(DPR,0,0,DPR,0,0);
   
   // 스케일 팩터 계산 (모바일 터치 최적화)
-  const baseW = 1024;
+  const baseW = 720;
   const currentW = CANVAS.width / DPR;
   SCALE = Math.max(0.8, Math.min(1.5, currentW / baseW));
 }
@@ -690,8 +690,10 @@ function drawQuiz() {
   const options = STATE.problem.options;
   const baseY = qy + 110;
   const ox = cardX+24, ow = cardW-48, oh = 56;
+  let lastOptionY = baseY;
   for (let i=0;i<options.length;i++){
     const oy = baseY + i*(oh+12);
+    lastOptionY = oy + oh; // 마지막 옵션의 하단 위치 저장
     roundRect(CTX, ox, oy, ow, oh, 12);
     const selected = STATE.selected===options[i];
     if (selected) {
