@@ -288,7 +288,22 @@ function buildNameToImageMap() {
 
 // Load images from JSON file
 let NAME2IMG = new Map();
+let IMAGE_CACHE = new Map(); // 이미지 객체 캐시
 let TINIPINGS = baseTinipings.map(t => ({ ...t, image: null }));
+
+// 이미지를 미리 로드하고 캐시하는 함수
+function preloadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous'; // CORS 지원
+    img.onload = () => resolve(img);
+    img.onerror = () => {
+      console.warn('이미지 로드 실패:', src);
+      resolve(null); // 실패해도 계속 진행
+    };
+    img.src = src;
+  });
+}
 
 // Async function to load images from external JSON
 async function loadTinipingImages() {
@@ -298,21 +313,38 @@ async function loadTinipingImages() {
       const jsonData = await response.json();
       // Replace tinipingImagesByGroup with loaded data
       Object.assign(tinipingImagesByGroup, jsonData);
-      // Rebuild the image map
-      NAME2IMG = buildNameToImageMap();
-      // Update TINIPINGS with images
-      TINIPINGS = baseTinipings.map(t => ({ ...t, image: NAME2IMG.get(t.name) || null }));
-      console.log('티니핑 이미지 로드 완료:', TINIPINGS.filter(t => t.image).length, '개');
     } else {
       console.warn('teeniepingIMG.json 로드 실패, 기본 이미지 사용');
-      NAME2IMG = buildNameToImageMap();
-      TINIPINGS = baseTinipings.map(t => ({ ...t, image: NAME2IMG.get(t.name) || null }));
     }
   } catch (error) {
     console.warn('이미지 JSON 로드 오류:', error);
-    NAME2IMG = buildNameToImageMap();
-    TINIPINGS = baseTinipings.map(t => ({ ...t, image: NAME2IMG.get(t.name) || null }));
   }
+
+  // Build image map
+  NAME2IMG = buildNameToImageMap();
+
+  // Preload all images
+  const imagePromises = [];
+  NAME2IMG.forEach((src, name) => {
+    const promise = preloadImage(src).then(img => {
+      if (img) {
+        IMAGE_CACHE.set(name, img);
+      }
+    });
+    imagePromises.push(promise);
+  });
+
+  // Wait for all images to load
+  await Promise.all(imagePromises);
+
+  // Update TINIPINGS with loaded images
+  TINIPINGS = baseTinipings.map(t => ({
+    ...t,
+    image: NAME2IMG.get(t.name) || null,
+    imageObj: IMAGE_CACHE.get(t.name) || null
+  }));
+
+  console.log('티니핑 이미지 로드 완료:', IMAGE_CACHE.size, '/', baseTinipings.length, '개');
 }
 
 // Initialize images
@@ -565,18 +597,12 @@ function drawBackgroundTiles(W, H, opacity = 0.15) {
       CTX.fill();
       CTX.restore();
 
-      // 티니핑 이미지 그리기 (클로저 문제 해결)
-      if (tp.image) {
-        ((currentX, currentY, currentOpacity, imgSrc) => {
-          const img = new Image();
-          img.onload = () => {
-            CTX.globalAlpha = currentOpacity;
-            const imgSize = tileSize * 0.7;
-            CTX.drawImage(img, currentX + (tileSize - imgSize) / 2, currentY + (tileSize - imgSize) / 2, imgSize, imgSize);
-            CTX.globalAlpha = 1.0;
-          };
-          img.src = imgSrc;
-        })(x, y, opacity, tp.image);
+      // 티니핑 이미지 그리기 (캐시된 이미지 사용)
+      if (tp.imageObj) {
+        CTX.globalAlpha = opacity;
+        const imgSize = tileSize * 0.7;
+        CTX.drawImage(tp.imageObj, x + (tileSize - imgSize) / 2, y + (tileSize - imgSize) / 2, imgSize, imgSize);
+        CTX.globalAlpha = 1.0;
       }
     }
   }
@@ -865,16 +891,10 @@ function drawCatch(ts) {
 
   // 이미지
   const tgt = STATE.newTiniping;
-  if (tgt && tgt.image) {
-    // 클로저 문제 해결 및 이미지와 UI 분리
-    ((centerX, centerY, currentScale, imgSrc) => {
-      const img = new Image();
-      img.onload = () => {
-        const size = 200*currentScale;
-        CTX.drawImage(img, centerX-size/2, centerY-size/2, size, size);
-      };
-      img.src = imgSrc;
-    })(cx, cy, scale, tgt.image);
+  if (tgt && tgt.imageObj) {
+    // 캐시된 이미지 사용
+    const size = 200*scale;
+    CTX.drawImage(tgt.imageObj, cx-size/2, cy-size/2, size, size);
   }
 
   // UI 요소는 이미지 로드와 별도로 표시
@@ -948,13 +968,9 @@ function drawCollection() {
     const centerY = y + 45; // 이미지 중심 위치 조정
     const size = 58;
 
-    if (STATE.caughtIds.includes(t.id) && t.image) {
-      // 클로저 문제 해결
-      ((cx, cy, sz, imgSrc) => {
-        const img = new Image();
-        img.onload = ()=> { CTX.drawImage(img, cx-sz/2, cy-sz/2, sz, sz); };
-        img.src = imgSrc;
-      })(centerX, centerY, size, t.image);
+    if (STATE.caughtIds.includes(t.id) && t.imageObj) {
+      // 캐시된 이미지 사용
+      CTX.drawImage(t.imageObj, centerX-size/2, centerY-size/2, size, size);
       CTX.fillStyle='#374151'; CTX.font='12px system-ui';
       CTX.fillText(t.name, centerX, y+h-20); // 텍스트 위치 조정하여 여백 확보
     } else {
@@ -1164,8 +1180,18 @@ function frame(ts) {
 
   requestAnimationFrame(frame);
 }
-ensureProblem();
-requestAnimationFrame(frame);
+
+// 이미지 로드 후 게임 시작
+loadTinipingImages().then(() => {
+  console.log('게임 시작 - 티니핑 이미지 로드 완료');
+  ensureProblem();
+  requestAnimationFrame(frame);
+}).catch(err => {
+  console.error('이미지 로드 실패:', err);
+  // 이미지 없이도 게임 시작
+  ensureProblem();
+  requestAnimationFrame(frame);
+});
 </script>
 </body>
 </html>
