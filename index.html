@@ -9,10 +9,12 @@
   #app { display:block; margin:0 auto; background:#ffffff; max-width:720px; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
   .wrap { padding:12px; }
   canvas { width:100%; height:auto; display:block; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+  #err { display:none; margin:12px auto 0; max-width:720px; padding:12px 16px; background:#fdecea; color:#b71c1c; border-radius:8px; font-size:14px; font-weight:600; line-height:1.4; box-shadow:0 6px 20px rgba(183,28,28,0.12); }
   /* 폰트는 시스템 폰트 사용 */
 </style>
 </head>
 <body>
+<div id="err" role="alert" aria-live="assertive" aria-hidden="true"></div>
 <div class="wrap">
   <canvas id="app" width="720" height="1280"></canvas>
 </div>
@@ -24,6 +26,47 @@
 const DPR = Math.min(2, window.devicePixelRatio || 1);
 const CANVAS = document.getElementById('app');
 const CTX = CANVAS.getContext('2d');
+const ERROR_BOX = document.getElementById('err');
+const shownErrorMessages = new Set();
+
+if (ERROR_BOX) {
+  ERROR_BOX.setAttribute('aria-hidden', 'true');
+}
+
+function extractErrorMessage(error) {
+  if (error == null) return '알 수 없는 오류가 발생했어요.';
+  if (typeof error === 'string') return error;
+  if (typeof error.message === 'string' && error.message.trim()) return error.message;
+  if (typeof error.status !== 'undefined' && error?.url) {
+    return `${error.status} ${error.url}`;
+  }
+  try {
+    return JSON.stringify(error);
+  } catch (_) {
+    return String(error);
+  }
+}
+
+function showGlobalError(error) {
+  if (!ERROR_BOX) return;
+  const message = extractErrorMessage(error);
+  if (!message || shownErrorMessages.has(message)) return;
+  shownErrorMessages.add(message);
+  ERROR_BOX.textContent = `[오류] ${message}`;
+  ERROR_BOX.style.display = 'block';
+  ERROR_BOX.setAttribute('aria-hidden', 'false');
+  console.error(error);
+}
+
+window.addEventListener('error', evt => {
+  const err = evt?.error || evt?.message || evt;
+  showGlobalError(err);
+});
+
+window.addEventListener('unhandledrejection', evt => {
+  const reason = evt?.reason || '비동기 처리 중 알 수 없는 오류가 발생했어요.';
+  showGlobalError(reason);
+});
 
 let SCALE = 1; // 반응형 스케일 팩터 (모바일 터치 최적화)
 let lastCssW = null;
@@ -337,6 +380,25 @@ const tinipingImagesByGroup = {
   ]
 };
 
+function detectMimeTypeFromBase64(data) {
+  if (!data) return null;
+  if (data.startsWith('/9j/')) return 'image/jpeg';
+  if (data.startsWith('iVBOR')) return 'image/png';
+  if (data.startsWith('R0lGOD')) return 'image/gif';
+  if (data.startsWith('UklGR')) return 'image/webp';
+  return 'image/png';
+}
+
+function normalizeImageSource(raw) {
+  if (typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith('data:')) return trimmed;
+  const mime = detectMimeTypeFromBase64(trimmed);
+  return `data:${mime};base64,${trimmed}`;
+}
+
 function buildNameToImageMap() {
   const map = new Map();
   const groups = [
@@ -350,18 +412,13 @@ function buildNameToImageMap() {
     for (const it of arr) {
       const name = it["이름"];
       const imageData = it["이미지"];
-      if (name && imageData) {
-        // Handle both URLs and base64 data
-        let url;
-        if (imageData.startsWith("http://") || imageData.startsWith("https://")) {
-          url = imageData; // Direct URL
-        } else if (imageData.startsWith("data:")) {
-          url = imageData; // Already formatted data URL
-        } else {
-          url = `data:image/jpeg;base64,${imageData}`; // Base64 data
-        }
-        map.set(name, url);
+      if (!name || !imageData) continue;
+      const url = normalizeImageSource(imageData);
+      if (!url) {
+        console.warn('이미지 데이터 파싱 실패:', name);
+        continue;
       }
+      map.set(name, url);
     }
   }
   return map;
@@ -391,23 +448,35 @@ function preloadImage(src) {
 
 // Async function to load images from external JSON
 async function loadTinipingImages() {
+  let loadedData = null;
   try {
     // base64 이미지가 포함된 JSON 파일 사용 (CORS 문제 없음)
-    const response = await fetch('teenieping_images_base64.json');
-    if (response.ok) {
-      const jsonData = await response.json();
-      // Replace tinipingImagesByGroup with loaded data
-      Object.assign(tinipingImagesByGroup, jsonData);
-      console.log('teenieping_images_base64.json 로드 성공');
-    } else {
-      console.warn('teenieping_images_base64.json 로드 실패, 기본 이미지 사용');
+    const response = await fetch('./teenieping_images_base64.json');
+    if (!response.ok) {
+      throw new Error(`JSON 404/네트워크 오류: ${response.status} ${response.url}`);
     }
+    loadedData = await response.json();
   } catch (error) {
     console.warn('이미지 JSON 로드 오류:', error);
+    showGlobalError(error);
+  }
+
+  if (loadedData) {
+    Object.assign(tinipingImagesByGroup, loadedData);
+    console.log('teenieping_images_base64.json 로드 성공');
+  } else {
+    console.warn('teenieping_images_base64.json 로드 실패, 기본 이미지 사용');
   }
 
   // Build image map
   NAME2IMG = buildNameToImageMap();
+
+  const missingNames = baseTinipings.filter(t => !NAME2IMG.has(t.name)).map(t => t.name);
+  if (missingNames.length) {
+    const message = `Base64 이미지 누락: ${missingNames.join(', ')}`;
+    console.warn(message);
+    showGlobalError(message);
+  }
 
   // Preload all images
   const imagePromises = [];
