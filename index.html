@@ -26,37 +26,94 @@ const CANVAS = document.getElementById('app');
 const CTX = CANVAS.getContext('2d');
 
 let SCALE = 1; // 반응형 스케일 팩터 (모바일 터치 최적화)
+let lastCssW = null;
+let lastCssH = null;
+
+function getHomeLayout(width) {
+  const titleY = Math.round(60 * SCALE);
+  const subtitleY = Math.round(90 * SCALE);
+  const startY = Math.round(120 * SCALE);
+  const gap = Math.max(8, Math.round(12 * SCALE));
+  const cardPadding = Math.round(20 * SCALE);
+  const cardMargin = Math.round(20 * SCALE);
+  const availableWidth = Math.max(160, width - cardMargin * 2);
+  const maxCols = Math.min(7, TINIPINGS.length);
+  const minTileSize = Math.max(48, Math.round(56 * SCALE));
+  const maxTileSize = Math.round(88 * SCALE);
+
+  let cols = Math.max(1, Math.min(maxCols, Math.floor((availableWidth + gap) / (minTileSize + gap))));
+  let tileSize = Math.floor((availableWidth - (cols - 1) * gap) / cols);
+  while (cols > 1 && tileSize < minTileSize) {
+    cols -= 1;
+    tileSize = Math.floor((availableWidth - (cols - 1) * gap) / cols);
+  }
+  tileSize = Math.min(maxTileSize, tileSize);
+
+  const rows = Math.ceil(TINIPINGS.length / cols);
+  const gridWidth = cols * (tileSize + gap) - gap + cardPadding * 2;
+  const gridHeight = rows * (tileSize + gap) - gap + cardPadding * 2;
+  const cardX = (width - gridWidth) / 2;
+  const btnW = Math.round(200 * SCALE);
+  const btnH = Math.max(48, Math.round(50 * SCALE));
+  const btnY = startY + gridHeight + Math.round(40 * SCALE);
+  const totalHeight = btnY + btnH + Math.round(80 * SCALE);
+
+  return {
+    titleY,
+    subtitleY,
+    startY,
+    gap,
+    cardPadding,
+    cardX,
+    cols,
+    rows,
+    tileSize,
+    gridWidth,
+    gridHeight,
+    btnW,
+    btnH,
+    btnY,
+    totalHeight,
+  };
+}
 
 function setHiDPI() {
   const viewportW = window.innerWidth;
   const viewportH = window.innerHeight;
-  const isPortrait = viewportH > viewportW;
-  
-  let cssW = CANVAS.clientWidth || Math.min(viewportW - 24, 720);
-  let cssH;
 
-  if (isPortrait) {
-    // 세로 모드: 9:16 비율 유지 (세로 모바일 최적화)
-    const maxH = viewportH - 48; // padding 고려
-    cssH = Math.min(maxH, Math.round(cssW * (16/9))); // 9:16 비율
-  } else {
-    // 가로 모드: 16:9 비율 유지
-    cssH = Math.round(cssW * (9/16));
+  const cssW = Math.max(280, Math.min(viewportW - 24, 720));
+  const baseW = 720;
+  const widthScale = cssW / baseW;
+  SCALE = Math.max(0.7, Math.min(1.5, widthScale));
+
+  let cssH = Math.round(cssW * (16 / 9));
+  const isHome = typeof STATE !== 'undefined' && STATE.mode === 'home';
+  if (isHome) {
+    const layout = getHomeLayout(cssW);
+    cssH = Math.max(cssH, layout.totalHeight);
+  } else if (viewportH > viewportW) {
+    cssH = Math.max(cssH, viewportH - 48);
   }
-  
+
+  if (lastCssW === cssW && lastCssH === cssH) {
+    return;
+  }
+
   CANVAS.style.width = cssW + 'px';
   CANVAS.style.height = cssH + 'px';
   CANVAS.width = Math.round(cssW * DPR);
   CANVAS.height = Math.round(cssH * DPR);
   CTX.setTransform(DPR,0,0,DPR,0,0);
-  
-  // 스케일 팩터 계산 (모바일 터치 최적화)
-  const baseW = 720;
-  const currentW = CANVAS.width / DPR;
-  SCALE = Math.max(0.8, Math.min(1.5, currentW / baseW));
+
+  lastCssW = cssW;
+  lastCssH = cssH;
 }
 setHiDPI();
-window.addEventListener('resize', setHiDPI);
+window.addEventListener('resize', () => {
+  lastCssW = null;
+  lastCssH = null;
+  setHiDPI();
+});
 
 function roundRect(ctx, x, y, w, h, r) {
   const rr = Math.min(r, w/2, h/2);
@@ -86,6 +143,30 @@ function fillTextWrap(ctx, text, x, y, maxWidth, lineHeight) {
   return outY;
 }
 function now() { return performance.now(); }
+
+function buildExplanation(dividend, divisor, quotient, answer) {
+  const fractionLine = `${dividend}/${divisor} = ${quotient}`;
+  const fractionDetail = `${dividend}/${divisor} = ${quotient}/1`;
+  const patterns = [
+    [
+      `① 나눗셈 계산: ${dividend} ÷ ${divisor} = ${quotient}`,
+      `② 거꾸로 곱셈 검산: ${quotient} × ${divisor} = ${dividend}`,
+      `③ 분수 해석: ${fractionLine}`
+    ],
+    [
+      `[나눗셈] ${dividend} ÷ ${divisor} → ${quotient}`,
+      `[검산] ${divisor} × ${quotient} = ${dividend} (역연산 확인)`,
+      `[분수] ${fractionDetail} (분모를 1로 두면 몫과 같아요)`
+    ],
+    [
+      `Step A. ${dividend} ÷ ${divisor} = ${quotient}`,
+      `Step B. ${quotient} × ${divisor} = ${dividend}`,
+      `Step C. ${fractionLine} (약분 결과)`
+    ]
+  ];
+  const selected = patterns[Math.floor(Math.random() * patterns.length)];
+  return `${selected.join('\n')}\n⇒ 따라서 정답은 ${answer} 입니다.`;
+}
 
 /* =========================================================================
    1) 데이터: 티니핑 메타(이름·유형·설명) + 이미지 JSON 매핑
@@ -465,7 +546,7 @@ function genProblem(diff) {
       if (w!==answer) wrongs.add(w);
     }
     const options = [answer, ...[...wrongs]].sort(()=>Math.random()-0.5);
-    const explanation = `${dividend} ÷ ${divisor} = ${quotient}\n따라서 정답은 ${answer} 입니다.`;
+    const explanation = buildExplanation(dividend, divisor, quotient, answer);
 
     // 출제된 문제로 기록
     STATE.usedProblems.push(problemKey);
@@ -503,7 +584,7 @@ function genProblem(diff) {
     if (w!==answer) wrongs.add(w);
   }
   const options = [answer, ...[...wrongs]].sort(()=>Math.random()-0.5);
-  const explanation = `${dividend} ÷ ${divisor} = ${quotient}\n따라서 정답은 ${answer} 입니다.`;
+  const explanation = buildExplanation(dividend, divisor, quotient, answer);
 
   return { question, options, answer, explanation };
 }
@@ -536,7 +617,9 @@ function drawHeader(W,H) {
 
   CTX.fillStyle = '#ec4899';
   CTX.font = 'bold 22px system-ui, -apple-system, Segoe UI, Roboto';
-  CTX.fillText('태희의 나눗셈 도전! (Canvas)', 32, 40);
+  CTX.textAlign = 'center';
+  CTX.fillText('태희의 나눗셈 도전! (Canvas)', W/2, 40);
+  CTX.textAlign = 'left';
 
   CTX.fillStyle = '#374151';
   CTX.font = '14px system-ui, -apple-system, Segoe UI, Roboto';
@@ -616,58 +699,50 @@ function drawBackgroundTiles(W, H, opacity = 0.15) {
 }
 
 function drawHome() {
-  const {W,H} = clear();
+  const {W} = clear();
+  const layout = getHomeLayout(W);
 
   // 타이틀
   CTX.fillStyle = '#ec4899';
   CTX.font = `bold ${Math.round(36 * SCALE)}px system-ui, -apple-system, Segoe UI, Roboto`;
   CTX.textAlign = 'center';
-  CTX.fillText('태희의 티니핑 나눗셈 도전!', W/2, 60);
+  CTX.fillText('태희의 티니핑 나눗셈 도전!', W / 2, layout.titleY);
   CTX.textAlign = 'left';
 
   // 서브타이틀
   CTX.fillStyle = '#6b7280';
-  CTX.font = '18px system-ui, -apple-system, Segoe UI, Roboto';
+  CTX.font = `${Math.round(18 * SCALE)}px system-ui, -apple-system, Segoe UI, Roboto`;
   CTX.textAlign = 'center';
-  CTX.fillText('나눗셈 문제를 풀고 귀여운 티니핑들을 모아보세요!', W/2, 90);
+  CTX.fillText('나눗셈 문제를 풀고 귀여운 티니핑들을 모아보세요!', W / 2, layout.subtitleY);
   CTX.textAlign = 'left';
 
-  // 티니핑 타일 그리드
-  const tileSize = 80;
-  const gap = 12;
-  const startY = 120;
-  const cols = Math.floor((W - 40) / (tileSize + gap));
-  const startX = (W - (cols * (tileSize + gap) - gap)) / 2;
-
   // 배경 카드
-  const cardPadding = 20;
-  const gridWidth = cols * (tileSize + gap) - gap + cardPadding * 2;
-  const rows = Math.ceil(TINIPINGS.length / cols);
-  const gridHeight = rows * (tileSize + gap) - gap + cardPadding * 2;
-
+  const cardRadius = Math.round(20 * SCALE);
+  const cardShadow = Math.round(12 * SCALE);
   CTX.save();
-  roundRect(CTX, (W - gridWidth) / 2, startY - 10, gridWidth, gridHeight + 20, 20);
+  CTX.shadowColor = 'rgba(0,0,0,0.08)';
+  CTX.shadowBlur = cardShadow;
+  roundRect(CTX, layout.cardX, layout.startY - Math.round(10 * SCALE), layout.gridWidth, layout.gridHeight + Math.round(20 * SCALE), cardRadius);
   CTX.fillStyle = '#ffffff';
   CTX.fill();
-  CTX.shadowColor='rgba(0,0,0,0.08)';
-  CTX.shadowBlur=12;
   CTX.restore();
+
+  const tileStartX = layout.cardX + layout.cardPadding;
+  const tileStartY = layout.startY;
 
   // 티니핑 타일들 그리기
   for (let i = 0; i < TINIPINGS.length; i++) {
-    const row = Math.floor(i / cols);
-    const col = i % cols;
-    const x = startX + col * (tileSize + gap);
-    const y = startY + row * (tileSize + gap);
+    const row = Math.floor(i / layout.cols);
+    const col = i % layout.cols;
+    const x = tileStartX + col * (layout.tileSize + layout.gap);
+    const y = tileStartY + row * (layout.tileSize + layout.gap);
 
     const tp = TINIPINGS[i];
 
-    // 타일 배경
     CTX.save();
-    roundRect(CTX, x, y, tileSize, tileSize, 12);
+    roundRect(CTX, x, y, layout.tileSize, layout.tileSize, Math.round(12 * SCALE));
 
-    // 그라데이션 배경
-    const g = CTX.createLinearGradient(x, y, x + tileSize, y + tileSize);
+    const g = CTX.createLinearGradient(x, y, x + layout.tileSize, y + layout.tileSize);
     if (tp.type === '로열') {
       g.addColorStop(0, '#fce7f3');
       g.addColorStop(1, '#fbcfe8');
@@ -684,48 +759,44 @@ function drawHome() {
     CTX.fillStyle = g;
     CTX.fill();
     CTX.strokeStyle = '#e5e7eb';
-    CTX.lineWidth = 2;
+    CTX.lineWidth = Math.max(1, Math.round(2 * SCALE));
     CTX.stroke();
     CTX.restore();
 
-    // 티니핑 이미지 그리기 (클로저 문제 해결)
     if (tp.imageObj) {
-      const imgSize = tileSize * 0.65;
-      CTX.drawImage(tp.imageObj, x + (tileSize - imgSize) / 2, y + 8, imgSize, imgSize);
+      const imgSize = layout.tileSize * 0.65;
+      CTX.drawImage(tp.imageObj, x + (layout.tileSize - imgSize) / 2, y + Math.round(8 * SCALE), imgSize, imgSize);
     }
 
-    // 티니핑 이름
     CTX.fillStyle = '#111827';
-    CTX.font = 'bold 11px system-ui, -apple-system';
+    CTX.font = `bold ${Math.max(10, Math.round(11 * SCALE))}px system-ui, -apple-system`;
     CTX.textAlign = 'center';
-    CTX.fillText(tp.name, x + tileSize / 2, y + tileSize - 8);
+    CTX.fillText(tp.name, x + layout.tileSize / 2, y + layout.tileSize - Math.round(8 * SCALE));
     CTX.textAlign = 'left';
   }
 
-  const btnY = startY + gridHeight + 40;
-  // 게임 시작 버튼
-  const btnW = Math.round(200 * SCALE);
-  const btnH = Math.max(48, Math.round(50 * SCALE)); // 최소 48px 터치 타겟
-  const btnX = (W - btnW) / 2;
+  const btnX = (W - layout.btnW) / 2;
 
   CTX.save();
-  roundRect(CTX, btnX, btnY, btnW, btnH, 12);
-  const btnG = CTX.createLinearGradient(btnX, btnY, btnX, btnY + btnH);
+  CTX.shadowColor = 'rgba(236,72,153,0.4)';
+  CTX.shadowBlur = Math.round(10 * SCALE);
+  roundRect(CTX, btnX, layout.btnY, layout.btnW, layout.btnH, Math.round(12 * SCALE));
+  const btnG = CTX.createLinearGradient(btnX, layout.btnY, btnX, layout.btnY + layout.btnH);
   btnG.addColorStop(0, '#ec4899');
   btnG.addColorStop(1, '#db2777');
   CTX.fillStyle = btnG;
   CTX.fill();
-  CTX.shadowColor='rgba(236,72,153,0.4)';
-  CTX.shadowBlur=10;
   CTX.restore();
 
   CTX.fillStyle = '#ffffff';
-  CTX.font = 'bold 20px system-ui, -apple-system';
   CTX.font = `bold ${Math.round(20 * SCALE)}px system-ui, -apple-system`;
-  CTX.fillText('게임 시작하기', btnX + btnW / 2, btnY + btnH / 2 + 7);
+  CTX.textAlign = 'center';
+  CTX.textBaseline = 'middle';
+  CTX.fillText('게임 시작하기', btnX + layout.btnW / 2, layout.btnY + layout.btnH / 2);
   CTX.textAlign = 'left';
+  CTX.textBaseline = 'alphabetic';
 
-  STATE.hitboxes.push({ id: 'btn_start_game', x: btnX, y: btnY, w: btnW, h: btnH });
+  STATE.hitboxes.push({ id: 'btn_start_game', x: btnX, y: layout.btnY, w: layout.btnW, h: layout.btnH });
 }
 
 function drawQuiz() {
@@ -1161,12 +1232,12 @@ function onTouch(evt) {
 
 CANVAS.addEventListener('click', onPointer);
 CANVAS.addEventListener('touchend', onTouch);
-CANVAS.addEventListener('touchstart', function(e) { e.preventDefault(); }); // 터치 시작 시 스크롤 방지
 
 /* =========================================================================
    7) 루프
    ========================================================================= */
 function frame(ts) {
+  setHiDPI();
   if (!STATE.problem && STATE.mode==='quiz') ensureProblem();
 
   if (STATE.mode==='home')       drawHome();
