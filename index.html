@@ -194,27 +194,90 @@ function fillTextWrap(ctx, text, x, y, maxWidth, lineHeight) {
 function now() { return performance.now(); }
 
 function buildExplanation(dividend, divisor, quotient, answer) {
-  const fractionLine = `${dividend}/${divisor} = ${quotient}`;
-  const fractionDetail = `${dividend}/${divisor} = ${quotient}/1`;
   const patterns = [
+    // 패턴 1: 시각적 나누기
     [
-      `① 나눗셈 계산: ${dividend} ÷ ${divisor} = ${quotient}`,
-      `② 거꾸로 곱셈 검산: ${quotient} × ${divisor} = ${dividend}`,
-      `③ 분수 해석: ${fractionLine}`
+      `🎯 태희야, 같이 생각해볼까?`,
+      `${dividend}개를 ${divisor}명에게 똑같이 나누면...`,
+      `한 명당 ${quotient}개씩 받을 수 있어!`,
+      `✨ 검산: ${quotient}명 × ${divisor}개 = ${dividend}개 (딱 맞네!)`
     ],
+
+    // 패턴 2: 거꾸로 생각하기
     [
-      `[나눗셈] ${dividend} ÷ ${divisor} → ${quotient}`,
-      `[검산] ${divisor} × ${quotient} = ${dividend} (역연산 확인)`,
-      `[분수] ${fractionDetail} (분모를 1로 두면 몫과 같아요)`
+      `💡 거꾸로 생각해보자!`,
+      `${divisor}개씩 ${quotient}묶음이면 전체 몇 개일까?`,
+      `${divisor} × ${quotient} = ${dividend}개야!`,
+      `그러니까 ${dividend} ÷ ${divisor} = ${quotient}이지! 👍`
     ],
+
+    // 패턴 3: 묶음으로 이해하기
     [
-      `Step A. ${dividend} ÷ ${divisor} = ${quotient}`,
-      `Step B. ${quotient} × ${divisor} = ${dividend}`,
-      `Step C. ${fractionLine} (약분 결과)`
+      `📦 묶음으로 생각해보면 쉬워!`,
+      `${dividend}개를 ${divisor}개씩 묶으면...`,
+      `${quotient}묶음이 만들어져!`,
+      `멋지게 풀었어! 😊`
+    ],
+
+    // 패턴 4: 공평하게 나누기
+    [
+      `⚖️ 공평하게 나누어볼까?`,
+      `${dividend}개를 ${divisor}명이 똑같이 나누면`,
+      `한 명당 ${quotient}개씩이야!`,
+      `모두에게 공평하게 나눠졌네! 잘했어! 🌟`
+    ],
+
+    // 패턴 5: 단계별 친절한 설명
+    [
+      `📝 차근차근 풀어보자!`,
+      `1단계: ${dividend}을 ${divisor}로 나누기`,
+      `2단계: ${dividend} ÷ ${divisor} = ${quotient}`,
+      `3단계: 확인하기 → ${quotient} × ${divisor} = ${dividend} ✓`
+    ],
+
+    // 패턴 6: 질문하며 설명하기
+    [
+      `🤔 함께 생각해볼까?`,
+      `"${dividend}개가 있는데 ${divisor}명이 나눠 가지면?"`,
+      `바로 한 명당 ${quotient}개씩이야!`,
+      `이해했지? 태희는 정말 똑똑해! 💯`
+    ],
+
+    // 패턴 7: 실생활 비유
+    [
+      `🍰 실제 상황으로 생각해보면`,
+      `케이크 ${dividend}조각을 ${divisor}명이 나눠 먹으면`,
+      `한 명이 ${quotient}조각씩 먹을 수 있어!`,
+      `간단하지? 잘했어! 🎉`
+    ],
+
+    // 패턴 8: 패턴 발견하기
+    [
+      `🔍 패턴을 찾아보자!`,
+      `${divisor}씩 ${quotient}번 더하면 ${dividend}이 돼`,
+      `그래서 ${dividend} ÷ ${divisor} = ${quotient}이야!`,
+      `수학은 패턴 찾기! 멋지게 해냈어! ✨`
+    ],
+
+    // 패턴 9: 곱셈표 활용
+    [
+      `📊 곱셈구구를 떠올려보면`,
+      `${divisor} × ${quotient} = ${dividend}이니까`,
+      `거꾸로 ${dividend} ÷ ${divisor} = ${quotient}이지!`,
+      `곱셈과 나눗셈은 친구야! 👫`
+    ],
+
+    // 패턴 10: 격려하며 설명
+    [
+      `🌈 잘 생각했어! 이렇게 풀면 돼`,
+      `${dividend}개에서 ${divisor}개씩 빼면`,
+      `${quotient}번 뺄 수 있어!`,
+      `그게 바로 ${dividend} ÷ ${divisor} = ${quotient}이야! 대단해! 🎊`
     ]
   ];
+
   const selected = patterns[Math.floor(Math.random() * patterns.length)];
-  return `${selected.join('\n')}\n⇒ 따라서 정답은 ${answer} 입니다.`;
+  return `${selected.join('\n')}\n\n💖 정답은 ${answer}이야!`;
 }
 
 /* =========================================================================
