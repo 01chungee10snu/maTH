@@ -201,6 +201,8 @@ function genProblem(diff) {
     if (topic.includes('도형') || topic.includes('삼각형') || topic.includes('사각형')) return genGeometryProblem(diff);
     if (topic.includes('시계') || topic.includes('측정')) return genMeasurementProblem(diff);
     if (topic.includes('규칙') || topic.includes('수열')) return genPatternProblem(diff);
+    if (topic.includes('길이')) return genLengthProblem(diff);
+    if (topic.includes('자료') || topic.includes('그래프')) return genGraphProblem(diff);
 
     // 기본값: 덧셈
     return genAdditionProblem(diff);
@@ -518,6 +520,88 @@ function genPatternProblem(diff) {
     };
 }
 
+function genLengthProblem(diff) {
+    // 길이 재기 (자 눈금 읽기)
+    const length = Math.floor(Math.random() * 8) + 2; // 2~9cm
+    const start = Math.floor(Math.random() * 3); // 0, 1, 2cm에서 시작 (난이도)
+
+    const answer = `${length}cm`;
+    const question = "연필의 길이는 몇 cm일까요?";
+
+    const wrongs = new Set();
+    while (wrongs.size < 4) {
+        let w = length + Math.floor(Math.random() * 5) - 2;
+        if (w < 1) w = length + 1;
+        if (w !== length) wrongs.add(`${w}cm`);
+    }
+
+    // 시작점이 0이 아닐 때 헷갈리는 오답 (끝 눈금만 읽은 경우)
+    if (start > 0) {
+        wrongs.add(`${start + length}cm`);
+    }
+
+    return {
+        question,
+        options: [answer, ...Array.from(wrongs)].slice(0, 4).sort(() => Math.random() - 0.5),
+        answer,
+        explanation: `물건의 한쪽 끝을 눈금 ${start}에 맞췄으니까,\n끝 눈금 ${start + length}에서 시작 눈금 ${start}을 빼면 ${length}cm야!`,
+        problemKey: `length-${length}-${start}`,
+        rulerData: { length, start }
+    };
+}
+
+function genGraphProblem(diff) {
+    // 막대그래프 해석
+    const items = ['사과', '바나나', '포도', '귤'];
+    const counts = items.map(() => Math.floor(Math.random() * 8) + 2); // 2~9개
+
+    // 질문 유형 랜덤 선택
+    const qType = Math.floor(Math.random() * 3);
+    let question, answer, explanation;
+
+    if (qType === 0) {
+        // 가장 많은 것 찾기
+        const maxVal = Math.max(...counts);
+        const maxItems = items.filter((_, i) => counts[i] === maxVal);
+        question = "가장 많은 과일은 무엇인가요?";
+        answer = maxItems[0]; // 복수 정답 방지 위해 하나만
+        explanation = `${answer}가 ${maxVal}개로 가장 많아!`;
+    } else if (qType === 1) {
+        // 특정 항목 개수 묻기
+        const targetIdx = Math.floor(Math.random() * items.length);
+        question = `${items[targetIdx]}는 몇 개일까요?`;
+        answer = `${counts[targetIdx]}개`;
+        explanation = `그래프의 막대 높이를 보면 ${items[targetIdx]}는 ${counts[targetIdx]}개야.`;
+    } else {
+        // 전체 개수 묻기
+        const total = counts.reduce((a, b) => a + b, 0);
+        question = "과일은 모두 몇 개일까요?";
+        answer = `${total}개`;
+        explanation = `모든 막대의 수를 더하면 ${counts.join(' + ')} = ${total}개야.`;
+    }
+
+    const wrongs = new Set();
+    if (qType === 0) {
+        items.forEach(it => { if (it !== answer) wrongs.add(it); });
+    } else {
+        while (wrongs.size < 4) {
+            let wVal = parseInt(answer) + Math.floor(Math.random() * 7) - 3;
+            if (wVal < 1) wVal = 1;
+            const wStr = `${wVal}개`;
+            if (wStr !== answer) wrongs.add(wStr);
+        }
+    }
+
+    return {
+        question,
+        options: [answer, ...Array.from(wrongs)].slice(0, 4).sort(() => Math.random() - 0.5),
+        answer,
+        explanation,
+        problemKey: `graph-${qType}-${counts.join('-')}`,
+        graphData: { items, counts }
+    };
+}
+
 function clear() {
     const W = CANVAS.width / DPR;
     const H = CANVAS.height / DPR;
@@ -542,7 +626,7 @@ function drawHeader(W, H) {
     CTX.fillStyle = '#ec4899';
     CTX.font = 'bold 28px Jua, sans-serif, Segoe UI, Roboto';
     CTX.textAlign = 'center';
-    const title = STATE.currentCurriculum === 'division' ? '태희의 나눗셈 도전!' : `태희의 ${STATE.currentCurriculum} 도전!`;
+    const title = STATE.currentCurriculum === 'division' ? '태희의 도전! 수학꾸러기' : `태희의 ${STATE.currentCurriculum} 도전!`;
     CTX.fillText(title, W / 2, 42);
     CTX.textAlign = 'left';
 
@@ -801,7 +885,7 @@ function drawHome() {
     CTX.fillStyle = '#ec4899';
     CTX.font = `bold ${Math.round(36 * SCALE)}px Jua, sans-serif, Segoe UI, Roboto`;
     CTX.textAlign = 'center';
-    CTX.fillText('태희의 티니핑 나눗셈 도전!', W / 2, layout.titleY);
+    CTX.fillText('태희의 도전! 수학꾸러기', W / 2, layout.titleY);
     CTX.textAlign = 'left';
 
     CTX.fillStyle = '#6b7280';
@@ -1244,6 +1328,102 @@ function drawGeometryShape(ctx, shapeType, cx, cy, size) {
             ctx.fill();
             ctx.stroke();
     }
+    ctx.restore();
+}
+
+function drawRuler(ctx, cx, cy, data) {
+    const { length, start } = data;
+    const rulerW = 280;
+    const rulerH = 50;
+    const scale = rulerW / 12; // 12cm 자
+
+    ctx.save();
+    ctx.translate(cx - rulerW / 2, cy);
+
+    // 자 본체
+    ctx.fillStyle = '#fef3c7';
+    ctx.strokeStyle = '#d97706';
+    ctx.lineWidth = 2;
+    ctx.fillRect(0, 0, rulerW, rulerH);
+    ctx.strokeRect(0, 0, rulerW, rulerH);
+
+    // 눈금
+    ctx.fillStyle = '#000000';
+    ctx.textAlign = 'center';
+    ctx.font = '12px sans-serif';
+
+    for (let i = 0; i <= 12; i++) {
+        const x = i * scale;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, 15);
+        ctx.stroke();
+        ctx.fillText(i, x, 28);
+    }
+
+    // 물체 (연필)
+    const objStart = start * scale;
+    const objW = length * scale;
+    const objY = -20;
+
+    ctx.fillStyle = '#ef4444';
+    roundRect(ctx, objStart, objY, objW, 10, 4);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+function drawBarGraph(ctx, cx, cy, data) {
+    const { items, counts } = data;
+    const maxVal = 10;
+    const w = 260;
+    const h = 140;
+    const barW = 30;
+    const gap = (w - (items.length * barW)) / (items.length + 1);
+
+    ctx.save();
+    ctx.translate(cx - w / 2, cy - h / 2);
+
+    // 축
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, h);
+    ctx.lineTo(w, h);
+    ctx.strokeStyle = '#374151';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // 눈금선
+    ctx.strokeStyle = '#e5e7eb';
+    ctx.lineWidth = 1;
+    for (let i = 1; i <= maxVal; i++) {
+        const y = h - (i / maxVal) * h;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+    }
+
+    // 막대
+    items.forEach((item, i) => {
+        const val = counts[i];
+        const barH = (val / maxVal) * h;
+        const x = gap + i * (barW + gap);
+        const y = h - barH;
+
+        ctx.fillStyle = ['#fca5a5', '#fdba74', '#86efac', '#93c5fd'][i % 4];
+        ctx.fillRect(x, y, barW, barH);
+
+        // 항목 이름
+        ctx.fillStyle = '#374151';
+        ctx.textAlign = 'center';
+        ctx.font = '14px Jua, sans-serif';
+        ctx.fillText(item, x + barW / 2, h + 20);
+
+        // 값 표시
+        ctx.fillText(val, x + barW / 2, y - 5);
+    });
+
     ctx.restore();
 }
 
@@ -1738,14 +1918,6 @@ function onPointer(evt) {
                     } else if (b.id.startsWith('subgrade_')) {
                         STATE.mapSelection.subGrade = b.id.replace('subgrade_', '');
                     } else if (b.id.startsWith('topic_')) {
-                        const topic = b.id.replace('topic_', '');
-                        console.log('선택된 토픽:', topic);
-                        STATE.currentCurriculum = topic;
-                        STATE.mode = 'quiz';
-                        STATE.questionIndex = 0;
-                        STATE.score = 0;
-                        STATE.caughtIds = [];
-                        ensureProblem();
                     } else if (b.id.startsWith('opt_')) {
                         STATE.selected = b.value;
                     }
@@ -1799,18 +1971,17 @@ function frame(ts) {
 loadState();
 setTimeout(checkSession, 500);
 
-document.fonts.ready.then(() => {
-    console.log('폰트 로드 완료 - Jua 폰트 적용');
-    return loadTinipingImages();
-}).then(() => {
-    console.log('게임 시작 - 티니핑 이미지 로드 완료');
+Promise.all([
+    document.fonts.ready,
+    loadTinipingImages(),
+    loadCurriculumData()
+]).then(() => {
+    console.log('모든 리소스 로드 완료');
     loadEncyclopedia();
-    ensureProblem();
     window.scrollTo(0, 0);
     requestAnimationFrame(frame);
 }).catch(err => {
-    console.error('로드 실패:', err);
-    ensureProblem();
+    console.error('초기화 실패:', err);
     window.scrollTo(0, 0);
     requestAnimationFrame(frame);
 });
