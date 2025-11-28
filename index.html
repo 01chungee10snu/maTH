@@ -32,17 +32,51 @@
   <!-- 사용자 정보 배지 (로그인 시 표시) -->
   <div id="userBadge" class="user-badge" style="display:none;" onclick="handleLogout()">
     <span>로그인 필요</span>
-  </div>
-  <div class="wrap">
-    <canvas id="app" width="720" height="1280"></canvas>
-  </div>
+    <!doctype html>
+    <html lang="ko">
 
-  <!-- 스크립트 로드 순서 중요 -->
-  <script src="js/config.js"></script>
-  <script src="js/supabase.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/curriculum.js"></script>
-  <script src="js/game.js"></script>
-</body>
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport"
+        content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+      <title>태희의 도전! 나눗셈을 성공하고 티니핑 캐치!</title>
+      <!-- Google Fonts - 어린이용 귀여운 한글 폰트 -->
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+      <link rel="stylesheet" href="css/style.css">
+    </head>
 
-</html>
+    <body>
+      <div id="err" role="alert" aria-live="assertive" aria-hidden="true"></div>
+
+      <!-- 로그인 모달 -->
+      <div id="loginModal" class="modal-overlay">
+        <div class="modal-window">
+          <div class="modal-title">태희의 수학 모험</div>
+          <input type="email" id="emailInput" class="input-field" placeholder="이메일 주소" />
+          <input type="password" id="passwordInput" class="input-field" placeholder="비밀번호 (6자리 이상)" />
+          <button class="btn-primary" onclick="handleLogin()">로그인 / 회원가입</button>
+          <button class="btn-secondary" onclick="closeLoginModal()">나중에 하기</button>
+          <div id="loginMsg" style="margin-top:10px; font-size:14px; color:#ef4444;"></div>
+        </div>
+      </div>
+
+      <!-- 사용자 정보 배지 (로그인 시 표시) -->
+      <div id="userBadge" class="user-badge" style="display:none;" onclick="handleLogout()">
+        <span>로그인 필요</span>
+      </div>
+      <div class="wrap">
+        <canvas id="app" width="720" height="1280"></canvas>
+      </div>
+
+      <!-- 스크립트 로드 순서 중요 -->
+      <script src="js/config.js?v=2"></script>
+      <script src="js/supabase.js?v=2"></script>
+      <script src="js/data.js?v=2"></script>
+      <script src="js/curriculum.js?v=2"></script>
+      <script src="js/game.js?v=2"></script>
+    </body>
+
+    </html>
