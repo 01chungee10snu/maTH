@@ -12,7 +12,7 @@ const LS_KEY = 'taehee-math-division-canvas';
 
 // 전역 상태 객체
 let STATE = {
-  mode: 'home', // home | map | quiz | explain | catch | collection | complete
+  mode: 'map', // home | map | quiz | explain | catch | collection | complete
   questionIndex: 0,
   totalQuestions: 0,
   score: 0,

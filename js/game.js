@@ -182,6 +182,11 @@ function loadState() {
         STATE.caughtIds = s.caughtIds || [];
         STATE.consecutiveCorrect = s.consecutiveCorrect || 0;
         STATE.usedProblems = s.usedProblems || [];
+
+        // 홈 모드인 경우 맵 모드로 강제 전환 (메인 페이지 변경)
+        if (STATE.mode === 'home') {
+            STATE.mode = 'map';
+        }
     } catch (e) { }
 }
 
@@ -1474,7 +1479,7 @@ function catchConfirm() {
 function resetAll() {
     localStorage.removeItem(LS_KEY);
     STATE = {
-        mode: 'home',
+        mode: 'map', // 초기 모드를 map으로 변경
         questionIndex: 0,
         totalQuestions: 0,
         score: 0,
@@ -1492,7 +1497,7 @@ function resetAll() {
         currentCurriculum: 'division',
         mapSelection: { grade: null, subGrade: null, domain: null }
     };
-    ensureProblem();
+    // ensureProblem(); // 맵에서는 문제 생성 불필요
     saveState();
 }
 
@@ -1518,15 +1523,19 @@ function onPointer(evt) {
         if (hit(x, y, b)) {
             if (b.disabled) return;
             switch (b.id) {
+                case 'btn_map_home':
+                    // 맵에서 홈 버튼 클릭 시 초기화 (최상위 레벨로)
+                    STATE.mapSelection = { grade: null, subGrade: null, domain: null };
+                    break;
                 case 'btn_start_game':
-                    STATE.mode = 'quiz';
-                    ensureProblem();
+                    STATE.mode = 'map'; // 홈 화면 대신 맵으로 이동
                     break;
                 case 'btn_collection':
                     STATE.mode = 'collection';
                     break;
                 case 'btn_close_collection':
-                    STATE.mode = 'quiz';
+                    // 컬렉션 닫을 때 이전 모드로 복귀 (퀴즈 중이었으면 퀴즈로, 아니면 맵으로)
+                    STATE.mode = STATE.problem ? 'quiz' : 'map';
                     break;
                 case 'btn_check':
                     checkAnswer();
@@ -1547,7 +1556,20 @@ function onPointer(evt) {
                     resetAll();
                     break;
                 default:
-                    if (b.id.startsWith('opt_')) {
+                    if (b.id.startsWith('grade_')) {
+                        STATE.mapSelection.grade = b.id.replace('grade_', '');
+                    } else if (b.id.startsWith('subgrade_')) {
+                        STATE.mapSelection.subGrade = b.id.replace('subgrade_', '');
+                    } else if (b.id.startsWith('topic_')) {
+                        const topic = b.id.replace('topic_', '');
+                        console.log('선택된 토픽:', topic);
+                        STATE.currentCurriculum = topic;
+                        STATE.mode = 'quiz';
+                        STATE.questionIndex = 0;
+                        STATE.score = 0;
+                        STATE.caughtIds = [];
+                        ensureProblem();
+                    } else if (b.id.startsWith('opt_')) {
                         STATE.selected = b.value;
                     }
             }
@@ -1584,6 +1606,7 @@ function frame(ts) {
     if (!STATE.problem && STATE.mode === 'quiz') ensureProblem();
 
     if (STATE.mode === 'home') drawHome();
+    else if (STATE.mode === 'map') drawMap();
     else if (STATE.mode === 'quiz') drawQuiz();
     else if (STATE.mode === 'explain') drawExplain();
     else if (STATE.mode === 'catch') drawCatch(ts);
