@@ -17,7 +17,9 @@ async function checkSession() {
         updateUserUI();
         await loadDataFromDB();
     } else {
-        document.getElementById('loginModal').style.display = 'flex';
+        // 로그인 모달 자동 표시 제거 (맵을 먼저 보여줌)
+        // document.getElementById('loginModal').style.display = 'flex';
+        updateUserUI(); // 로그인 버튼 표시
     }
 
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
