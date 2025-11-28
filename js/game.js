@@ -1969,7 +1969,7 @@ function frame(ts) {
    초기화
    ========================================================================= */
 loadState();
-setTimeout(checkSession, 500);
+// setTimeout(checkSession, 500); // 로그인 체크 제거
 
 Promise.all([
     document.fonts.ready,
