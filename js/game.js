@@ -617,6 +617,183 @@ function drawBackgroundTiles(W, H, opacity = 0.15) {
     CTX.globalAlpha = 1.0;
 }
 
+function drawMap() {
+    const { W, H } = clear();
+    drawBackgroundTiles(W, H, 0.1);
+
+    // 상단 헤더 (홈 버튼 포함)
+    CTX.save();
+    roundRect(CTX, 16, 12, W - 32, 60, 16);
+    CTX.fillStyle = '#ffffff';
+    CTX.fill();
+    CTX.shadowColor = 'rgba(0,0,0,0.06)';
+    CTX.shadowBlur = 10;
+    CTX.restore();
+
+    CTX.fillStyle = '#ec4899';
+    CTX.font = 'bold 24px Jua, sans-serif';
+    CTX.textAlign = 'center';
+    CTX.textBaseline = 'middle';
+    CTX.fillText('수학 탐험 지도', W / 2, 42);
+
+    // 홈 버튼 (맵 초기화)
+    const homeBtnW = 80;
+    const homeBtnH = 40;
+    const homeBtnX = 30;
+    const homeBtnY = 22;
+
+    CTX.save();
+    roundRect(CTX, homeBtnX, homeBtnY, homeBtnW, homeBtnH, 8);
+    CTX.fillStyle = '#fce7f3';
+    CTX.fill();
+    CTX.strokeStyle = '#ec4899';
+    CTX.lineWidth = 2;
+    CTX.stroke();
+    CTX.restore();
+
+    CTX.fillStyle = '#db2777';
+    CTX.font = 'bold 16px Jua, sans-serif';
+    CTX.fillText('처음으로', homeBtnX + homeBtnW / 2, homeBtnY + homeBtnH / 2);
+    STATE.hitboxes.push({ id: 'btn_map_home', x: homeBtnX, y: homeBtnY, w: homeBtnW, h: homeBtnH });
+
+    CTX.textAlign = 'left';
+    CTX.textBaseline = 'alphabetic';
+
+    const contentY = 100;
+    const contentH = H - contentY - 20;
+
+    if (!STATE.mapSelection.grade) {
+        // 1단계: 학교급 선택 (초등학교, 중학교, 고등학교)
+        const levels = [
+            { id: 'elementary_school', label: '초등학교', color: '#fca5a5' },
+            { id: 'middle_school', label: '중학교', color: '#86efac' },
+            { id: 'high_school', label: '고등학교', color: '#93c5fd' }
+        ];
+
+        const btnW = Math.min(300, W - 60);
+        const btnH = 80;
+        const gap = 30;
+        const totalH = levels.length * btnH + (levels.length - 1) * gap;
+        let startY = contentY + (contentH - totalH) / 2;
+
+        levels.forEach(lvl => {
+            const bx = (W - btnW) / 2;
+            const by = startY;
+
+            CTX.save();
+            roundRect(CTX, bx, by, btnW, btnH, 20);
+            CTX.fillStyle = lvl.color;
+            CTX.shadowColor = 'rgba(0,0,0,0.1)';
+            CTX.shadowBlur = 10;
+            CTX.fill();
+            CTX.restore();
+
+            CTX.fillStyle = '#ffffff';
+            CTX.font = 'bold 30px Jua, sans-serif';
+            CTX.textAlign = 'center';
+            CTX.textBaseline = 'middle';
+            CTX.fillText(lvl.label, bx + btnW / 2, by + btnH / 2);
+
+            STATE.hitboxes.push({ id: `grade_${lvl.id}`, x: bx, y: by, w: btnW, h: btnH });
+            startY += btnH + gap;
+        });
+
+    } else if (!STATE.mapSelection.subGrade) {
+        // 2단계: 학년군/학년 선택
+        const gradeData = CURRICULUM_DATA[STATE.mapSelection.grade];
+        if (!gradeData) return;
+
+        const subGrades = Object.keys(gradeData);
+        const btnW = Math.min(280, W - 60);
+        const btnH = 60;
+        const gap = 20;
+
+        let startY = contentY + 20;
+
+        CTX.fillStyle = '#1f2937';
+        CTX.font = 'bold 24px Jua, sans-serif';
+        CTX.textAlign = 'center';
+        CTX.fillText('학년을 선택해줘!', W / 2, startY);
+        startY += 50;
+
+        subGrades.forEach(sub => {
+            const bx = (W - btnW) / 2;
+            const by = startY;
+
+            CTX.save();
+            roundRect(CTX, bx, by, btnW, btnH, 15);
+            CTX.fillStyle = '#c4b5fd';
+            CTX.fill();
+            CTX.restore();
+
+            CTX.fillStyle = '#ffffff';
+            CTX.font = 'bold 22px Jua, sans-serif';
+            CTX.textAlign = 'center';
+            CTX.textBaseline = 'middle';
+            CTX.fillText(sub, bx + btnW / 2, by + btnH / 2);
+
+            STATE.hitboxes.push({ id: `subgrade_${sub}`, x: bx, y: by, w: btnW, h: btnH });
+            startY += btnH + gap;
+        });
+
+    } else {
+        // 3단계: 영역 및 주제 선택
+        const domainData = CURRICULUM_DATA[STATE.mapSelection.grade][STATE.mapSelection.subGrade];
+        if (!domainData) return;
+
+        const domains = Object.keys(domainData);
+        let startY = contentY + 10;
+
+        domains.forEach(dom => {
+            // 영역 제목
+            CTX.fillStyle = '#374151';
+            CTX.font = 'bold 20px Jua, sans-serif';
+            CTX.textAlign = 'left';
+            CTX.fillText(dom, 30, startY);
+            startY += 30;
+
+            // 주제 버튼들
+            const topics = domainData[dom];
+            const btnH = 40;
+            const gap = 10;
+            const colCount = Math.floor((W - 60) / 160); // 버튼 최소 너비 고려
+            const btnW = (W - 60 - (colCount - 1) * gap) / colCount;
+
+            topics.forEach((topic, idx) => {
+                const row = Math.floor(idx / colCount);
+                const col = idx % colCount;
+                const bx = 30 + col * (btnW + gap);
+                const by = startY + row * (btnH + gap);
+
+                CTX.save();
+                roundRect(CTX, bx, by, btnW, btnH, 10);
+                CTX.fillStyle = '#f0f9ff';
+                CTX.fill();
+                CTX.strokeStyle = '#bae6fd';
+                CTX.lineWidth = 1;
+                CTX.stroke();
+                CTX.restore();
+
+                CTX.fillStyle = '#0369a1';
+                CTX.font = '16px Jua, sans-serif';
+                CTX.textAlign = 'center';
+                CTX.textBaseline = 'middle';
+
+                // 텍스트 길이 조절
+                let displayTopic = topic;
+                if (topic.length > 8) displayTopic = topic.substring(0, 8) + '..';
+
+                CTX.fillText(displayTopic, bx + btnW / 2, by + btnH / 2);
+
+                STATE.hitboxes.push({ id: `topic_${topic}`, x: bx, y: by, w: btnW, h: btnH });
+            });
+
+            const rows = Math.ceil(topics.length / colCount);
+            startY += rows * (btnH + gap) + 20;
+        });
+    }
+}
+
 function drawHome() {
     const { W } = clear();
     const layout = getHomeLayout(W);
