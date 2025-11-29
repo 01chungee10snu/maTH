@@ -17,5 +17,5 @@ async function loadCurriculumData() {
     }
 }
 
-// 초기 로드 시 실행
-loadCurriculumData();
+// 초기 로드 시 실행 (game.js에서 제어하므로 주석 처리)
+// loadCurriculumData();

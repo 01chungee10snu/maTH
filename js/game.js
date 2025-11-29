@@ -784,8 +784,15 @@ function drawMap() {
 
     } else if (!STATE.mapSelection.subGrade) {
         // 2단계: 학년군/학년 선택
+        if (!CURRICULUM_DATA) {
+            console.error('커리큘럼 데이터가 로드되지 않았습니다.');
+            return;
+        }
         const gradeData = CURRICULUM_DATA[STATE.mapSelection.grade];
-        if (!gradeData) return;
+        if (!gradeData) {
+            console.error(`해당 학년급(${STATE.mapSelection.grade}) 데이터를 찾을 수 없습니다.`);
+            return;
+        }
 
         const subGrades = Object.keys(gradeData);
         const btnW = Math.min(280, W - 60);
@@ -822,8 +829,13 @@ function drawMap() {
 
     } else {
         // 3단계: 영역 및 주제 선택
+        if (!CURRICULUM_DATA || !CURRICULUM_DATA[STATE.mapSelection.grade]) return;
+
         const domainData = CURRICULUM_DATA[STATE.mapSelection.grade][STATE.mapSelection.subGrade];
-        if (!domainData) return;
+        if (!domainData) {
+            console.error(`해당 학년(${STATE.mapSelection.subGrade}) 데이터를 찾을 수 없습니다.`);
+            return;
+        }
 
         const domains = Object.keys(domainData);
         let startY = contentY + 10;
