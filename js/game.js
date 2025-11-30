@@ -195,17 +195,80 @@ function genProblem(diff) {
 
     if (topic.includes('덧셈') || topic.includes('합')) return genAdditionProblem(diff);
     if (topic.includes('뺄셈') || topic.includes('차')) return genSubtractionProblem(diff);
-    if (topic.includes('곱셈') || topic.includes('곱')) return genMultiplicationProblem(diff);
+    if (topic.includes('곱셈') || topic.includes('구구')) return genMultiplicationProblem(diff);
     if (topic.includes('나눗셈') || topic.includes('나머지') || topic === 'division') return genDivisionProblem(diff);
     if (topic.includes('분수')) return genFractionProblem(diff);
-    if (topic.includes('도형') || topic.includes('삼각형') || topic.includes('사각형')) return genGeometryProblem(diff);
-    if (topic.includes('시계') || topic.includes('측정')) return genMeasurementProblem(diff);
+    if (topic.includes('도형') || topic.includes('모양') || topic.includes('삼각형') || topic.includes('사각형')) return genGeometryProblem(diff);
+    if (topic.includes('시계') || topic.includes('시각') || topic.includes('시간')) return genMeasurementProblem(diff);
     if (topic.includes('규칙') || topic.includes('수열')) return genPatternProblem(diff);
     if (topic.includes('길이')) return genLengthProblem(diff);
-    if (topic.includes('자료') || topic.includes('그래프')) return genGraphProblem(diff);
+    if (topic.includes('자료') || topic.includes('그래프') || topic.includes('표') || topic.includes('분류')) return genGraphProblem(diff);
+    if (topic.includes('수') && !topic.includes('수열')) return genNumberProblem(diff); // '네 자리 이하의 수' 등
 
     // 기본값: 덧셈
     return genAdditionProblem(diff);
+}
+
+function genNumberProblem(diff) {
+    // 수의 개념 (크기 비교, 수 읽기, 자릿수)
+    const type = Math.floor(Math.random() * 3);
+    let question, answer, explanation;
+    const wrongs = new Set();
+
+    if (type === 0) {
+        // 크기 비교
+        const a = Math.floor(Math.random() * 90) + 10;
+        const b = Math.floor(Math.random() * 90) + 10;
+        if (a === b) return genNumberProblem(diff); // 재귀 호출로 다시 생성
+
+        const isBigger = a > b;
+        question = `${a}와 ${b} 중에서 더 큰 수는?`;
+        answer = String(Math.max(a, b));
+        explanation = `${a}와 ${b}를 비교하면 ${answer}가 더 커!`;
+
+        wrongs.add(String(Math.min(a, b)));
+        wrongs.add(String(Math.max(a, b) + 1));
+        wrongs.add(String(Math.max(a, b) + 10));
+    } else if (type === 1) {
+        // 수 읽기 (일, 십, 백)
+        const num = Math.floor(Math.random() * 900) + 100; // 100~999
+        const digit = Math.floor(Math.random() * 3); // 0:일, 1:십, 2:백
+        const place = ['일', '십', '백'][digit];
+        const val = String(num)[2 - digit];
+
+        question = `${num}에서 ${place}의 자리 숫자는?`;
+        answer = val;
+        explanation = `${num}을 자릿수대로 쓰면 백의 자리 ${String(num)[0]}, 십의 자리 ${String(num)[1]}, 일의 자리 ${String(num)[2]}야.`;
+
+        while (wrongs.size < 3) {
+            const w = Math.floor(Math.random() * 10);
+            if (String(w) !== answer) wrongs.add(String(w));
+        }
+    } else {
+        // 뛰어 세기
+        const start = Math.floor(Math.random() * 50) + 1;
+        const step = [2, 5, 10][Math.floor(Math.random() * 3)];
+        const targetIdx = 3; // 4번째 수 묻기
+
+        const seq = [];
+        for (let i = 0; i < 5; i++) seq.push(start + i * step);
+
+        question = `${start}부터 ${step}씩 뛰어 세면 네 번째 수는?`;
+        answer = String(seq[targetIdx]);
+        explanation = `${start} - ${seq[1]} - ${seq[2]} - ${seq[3]}... ${step}씩 커지니까 네 번째는 ${answer}야!`;
+
+        wrongs.add(String(seq[targetIdx] - step));
+        wrongs.add(String(seq[targetIdx] + step));
+        wrongs.add(String(seq[targetIdx] + step * 2));
+    }
+
+    return {
+        question,
+        options: [answer, ...Array.from(wrongs)].slice(0, 4).sort(() => Math.random() - 0.5),
+        answer,
+        explanation,
+        problemKey: `number-${type}-${Math.random()}`
+    };
 }
 
 function genAdditionProblem(diff) {
