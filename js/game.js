@@ -1993,6 +1993,14 @@ function onPointer(evt) {
                     } else if (b.id.startsWith('subgrade_')) {
                         STATE.mapSelection.subGrade = b.id.replace('subgrade_', '');
                     } else if (b.id.startsWith('topic_')) {
+                        const topic = b.id.replace('topic_', '');
+                        console.log('선택된 토픽:', topic);
+                        STATE.currentCurriculum = topic;
+                        STATE.mode = 'quiz';
+                        STATE.questionIndex = 0;
+                        STATE.score = 0;
+                        STATE.caughtIds = [];
+                        ensureProblem();
                     } else if (b.id.startsWith('opt_')) {
                         STATE.selected = b.value;
                     }
