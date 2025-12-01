@@ -49,7 +49,7 @@ function getHomeLayout(width) {
     const cardPadding = Math.round(20 * SCALE);
     const cardMargin = Math.round(20 * SCALE);
     const availableWidth = Math.max(160, width - cardMargin * 2);
-    const maxCols = Math.min(7, TINIPINGS.length);
+    const maxCols = Math.max(1, Math.min(7, TINIPINGS.length || 1));
     const minTileSize = Math.max(48, Math.round(56 * SCALE));
     const maxTileSize = Math.round(88 * SCALE);
 
@@ -256,9 +256,8 @@ function genNumberProblem(diff) {
         // 크기 비교
         const a = Math.floor(Math.random() * 90) + 10;
         const b = Math.floor(Math.random() * 90) + 10;
-        if (a === b) return genNumberProblem(diff); // 재귀 호출로 다시 생성
+        if (a === b) return genNumberProblem(diff); // 같은 수 방지
 
-        const isBigger = a > b;
         question = `${a}와 ${b} 중에서 더 큰 수는?`;
         answer = String(Math.max(a, b));
         explanation = `${a}와 ${b}를 비교하면 ${answer}가 더 커!`;
@@ -461,6 +460,7 @@ function genFractionProblem(diff) {
         const big = Math.max(num1, num2);
         const small = Math.min(num1, num2);
         const diffNum = big - small;
+        if (diffNum === 0) return genFractionProblem(diff); // 분자 0 방지
         question = `${big}/${denom} - ${small}/${denom} = ?`;
         answerStr = `${diffNum}/${denom}`;
         explanation = `분모가 같은 분수의 뺄셈은 분자끼리 빼!\n${big} - ${small} = ${diffNum}이니까 정답은 ${diffNum}/${denom}이야.`;
@@ -823,6 +823,7 @@ function drawCollectionButton(W, H) {
 }
 
 function drawBackgroundTiles(W, H, opacity = 0.15) {
+    if (!TINIPINGS || TINIPINGS.length === 0) return;
     const tileSize = 60;
     const gap = 10;
     const cols = Math.floor(W / (tileSize + gap)) + 1;
@@ -2044,7 +2045,7 @@ function checkAnswer() {
         if (STATE.score >= threshold && canCatchMore) {
             // 현재 문제의 영역에 맞는 티니핑 필터링
             let targetDomain = '수와 연산'; // 기본값
-            const topic = STATE.currentCurriculum;
+            const topic = STATE.currentCurriculum || '';
 
             if (topic.includes('도형') || topic.includes('측정') || topic.includes('시계') || topic.includes('길이')) targetDomain = '도형과 측정';
             else if (topic.includes('규칙') || topic.includes('수열')) targetDomain = '규칙성';
