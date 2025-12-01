@@ -30,10 +30,6 @@ const baseTinipings = [
 ];
 
 const tinipingImagesByGroup = {};
-let TINIPINGS = []; // 전역 변수 초기화
-let NAME2IMG = new Map();
-let IMAGE_CACHE = new Map();
-let ENCYCLOPEDIA = [];
 
 function detectMimeTypeFromBase64(data) {
     if (!data) return null;

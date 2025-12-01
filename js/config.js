@@ -38,7 +38,9 @@ let STATE = {
     grade: null, // 'elementary_school', 'middle_school', 'high_school'
     subGrade: null, // '1-2학년', '1학년' 등
     domain: null // '수와 연산' 등
-  }
+  },
+  // 컬렉션 탭 상태
+  collectionTab: '전체'
 };
 
 let TINIPINGS = [];

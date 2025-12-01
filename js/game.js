@@ -192,7 +192,10 @@ function saveState() {
         difficulty: STATE.difficulty,
         consecutiveCorrect: STATE.consecutiveCorrect,
         caughtIds: STATE.caughtIds,
-        usedProblems: STATE.usedProblems
+        usedProblems: STATE.usedProblems,
+        currentCurriculum: STATE.currentCurriculum,
+        mapSelection: STATE.mapSelection,
+        collectionTab: STATE.collectionTab
     };
     localStorage.setItem(LS_KEY, JSON.stringify(s));
 }
@@ -209,6 +212,9 @@ function loadState() {
         STATE.caughtIds = s.caughtIds || [];
         STATE.consecutiveCorrect = s.consecutiveCorrect || 0;
         STATE.usedProblems = s.usedProblems || [];
+        STATE.currentCurriculum = s.currentCurriculum || 'division';
+        STATE.mapSelection = s.mapSelection || { grade: null, subGrade: null, domain: null };
+        STATE.collectionTab = s.collectionTab || '전체';
 
         // 홈 모드인 경우 맵 모드로 강제 전환 (메인 페이지 변경)
         if (STATE.mode === 'home') {
@@ -1825,6 +1831,7 @@ function drawCatch(ts) {
         CTX.font = `bold ${Math.round(22 * SCALE)}px Jua, sans-serif`;
         CTX.textAlign = 'center';
         CTX.textBaseline = 'middle';
+        CTX.fillText('확인', bx + bw / 2, by + bh / 2);
         CTX.textBaseline = 'alphabetic';
         STATE.hitboxes.push({ id: 'btn_catch_ok', x: bx, y: by, w: bw, h: bh });
     }
