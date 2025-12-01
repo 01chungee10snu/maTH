@@ -2,33 +2,38 @@
    데이터: 티니핑 메타(이름·유형·설명) + 이미지 로딩
    ========================================================================= */
 const baseTinipings = [
-    { id: 1, name: "하츄핑", type: "로열", desc: "사랑의 티니핑" },
-    { id: 2, name: "사뿐핑", type: "로열", desc: "우아함의 티니핑" },
-    { id: 3, name: "아름핑", type: "로열", desc: "아름다움의 티니핑" },
-    { id: 4, name: "뽀니핑", type: "로열", desc: "자신감의 티니핑" },
-    { id: 5, name: "이클립스핑", type: "전설", desc: "어둠을 지배하는 전설의 티니핑" },
-    { id: 6, name: "다이아나핑", type: "전설", desc: "밤과 달의 여신" },
-    { id: 7, name: "해핑", type: "서포팅", desc: "행복의 티니핑" },
-    { id: 8, name: "포실핑", type: "서포팅", desc: "순수의 티니핑" },
-    { id: 9, name: "깡총핑", type: "서포팅", desc: "투지의 티니핑" },
-    { id: 10, name: "뽀득핑", type: "일반", desc: "상쾌함의 티니핑" },
-    { id: 11, name: "차밍핑", type: "일반", desc: "매력과 장난기의 티니핑" },
-    { id: 12, name: "나비핑", type: "일반", desc: "가벼움의 티니핑" },
-    { id: 13, name: "실크핑", type: "일반", desc: "모험의 티니핑" },
-    { id: 14, name: "샤를핑", type: "일반", desc: "명예의 티니핑" },
-    { id: 15, name: "트롯핑", type: "일반", desc: "흥겨움의 티니핑" },
-    { id: 16, name: "깨굴핑", type: "일반", desc: "교활함의 티니핑" },
-    { id: 17, name: "스노우핑", type: "일반", desc: "빙결의 티니핑" },
-    { id: 18, name: "이슬핑", type: "일반", desc: "순수함의 티니핑" },
-    { id: 19, name: "쿨쿨핑", type: "일반", desc: "잠의 티니핑" },
-    { id: 20, name: "슈슈핑", type: "일반", desc: "성실의 티니핑" },
-    { id: 21, name: "큐핑", type: "일반", desc: "짝사랑의 티니핑" },
-    { id: 22, name: "롱롱핑", type: "일반", desc: "성장의 티니핑" },
-    { id: 23, name: "야옹핑", type: "일반", desc: "도도함의 티니핑" },
-    { id: 24, name: "젠틀핑", type: "일반", desc: "정중함의 티니핑" }
+    { id: 1, name: "하츄핑", type: "로열", domain: "수와 연산", desc: "사랑의 티니핑" },
+    { id: 2, name: "바로핑", type: "로열", domain: "수와 연산", desc: "올바름의 티니핑" },
+    { id: 3, name: "아자핑", type: "로열", domain: "수와 연산", desc: "용기의 티니핑" },
+    { id: 4, name: "차차핑", type: "로열", domain: "수와 연산", desc: "희망의 티니핑" },
+    { id: 5, name: "라라핑", type: "로열", domain: "도형과 측정", desc: "즐거움의 티니핑" },
+    { id: 6, name: "해핑", type: "로열", domain: "도형과 측정", desc: "행복의 티니핑" },
+    { id: 7, name: "키키핑", type: "일반", domain: "도형과 측정", desc: "장난의 티니핑" },
+    { id: 8, name: "아잉핑", type: "일반", domain: "도형과 측정", desc: "애교의 티니핑" },
+    { id: 9, name: "부끄핑", type: "일반", domain: "도형과 측정", desc: "부끄러움의 티니핑" },
+    { id: 10, name: "베베핑", type: "일반", domain: "규칙성", desc: "아기의 티니핑" },
+    { id: 11, name: "띠용핑", type: "일반", domain: "규칙성", desc: "상상의 티니핑" },
+    { id: 12, name: "주르핑", type: "일반", domain: "규칙성", desc: "슬픔의 티니핑" },
+    { id: 13, name: "차나핑", type: "일반", domain: "규칙성", desc: "귀찮음의 티니핑" },
+    { id: 14, name: "따라핑", type: "일반", domain: "규칙성", desc: "따라쟁이 티니핑" },
+    { id: 15, name: "나르핑", type: "일반", domain: "자료와 가능성", desc: "자아도취 티니핑" },
+    { id: 16, name: "무거핑", type: "일반", domain: "자료와 가능성", desc: "무거움의 티니핑" },
+    { id: 17, name: "시러핑", type: "일반", domain: "자료와 가능성", desc: "거절의 티니핑" },
+    { id: 18, name: "바네핑", type: "일반", domain: "자료와 가능성", desc: "반함의 티니핑" },
+    { id: 19, name: "덜덜핑", type: "일반", domain: "자료와 가능성", desc: "두려움의 티니핑" },
+    { id: 20, name: "그림핑", type: "일반", domain: "자료와 가능성", desc: "그림의 티니핑" },
+    { id: 21, name: "사뿐핑", type: "로열", domain: "수와 연산", desc: "우아함의 티니핑" },
+    { id: 22, name: "아름핑", type: "로열", domain: "수와 연산", desc: "아름다움의 티니핑" },
+    { id: 23, name: "뽀니핑", type: "로열", domain: "수와 연산", desc: "자신감의 티니핑" },
+    { id: 24, name: "이클립스핑", type: "전설", domain: "규칙성", desc: "어둠을 지배하는 전설의 티니핑" },
+    { id: 25, name: "다이아나핑", type: "전설", domain: "도형과 측정", desc: "밤과 달의 여신" }
 ];
 
 const tinipingImagesByGroup = {};
+let TINIPINGS = []; // 전역 변수 초기화
+let NAME2IMG = new Map();
+let IMAGE_CACHE = new Map();
+let ENCYCLOPEDIA = [];
 
 function detectMimeTypeFromBase64(data) {
     if (!data) return null;
@@ -99,7 +104,7 @@ async function loadTinipingImages() {
         loadedData = await response.json();
     } catch (error) {
         console.warn('이미지 JSON 로드 오류:', error);
-        showGlobalError(error);
+        // showGlobalError(error); // game.js에 정의된 함수라 여기서 호출 시 오류 가능성 있음
     }
 
     if (loadedData) {
