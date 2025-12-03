@@ -170,6 +170,15 @@ function getLines(ctx, text, maxWidth) {
     return lines;
 }
 
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
 function buildExplanation(dividend, divisor, quotient, answer) {
     const patterns = [
         [`🎯 태희야, 같이 생각해볼까?`, `${dividend}개를 ${divisor}명에게 똑같이 나누면...`, `한 명당 ${quotient}개씩 받을 수 있어!`, `✨ 검산: ${quotient} × ${divisor} = ${dividend} (딱 맞네!)`],
@@ -247,34 +256,54 @@ function genProblem(diff) {
 }
 
 function genNumberProblem(diff) {
-    // 수의 개념 (크기 비교, 수 읽기, 자릿수)
     const type = Math.floor(Math.random() * 3);
     let question, answer, explanation;
     const wrongs = new Set();
+
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑', '해핑'];
+    const name1 = names[Math.floor(Math.random() * names.length)];
+    const name2 = names[(names.indexOf(name1) + 1) % names.length];
 
     if (type === 0) {
         // 크기 비교
         const a = Math.floor(Math.random() * 90) + 10;
         const b = Math.floor(Math.random() * 90) + 10;
-        if (a === b) return genNumberProblem(diff); // 같은 수 방지
+        if (a === b) return genNumberProblem(diff);
 
-        question = `${a}와 ${b} 중에서 더 큰 수는?`;
-        answer = String(Math.max(a, b));
-        explanation = `${a}와 ${b}를 비교하면 ${answer}가 더 커!`;
+        const bigger = Math.max(a, b);
+        const smaller = Math.min(a, b);
 
-        wrongs.add(String(Math.min(a, b)));
-        wrongs.add(String(Math.max(a, b) + 1));
-        wrongs.add(String(Math.max(a, b) + 10));
+        const templates = [
+            { q: `${name1}이(가) 스티커를 ${a}장, ${name2}이(가) ${b}장 모았어요. 더 많이 모은 티니핑의 스티커 수는?`, e: `${a}와 ${b}를 비교하면 ${bigger}가 더 크므로, 더 많이 모은 티니핑은 ${bigger}장을 가지고 있습니다.` },
+            { q: `태희는 줄넘기를 ${a}번, 친구는 ${b}번 했어요. 더 많이 한 기록은 몇 번일까요?`, e: `${a}와 ${b}를 비교하면 ${bigger}가 더 크므로, 더 많이 한 기록은 ${bigger}번입니다.` },
+            { q: `빨간 상자에 구슬 ${a}개, 파란 상자에 ${b}개가 있어요. 더 많은 상자에는 몇 개가 있을까요?`, e: `${a}와 ${b}를 비교하면 ${bigger}가 더 크므로, 더 많은 상자에는 ${bigger}개가 있습니다.` }
+        ];
+
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        question = t.q;
+        answer = String(bigger);
+        explanation = t.e;
+
+        wrongs.add(String(smaller));
+        wrongs.add(String(bigger + 1));
+        wrongs.add(String(bigger + 10));
     } else if (type === 1) {
-        // 수 읽기 (일, 십, 백)
-        const num = Math.floor(Math.random() * 900) + 100; // 100~999
-        const digit = Math.floor(Math.random() * 3); // 0:일, 1:십, 2:백
+        // 자릿수
+        const num = Math.floor(Math.random() * 900) + 100;
+        const digit = Math.floor(Math.random() * 3);
         const place = ['일', '십', '백'][digit];
         const val = String(num)[2 - digit];
 
-        question = `${num}에서 ${place}의 자리 숫자는?`;
+        const templates = [
+            { q: `${name1}의 카드 번호는 ${num}이에요. ${place}의 자리 숫자는 무엇일까요?`, e: `${num}에서 백의 자리 ${String(num)[0]}, 십의 자리 ${String(num)[1]}, 일의 자리 ${String(num)[2]}입니다. ${place}의 자리 숫자는 ${val}입니다.` },
+            { q: `학교 도서관에 책이 ${num}권 있어요. ${place}의 자리 숫자는?`, e: `${num}에서 백의 자리 ${String(num)[0]}, 십의 자리 ${String(num)[1]}, 일의 자리 ${String(num)[2]}입니다. ${place}의 자리 숫자는 ${val}입니다.` },
+            { q: `태희네 아파트는 ${num}동이에요. ${place}의 자리 숫자는?`, e: `${num}에서 백의 자리 ${String(num)[0]}, 십의 자리 ${String(num)[1]}, 일의 자리 ${String(num)[2]}입니다. ${place}의 자리 숫자는 ${val}입니다.` }
+        ];
+
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        question = t.q;
         answer = val;
-        explanation = `${num}을 자릿수대로 쓰면 백의 자리 ${String(num)[0]}, 십의 자리 ${String(num)[1]}, 일의 자리 ${String(num)[2]}야.`;
+        explanation = t.e;
 
         while (wrongs.size < 3) {
             const w = Math.floor(Math.random() * 10);
@@ -284,14 +313,21 @@ function genNumberProblem(diff) {
         // 뛰어 세기
         const start = Math.floor(Math.random() * 50) + 1;
         const step = [2, 5, 10][Math.floor(Math.random() * 3)];
-        const targetIdx = 3; // 4번째 수 묻기
+        const targetIdx = 3;
 
         const seq = [];
         for (let i = 0; i < 5; i++) seq.push(start + i * step);
 
-        question = `${start}부터 ${step}씩 뛰어 세면 네 번째 수는?`;
+        const templates = [
+            { q: `버스 정류장 번호가 ${start}부터 ${step}씩 커져요. 네 번째 정류장 번호는? (${start}, ${seq[1]}, ${seq[2]}, ?)`, e: `${start}부터 ${step}씩 커지므로: ${start} → ${seq[1]} → ${seq[2]} → ${seq[3]}. 네 번째 번호는 ${seq[targetIdx]}입니다.` },
+            { q: `${name1}이(가) ${step}개씩 묶어서 사탕을 세어요. ${start}부터 시작하면 네 번째 수는?`, e: `${start}부터 ${step}씩 커지므로: ${start} → ${seq[1]} → ${seq[2]} → ${seq[3]}. 네 번째 수는 ${seq[targetIdx]}입니다.` },
+            { q: `계단 번호가 ${start}, ${seq[1]}, ${seq[2]}, ? 순서예요. ?에 알맞은 수는?`, e: `${start}부터 ${step}씩 커지므로: ${start} → ${seq[1]} → ${seq[2]} → ${seq[3]}. 네 번째 수는 ${seq[targetIdx]}입니다.` }
+        ];
+
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        question = t.q;
         answer = String(seq[targetIdx]);
-        explanation = `${start} - ${seq[1]} - ${seq[2]} - ${seq[3]}... ${step}씩 커지니까 네 번째는 ${answer}야!`;
+        explanation = t.e;
 
         wrongs.add(String(seq[targetIdx] - step));
         wrongs.add(String(seq[targetIdx] + step));
@@ -300,7 +336,7 @@ function genNumberProblem(diff) {
 
     return {
         question,
-        options: [answer, ...Array.from(wrongs)].slice(0, 4).sort(() => Math.random() - 0.5),
+        options: shuffleArray([answer, ...Array.from(wrongs)].slice(0, 4)),
         answer,
         explanation,
         problemKey: `number-${type}-${Math.random()}`
@@ -312,7 +348,33 @@ function genAdditionProblem(diff) {
     const a = Math.floor(Math.random() * max) + 1;
     const b = Math.floor(Math.random() * max) + 1;
     const answer = a + b;
-    const question = `${a} + ${b} = ( )`;
+
+    // 티니핑 이름
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑', '해핑'];
+    const name1 = names[Math.floor(Math.random() * names.length)];
+    const name2 = names[(names.indexOf(name1) + 1 + Math.floor(Math.random() * (names.length - 1))) % names.length];
+
+    // 문장제 템플릿 (80% 문장제)
+    const templates = [
+        { q: `${name1}이(가) 사탕 ${a}개를 가지고 있었어요. ${name2}이(가) ${b}개를 더 주었다면, 사탕은 모두 몇 개일까요?`, e: `${name1}의 사탕 ${a}개에 ${name2}이(가) 준 ${b}개를 더하면 ${a} + ${b} = ${answer}개입니다.` },
+        { q: `버스에 ${a}명이 타고 있었어요. 다음 정류장에서 ${b}명이 더 탔다면, 버스에는 모두 몇 명이 있을까요?`, e: `처음 ${a}명에 새로 탄 ${b}명을 더하면 ${a} + ${b} = ${answer}명입니다.` },
+        { q: `태희가 동화책을 아침에 ${a}쪽, 저녁에 ${b}쪽 읽었어요. 오늘 모두 몇 쪽을 읽었을까요?`, e: `아침에 읽은 ${a}쪽과 저녁에 읽은 ${b}쪽을 더하면 ${a} + ${b} = ${answer}쪽입니다.` },
+        { q: `운동장에 남학생 ${a}명과 여학생 ${b}명이 있어요. 학생은 모두 몇 명일까요?`, e: `남학생 ${a}명과 여학생 ${b}명을 더하면 ${a} + ${b} = ${answer}명입니다.` },
+        { q: `${name1}이(가) 스티커 ${a}장을 모았어요. 퀴즈를 맞혀서 ${b}장을 더 받았다면, 스티커는 모두 몇 장일까요?`, e: `원래 ${a}장에 받은 ${b}장을 더하면 ${a} + ${b} = ${answer}장입니다.` },
+        { q: `빨간 풍선 ${a}개와 파란 풍선 ${b}개가 있어요. 풍선은 모두 몇 개일까요?`, e: `빨간 풍선 ${a}개와 파란 풍선 ${b}개를 더하면 ${a} + ${b} = ${answer}개입니다.` },
+        { q: `과일 바구니에 사과 ${a}개가 있었어요. 엄마가 ${b}개를 더 넣었다면, 사과는 모두 몇 개일까요?`, e: `원래 ${a}개에 추가된 ${b}개를 더하면 ${a} + ${b} = ${answer}개입니다.` }
+    ];
+
+    let question, explanation;
+    if (Math.random() < 0.2) {
+        question = `다음 덧셈의 정답은 무엇일까요?
+${a} + ${b} = ?`;
+        explanation = buildSimpleExplanation(a, b, '+', answer);
+    } else {
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        question = t.q;
+        explanation = t.e;
+    }
 
     const wrongs = new Set();
     while (wrongs.size < 4) {
@@ -320,13 +382,13 @@ function genAdditionProblem(diff) {
         if (w < 0) w = answer + 1;
         if (w !== answer) wrongs.add(w);
     }
-    const options = [answer, ...wrongs].sort(() => Math.random() - 0.5);
+    const options = shuffleArray([answer, ...wrongs].slice(0, 4));
 
     return {
         question,
         options,
         answer,
-        explanation: buildSimpleExplanation(a, b, '+', answer),
+        explanation,
         problemKey: `add-${a}-${b}`
     };
 }
@@ -335,10 +397,33 @@ function genSubtractionProblem(diff) {
     const max = diff * 10;
     let a = Math.floor(Math.random() * max) + 1;
     let b = Math.floor(Math.random() * max) + 1;
-    if (a < b) [a, b] = [b, a]; // 음수 방지
+    if (a < b) [a, b] = [b, a];
 
     const answer = a - b;
-    const question = `${a} - ${b} = ( )`;
+
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑', '해핑'];
+    const name1 = names[Math.floor(Math.random() * names.length)];
+
+    const templates = [
+        { q: `${name1}이(가) 사탕 ${a}개를 가지고 있었어요. 친구에게 ${b}개를 주었다면, 남은 사탕은 몇 개일까요?`, e: `원래 ${a}개에서 준 ${b}개를 빼면 ${a} - ${b} = ${answer}개가 남습니다.` },
+        { q: `버스에 ${a}명이 타고 있었어요. 정류장에서 ${b}명이 내렸다면, 남은 사람은 몇 명일까요?`, e: `처음 ${a}명에서 내린 ${b}명을 빼면 ${a} - ${b} = ${answer}명입니다.` },
+        { q: `책상 위에 연필이 ${a}자루 있었어요. 동생이 ${b}자루를 가져갔다면, 남은 연필은 몇 자루일까요?`, e: `원래 ${a}자루에서 가져간 ${b}자루를 빼면 ${a} - ${b} = ${answer}자루입니다.` },
+        { q: `과자가 ${a}개 있었는데 ${b}개를 먹었어요. 남은 과자는 몇 개일까요?`, e: `원래 ${a}개에서 먹은 ${b}개를 빼면 ${a} - ${b} = ${answer}개입니다.` },
+        { q: `${name1}이(가) 스티커 ${a}장을 가지고 있었어요. 친구에게 ${b}장을 선물했다면, 남은 스티커는 몇 장일까요?`, e: `원래 ${a}장에서 선물한 ${b}장을 빼면 ${a} - ${b} = ${answer}장입니다.` },
+        { q: `풍선이 ${a}개 있었는데 ${b}개가 터졌어요. 남은 풍선은 몇 개일까요?`, e: `원래 ${a}개에서 터진 ${b}개를 빼면 ${a} - ${b} = ${answer}개입니다.` },
+        { q: `태희가 동화책 ${a}쪽을 읽으려고 해요. 이미 ${b}쪽을 읽었다면, 남은 쪽수는?`, e: `전체 ${a}쪽에서 읽은 ${b}쪽을 빼면 ${a} - ${b} = ${answer}쪽 남았습니다.` }
+    ];
+
+    let question, explanation;
+    if (Math.random() < 0.2) {
+        question = `다음 뺄셈의 정답은 무엇일까요?
+${a} - ${b} = ?`;
+        explanation = buildSimpleExplanation(a, b, '-', answer);
+    } else {
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        question = t.q;
+        explanation = t.e;
+    }
 
     const wrongs = new Set();
     while (wrongs.size < 4) {
@@ -346,13 +431,13 @@ function genSubtractionProblem(diff) {
         if (w < 0) w = answer + 1;
         if (w !== answer) wrongs.add(w);
     }
-    const options = [answer, ...wrongs].sort(() => Math.random() - 0.5);
+    const options = shuffleArray([answer, ...wrongs].slice(0, 4));
 
     return {
         question,
         options,
         answer,
-        explanation: buildSimpleExplanation(a, b, '-', answer),
+        explanation,
         problemKey: `sub-${a}-${b}`
     };
 }
@@ -362,7 +447,30 @@ function genMultiplicationProblem(diff) {
     const a = dan;
     const b = Math.floor(Math.random() * 9) + 1;
     const answer = a * b;
-    const question = `${a} × ${b} = ( )`;
+
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑', '해핑'];
+    const name1 = names[Math.floor(Math.random() * names.length)];
+
+    const templates = [
+        { q: `한 봉지에 사탕이 ${a}개씩 들어 있어요. ${b}봉지에는 사탕이 모두 몇 개 있을까요?`, e: `한 봉지에 ${a}개씩 ${b}봉지이므로 ${a} × ${b} = ${answer}개입니다.` },
+        { q: `${name1}이(가) 하루에 스티커를 ${a}장씩 모아요. ${b}일 동안 모으면 스티커는 모두 몇 장일까요?`, e: `하루에 ${a}장씩 ${b}일이므로 ${a} × ${b} = ${answer}장입니다.` },
+        { q: `한 상자에 귤이 ${a}개씩 들어 있어요. ${b}상자에는 귤이 모두 몇 개 있을까요?`, e: `한 상자에 ${a}개씩 ${b}상자이므로 ${a} × ${b} = ${answer}개입니다.` },
+        { q: `버스 한 대에 ${a}명씩 탈 수 있어요. 버스 ${b}대에는 모두 몇 명이 탈 수 있을까요?`, e: `한 대에 ${a}명씩 ${b}대이므로 ${a} × ${b} = ${answer}명입니다.` },
+        { q: `연필 한 묶음에 ${a}자루씩 있어요. ${b}묶음에는 연필이 모두 몇 자루 있을까요?`, e: `한 묶음에 ${a}자루씩 ${b}묶음이므로 ${a} × ${b} = ${answer}자루입니다.` },
+        { q: `${name1}이(가) 친구 ${b}명에게 초콜릿을 ${a}개씩 나눠주려고 해요. 초콜릿은 모두 몇 개 필요할까요?`, e: `친구 한 명에게 ${a}개씩 ${b}명이므로 ${a} × ${b} = ${answer}개입니다.` },
+        { q: `한 줄에 의자가 ${a}개씩 놓여 있어요. ${b}줄에는 의자가 모두 몇 개 있을까요?`, e: `한 줄에 ${a}개씩 ${b}줄이므로 ${a} × ${b} = ${answer}개입니다.` }
+    ];
+
+    let question, explanation;
+    if (Math.random() < 0.2) {
+        question = `다음 곱셈의 정답은 무엇일까요?
+${a} × ${b} = ?`;
+        explanation = buildSimpleExplanation(a, b, '×', answer);
+    } else {
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        question = t.q;
+        explanation = t.e;
+    }
 
     const wrongs = new Set();
     while (wrongs.size < 4) {
@@ -370,13 +478,13 @@ function genMultiplicationProblem(diff) {
         if (w < 1) w = answer + 1;
         if (w !== answer) wrongs.add(w);
     }
-    const options = [answer, ...wrongs].sort(() => Math.random() - 0.5);
+    const options = shuffleArray([answer, ...wrongs].slice(0, 4));
 
     return {
         question,
         options,
         answer,
-        explanation: buildSimpleExplanation(a, b, '×', answer),
+        explanation,
         problemKey: `mul-${a}-${b}`
     };
 }
@@ -424,7 +532,7 @@ function genDivisionProblem(diff) {
             if (w < 1) w = answer + wrongs.size + 1;
             if (w !== answer) wrongs.add(w);
         }
-        const options = [answer, ...[...wrongs]].sort(() => Math.random() - 0.5);
+        const options = shuffleArray([answer, ...[...wrongs]].slice(0, 4));
         const explanation = buildExplanation(dividend, divisor, quotient, answer);
 
         STATE.usedProblems.push(problemKey);
@@ -437,36 +545,68 @@ function genDivisionProblem(diff) {
     const dividend = divisor * quotient;
     const question = `${dividend} ÷ ${divisor} = ( )`;
     const answer = quotient;
-    const options = [answer, answer + 1, answer - 1, answer + 2, answer - 2].filter(n => n > 0).slice(0, 5).sort(() => Math.random() - 0.5);
+    const options = [answer, answer + 1, answer - 1, answer + 2, answer - 2].filter(n => n > 0).slice(0, 5);
     return { question, options, answer, explanation: `정답은 ${answer}이야!` };
 }
 
 function genFractionProblem(diff) {
-    // 분모가 같은 분수의 덧셈/뺄셈
     const denom = Math.floor(Math.random() * 8) + 2; // 2~9
     const num1 = Math.floor(Math.random() * (denom - 1)) + 1;
     const num2 = Math.floor(Math.random() * (denom - num1)) + 1;
+
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑'];
+    const name1 = names[Math.floor(Math.random() * names.length)];
+    const name2 = names[(names.indexOf(name1) + 1) % names.length];
+
+    const items = ['피자', '케이크', '사과 파이', '초콜릿'];
+    const item = items[Math.floor(Math.random() * items.length)];
 
     const isAdd = Math.random() < 0.5;
     let question, answerStr, explanation;
 
     if (isAdd) {
         const sumNum = num1 + num2;
-        question = `${num1}/${denom} + ${num2}/${denom} = ?`;
         answerStr = `${sumNum}/${denom}`;
-        explanation = `분모가 같은 분수의 덧셈은 분자끼리 더해!\n${num1} + ${num2} = ${sumNum}이니까 정답은 ${sumNum}/${denom}이야.`;
+
+        const templates = [
+            { q: `${item}를 ${denom}조각으로 똑같이 나누었어요. ${name1}이(가) ${num1}조각, ${name2}이(가) ${num2}조각을 먹었다면, 둘이 먹은 양은 전체의 얼마일까요?`, e: `${name1}이 먹은 ${num1}/${denom}과 ${name2}이 먹은 ${num2}/${denom}을 더하면 ${num1}/${denom} + ${num2}/${denom} = ${sumNum}/${denom}입니다.` },
+            { q: `리본을 ${denom}등분 했어요. ${num1}만큼 빨간색, ${num2}만큼 파란색으로 칠했다면, 색칠한 부분은 전체의 얼마일까요?`, e: `빨간색 ${num1}/${denom}과 파란색 ${num2}/${denom}을 더하면 ${sumNum}/${denom}입니다.` },
+            { q: `${item}를 ${denom}조각으로 나누어 어제 ${num1}조각, 오늘 ${num2}조각을 먹었어요. 먹은 양은 전체의 얼마일까요?`, e: `어제 ${num1}/${denom}과 오늘 ${num2}/${denom}을 더하면 ${sumNum}/${denom}입니다.` }
+        ];
+
+        if (Math.random() < 0.2) {
+            question = `다음 분수의 덧셈 결과는?
+${num1}/${denom} + ${num2}/${denom} = ?`;
+            explanation = `분모가 같은 분수는 분자끼리 더합니다. ${num1} + ${num2} = ${sumNum}이므로 정답은 ${sumNum}/${denom}입니다.`;
+        } else {
+            const t = templates[Math.floor(Math.random() * templates.length)];
+            question = t.q;
+            explanation = t.e;
+        }
     } else {
-        // 뺄셈 (큰 수에서 작은 수 빼기)
         const big = Math.max(num1, num2);
         const small = Math.min(num1, num2);
         const diffNum = big - small;
-        if (diffNum === 0) return genFractionProblem(diff); // 분자 0 방지
-        question = `${big}/${denom} - ${small}/${denom} = ?`;
+        if (diffNum === 0) return genFractionProblem(diff);
         answerStr = `${diffNum}/${denom}`;
-        explanation = `분모가 같은 분수의 뺄셈은 분자끼리 빼!\n${big} - ${small} = ${diffNum}이니까 정답은 ${diffNum}/${denom}이야.`;
+
+        const templates = [
+            { q: `${item}를 ${denom}조각으로 나누었어요. ${big}조각이 있었는데 ${small}조각을 먹었다면, 남은 양은 전체의 얼마일까요?`, e: `있던 ${big}/${denom}에서 먹은 ${small}/${denom}을 빼면 ${diffNum}/${denom}입니다.` },
+            { q: `물통에 물이 전체의 ${big}/${denom}만큼 있었어요. ${small}/${denom}만큼 마셨다면, 남은 물은 전체의 얼마일까요?`, e: `있던 ${big}/${denom}에서 마신 ${small}/${denom}을 빼면 ${diffNum}/${denom}입니다.` },
+            { q: `색종이의 ${big}/${denom}에 그림을 그리고 ${small}/${denom}만큼 잘라냈어요. 그림이 남은 부분은 전체의 얼마일까요?`, e: `그린 부분 ${big}/${denom}에서 자른 ${small}/${denom}을 빼면 ${diffNum}/${denom}입니다.` }
+        ];
+
+        if (Math.random() < 0.2) {
+            question = `다음 분수의 뺄셈 결과는?
+${big}/${denom} - ${small}/${denom} = ?`;
+            explanation = `분모가 같은 분수는 분자끼리 뺍니다. ${big} - ${small} = ${diffNum}이므로 정답은 ${diffNum}/${denom}입니다.`;
+        } else {
+            const t = templates[Math.floor(Math.random() * templates.length)];
+            question = t.q;
+            explanation = t.e;
+        }
     }
 
-    // 오답 생성
     const wrongs = new Set();
     while (wrongs.size < 4) {
         const wNum = Math.floor(Math.random() * denom) + 1;
@@ -477,7 +617,7 @@ function genFractionProblem(diff) {
 
     return {
         question,
-        options: [answerStr, ...wrongs].sort(() => Math.random() - 0.5),
+        options: shuffleArray([answerStr, ...wrongs].slice(0, 4)),
         answer: answerStr,
         explanation,
         problemKey: `frac-${question}`
@@ -524,7 +664,7 @@ function genGeometryProblem(diff) {
     }
 
     const quiz = quizzes[Math.floor(Math.random() * quizzes.length)];
-    const options = [quiz.a, ...quiz.wrong.slice(0, 4)].sort(() => Math.random() - 0.5);
+    const options = [quiz.a, ...quiz.wrong.slice(0, 4)];
 
     return {
         question: quiz.q,
@@ -584,7 +724,7 @@ function genMeasurementProblem(diff) {
 
     return {
         question,
-        options: [answer, ...wrongs].sort(() => Math.random() - 0.5),
+        options: shuffleArray([answer, ...wrongs].slice(0, 4)),
         answer,
         explanation: `짧은 바늘이 ${h} 근처, 긴 바늘이 ${m}분을 가리키고 있어!\n정답은 ${answer}이야.`,
         problemKey: `clock-${h}-${m}`,
@@ -593,7 +733,6 @@ function genMeasurementProblem(diff) {
 }
 
 function genPatternProblem(diff) {
-    // 등차수열 규칙 찾기
     const start = Math.floor(Math.random() * 20) + 1;
     const step = Math.floor(Math.random() * Math.min(diff, 10)) + 1;
     const length = 5;
@@ -605,9 +744,30 @@ function genPatternProblem(diff) {
 
     const blankIdx = Math.floor(Math.random() * length);
     const answer = seq[blankIdx];
-    seq[blankIdx] = '( )';
+    const displaySeq = [...seq];
+    displaySeq[blankIdx] = '?';
 
-    const question = `규칙을 찾아 빈칸에 알맞은 수는?\n${seq.join(', ')}`;
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑'];
+    const name1 = names[Math.floor(Math.random() * names.length)];
+
+    const templates = [
+        { q: `${name1}이(가) 매일 저금통에 동전을 ${step}개씩 더 넣어요. 첫째 날부터 다섯째 날까지 동전 수가 ${displaySeq.join(', ')}일 때, ?는?`, e: `매일 ${step}개씩 늘어나는 규칙입니다. ${answer - step} 다음은 ${step}을 더해 ${answer}이 됩니다.` },
+        { q: `엘리베이터가 ${step}층씩 올라가요. ${displaySeq.join(', ')}에서 ?는 몇 층?`, e: `${step}층씩 올라가는 규칙입니다. ${answer - step} 다음 층은 ${answer}층입니다.` },
+        { q: `줄넘기 기록이 매일 ${step}번씩 늘었어요. ${displaySeq.join(', ')}번에서 ?는?`, e: `매일 ${step}번씩 늘어나는 규칙입니다. ${answer - step} 다음은 ${answer}번입니다.` },
+        { q: `화분에 꽃잎이 매일 ${step}장씩 피어요. ${displaySeq.join(', ')}장에서 ?는?`, e: `매일 ${step}장씩 늘어나는 규칙입니다. ${answer - step} 다음은 ${answer}장입니다.` },
+        { q: `버스 번호가 ${step}씩 커지는 규칙이에요. ${displaySeq.join(', ')}에서 ?는?`, e: `${step}씩 커지는 규칙입니다. ${answer - step} 다음 번호는 ${answer}입니다.` }
+    ];
+
+    let question, explanation;
+    if (Math.random() < 0.2) {
+        question = `다음 수의 규칙을 찾아 ?에 알맞은 수를 고르세요.
+${displaySeq.join(', ')}`;
+        explanation = `숫자가 ${step}씩 커지는 규칙입니다. ${answer - step} 다음 수는 ${answer}입니다.`;
+    } else {
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        question = t.q;
+        explanation = t.e;
+    }
 
     const wrongs = new Set();
     while (wrongs.size < 4) {
@@ -618,9 +778,9 @@ function genPatternProblem(diff) {
 
     return {
         question,
-        options: [answer, ...wrongs].sort(() => Math.random() - 0.5),
+        options: shuffleArray([answer, ...wrongs].slice(0, 4)),
         answer,
-        explanation: `숫자가 ${step}씩 커지는 규칙이야!\n${answer - step} 다음은 ${answer}이지.`,
+        explanation,
         problemKey: `pattern-${start}-${step}-${blankIdx}`
     };
 }
@@ -647,7 +807,7 @@ function genLengthProblem(diff) {
 
     return {
         question,
-        options: [answer, ...Array.from(wrongs)].slice(0, 4).sort(() => Math.random() - 0.5),
+        options: [answer, ...Array.from(wrongs)].slice(0, 4),
         answer,
         explanation: `물건의 한쪽 끝을 눈금 ${start}에 맞췄으니까,\n끝 눈금 ${start + length}에서 시작 눈금 ${start}을 빼면 ${length}cm야!`,
         problemKey: `length-${length}-${start}`,
@@ -699,7 +859,7 @@ function genGraphProblem(diff) {
 
     return {
         question,
-        options: [answer, ...Array.from(wrongs)].slice(0, 4).sort(() => Math.random() - 0.5),
+        options: [answer, ...Array.from(wrongs)].slice(0, 4),
         answer,
         explanation,
         problemKey: `graph-${qType}-${counts.join('-')}`,
@@ -751,7 +911,7 @@ function genCreativeProblem(diff) {
 
     return {
         question,
-        options: [answer, ...Array.from(wrongs)].slice(0, 4).sort(() => Math.random() - 0.5),
+        options: [answer, ...Array.from(wrongs)].slice(0, 4),
         answer,
         explanation,
         problemKey: `creative-${type}-${Math.random()}`
