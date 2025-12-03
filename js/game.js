@@ -1297,7 +1297,7 @@ function drawQuiz() {
     drawHeader(W, H);
     drawCollectionButton(W, H);
 
-    const cardX = 24, cardY = 110, cardW = W - 48, cardH = H - 180;
+    const cardX = 20, cardY = 100, cardW = W - 40, cardH = H - 140;
     CTX.save();
     roundRect(CTX, cardX, cardY, cardW, cardH, 24);
     CTX.fillStyle = '#ffffff';
@@ -1351,7 +1351,7 @@ function drawQuiz() {
     const optionsAreaX = cardX + 20;
 
     const numOptions = options.length;
-    const buttonGap = Math.round(12 * SCALE);
+    const buttonGap = Math.round(10 * SCALE);
     let cols = numOptions;
     let rows = 1;
     let buttonW = Math.floor((optionsAreaW - (cols - 1) * buttonGap) / cols);
@@ -1402,7 +1402,8 @@ function drawQuiz() {
 
         CTX.textAlign = 'center';
         CTX.textBaseline = 'middle';
-        const displayText = buttonW < 80 ? `${options[i]}` : `${i + 1}. ${options[i]}`;
+        const circleNums = ['①', '②', '③', '④', '⑤'];
+        const displayText = buttonW < 80 ? `${options[i]}` : `${circleNums[i] || (i+1)+'.'} ${options[i]}`;
         CTX.fillText(displayText, ox + buttonW / 2, oy + buttonH / 2);
         CTX.textBaseline = 'alphabetic';
 
@@ -1412,7 +1413,7 @@ function drawQuiz() {
     const btnW = Math.max(200, Math.min(Math.round(240 * SCALE), optionsAreaW * 0.7));
     const btnH = Math.max(50, Math.round(56 * SCALE));
     const btnX = cardX + (cardW - btnW) / 2;
-    const btnY = lastOptionY + Math.round(24 * SCALE);
+    const btnY = Math.min(lastOptionY + Math.round(20 * SCALE), cardY + cardH - btnH - Math.round(16 * SCALE));
 
     CTX.save();
     roundRect(CTX, btnX, btnY, btnW, btnH, Math.round(14 * SCALE));
@@ -1445,7 +1446,7 @@ function drawExplain() {
     drawHeader(W, H);
     drawCollectionButton(W, H);
 
-    const cardX = 24, cardY = 110, cardW = W - 48, cardH = H - 180;
+    const cardX = 20, cardY = 100, cardW = W - 40, cardH = H - 140;
     CTX.save();
     roundRect(CTX, cardX, cardY, cardW, cardH, 24);
     CTX.fillStyle = '#ffffff';
@@ -1556,7 +1557,7 @@ function drawEncyclopediaCard(cx, startY, tiniping) {
     const colors = typeColors[encyclopedia.type] || typeColors['일반'];
 
     const cardW = Math.min(360, Math.round(400 * SCALE));
-    const cardH = Math.round(280 * SCALE);
+    const cardH = Math.min(Math.round(260 * SCALE), H - (startY + Math.round(120 * SCALE)));
     const cardX = cx - cardW / 2;
     const cardY = startY;
     const padding = Math.round(16 * SCALE);
@@ -1872,6 +1873,35 @@ function drawClock(ctx, cx, cy, radius, h, m) {
     ctx.restore();
 }
 
+function drawTinipingImage(tgt, cx, cy, imageSize) {
+    if (tgt.imageObj) {
+        try {
+            CTX.drawImage(tgt.imageObj, cx - imageSize / 2, cy - imageSize / 2, imageSize, imageSize);
+            return true;
+        } catch (e) {
+            console.warn('이미지 그리기 실패:', tgt.name, e);
+        }
+    }
+    // Fallback: draw circle with name
+    CTX.save();
+    CTX.beginPath();
+    CTX.arc(cx, cy, imageSize / 2 - 10, 0, Math.PI * 2);
+    CTX.fillStyle = '#fce7f3';
+    CTX.fill();
+    CTX.strokeStyle = '#ec4899';
+    CTX.lineWidth = 3;
+    CTX.stroke();
+    CTX.restore();
+    
+    CTX.fillStyle = '#9f1239';
+    CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'center';
+    CTX.textBaseline = 'middle';
+    CTX.fillText(tgt.name || '???', cx, cy);
+    CTX.textBaseline = 'alphabetic';
+    return false;
+}
+
 function drawCatch(ts) {
     const { W, H } = clear();
     drawBackgroundTiles(W, H, 0.1);
@@ -1920,9 +1950,7 @@ function drawCatch(ts) {
         CTX.fill();
         CTX.restore();
 
-        if (tgt.imageObj) {
-            CTX.drawImage(tgt.imageObj, cx - imageSize / 2, cy - imageSize / 2, imageSize, imageSize);
-        }
+        drawTinipingImage(tgt, cx, cy, imageSize);
 
         CTX.fillStyle = '#9333ea';
         CTX.font = `bold ${Math.round(28 * SCALE)}px Jua, sans-serif`;
@@ -1948,9 +1976,7 @@ function drawCatch(ts) {
         CTX.fill();
         CTX.restore();
 
-        if (tgt.imageObj) {
-            CTX.drawImage(tgt.imageObj, cx - imageSize / 2, cy - imageSize / 2, imageSize, imageSize);
-        }
+        drawTinipingImage(tgt, cx, cy, imageSize);
 
     } else {
         cy = Math.round(180 * SCALE);
@@ -1966,16 +1992,14 @@ function drawCatch(ts) {
         CTX.fill();
         CTX.restore();
 
-        if (tgt.imageObj) {
-            CTX.drawImage(tgt.imageObj, cx - imageSize / 2, cy - imageSize / 2, imageSize, imageSize);
-        }
+        drawTinipingImage(tgt, cx, cy, imageSize);
 
         drawEncyclopediaCard(cx, cy + baseR + 20, tgt);
 
         const bw = Math.max(200, Math.round(240 * SCALE));
         const bh = Math.max(50, Math.round(56 * SCALE));
         const bx = cx - bw / 2;
-        const by = H - Math.round(80 * SCALE);
+        const by = Math.max(H - Math.round(90 * SCALE), cy + baseR + 320);
 
         CTX.save();
         roundRect(CTX, bx, by, bw, bh, Math.round(14 * SCALE));
