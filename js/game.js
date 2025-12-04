@@ -247,6 +247,10 @@ function genProblem(diff) {
     if (topic.includes('자료') || topic.includes('그래프') || topic.includes('표') || topic.includes('분류')) return genGraphProblem(diff);
     if (topic.includes('수') && !topic.includes('수열')) return genNumberProblem(diff);
     if (topic.includes('창의') || topic.includes('영재') || topic.includes('사고력')) return genCreativeProblem(diff);
+    // 새로 추가된 영역
+    if (topic.includes('들이') || topic.includes('용량') || topic.includes('mL') || topic.includes('L')) return genCapacityProblem(diff);
+    if (topic.includes('무게') || topic.includes('kg') || topic.includes('g')) return genWeightProblem(diff);
+    if (topic.includes('부피') || topic.includes('쌓기') || topic.includes('직육면체')) return genVolumeProblem(diff);
 
     // 난이도가 높으면(15 이상) 20% 확률로 창의력 문제 출제
     if (diff >= 15 && Math.random() < 0.2) return genCreativeProblem(diff);
@@ -265,7 +269,7 @@ function genNumberProblem(diff) {
     const name2 = names[(names.indexOf(name1) + 1) % names.length];
 
     if (type === 0) {
-        // 크기 비교
+        // 크기 비교 (100% 문장제, 이모지 포함)
         const a = Math.floor(Math.random() * 90) + 10;
         const b = Math.floor(Math.random() * 90) + 10;
         if (a === b) return genNumberProblem(diff);
@@ -274,9 +278,11 @@ function genNumberProblem(diff) {
         const smaller = Math.min(a, b);
 
         const templates = [
-            { q: `${name1}이(가) 스티커를 ${a}장, ${name2}이(가) ${b}장 모았어요. 더 많이 모은 티니핑의 스티커 수는?`, e: `${a}와 ${b}를 비교하면 ${bigger}가 더 크므로, 더 많이 모은 티니핑은 ${bigger}장을 가지고 있습니다.` },
-            { q: `태희는 줄넘기를 ${a}번, 친구는 ${b}번 했어요. 더 많이 한 기록은 몇 번일까요?`, e: `${a}와 ${b}를 비교하면 ${bigger}가 더 크므로, 더 많이 한 기록은 ${bigger}번입니다.` },
-            { q: `빨간 상자에 구슬 ${a}개, 파란 상자에 ${b}개가 있어요. 더 많은 상자에는 몇 개가 있을까요?`, e: `${a}와 ${b}를 비교하면 ${bigger}가 더 크므로, 더 많은 상자에는 ${bigger}개가 있습니다.` }
+            { q: `⭐ ${name1}이(가) 스티커를 ${a}장, ${name2}이(가) ${b}장 모았어요. 더 많이 모은 티니핑의 스티커 수는 몇 장일까요?`, e: `${a}와 ${b}를 비교하면 ${bigger}가 더 크므로, 더 많이 모은 티니핑은 ${bigger}장을 가지고 있습니다.` },
+            { q: `🏃 태희는 줄넘기를 ${a}번, 친구는 ${b}번 했어요. 더 많이 한 기록은 몇 번일까요?`, e: `${a}와 ${b}를 비교하면 ${bigger}가 더 크므로, 더 많이 한 기록은 ${bigger}번입니다.` },
+            { q: `🔴🔵 빨간 상자에 구슬 ${a}개, 파란 상자에 ${b}개가 있어요. 더 많은 상자에는 몇 개가 있을까요?`, e: `${a}와 ${b}를 비교하면 ${bigger}가 더 크므로, 더 많은 상자에는 ${bigger}개가 있습니다.` },
+            { q: `🍎 ${name1}은 사과 ${a}개, ${name2}은 ${b}개를 가지고 있어요. 더 많이 가진 사과는 몇 개일까요?`, e: `${a}와 ${b}를 비교하면 ${bigger}가 더 큽니다. 정답은 ${bigger}개입니다.` },
+            { q: `📚 ${name1}은 책 ${a}권, ${name2}은 ${b}권을 읽었어요. 더 많이 읽은 책은 몇 권일까요?`, e: `${a}와 ${b}를 비교하면 ${bigger}가 더 큽니다. 정답은 ${bigger}권입니다.` }
         ];
 
         const t = templates[Math.floor(Math.random() * templates.length)];
@@ -288,16 +294,17 @@ function genNumberProblem(diff) {
         wrongs.add(String(bigger + 1));
         wrongs.add(String(bigger + 10));
     } else if (type === 1) {
-        // 자릿수
+        // 자릿수 (100% 문장제, 이모지 포함)
         const num = Math.floor(Math.random() * 900) + 100;
         const digit = Math.floor(Math.random() * 3);
         const place = ['일', '십', '백'][digit];
         const val = String(num)[2 - digit];
 
         const templates = [
-            { q: `${name1}의 카드 번호는 ${num}이에요. ${place}의 자리 숫자는 무엇일까요?`, e: `${num}에서 백의 자리 ${String(num)[0]}, 십의 자리 ${String(num)[1]}, 일의 자리 ${String(num)[2]}입니다. ${place}의 자리 숫자는 ${val}입니다.` },
-            { q: `학교 도서관에 책이 ${num}권 있어요. ${place}의 자리 숫자는?`, e: `${num}에서 백의 자리 ${String(num)[0]}, 십의 자리 ${String(num)[1]}, 일의 자리 ${String(num)[2]}입니다. ${place}의 자리 숫자는 ${val}입니다.` },
-            { q: `태희네 아파트는 ${num}동이에요. ${place}의 자리 숫자는?`, e: `${num}에서 백의 자리 ${String(num)[0]}, 십의 자리 ${String(num)[1]}, 일의 자리 ${String(num)[2]}입니다. ${place}의 자리 숫자는 ${val}입니다.` }
+            { q: `🎴 ${name1}의 카드 번호는 ${num}이에요. ${place}의 자리 숫자는 무엇일까요?`, e: `${num}에서 백의 자리 ${String(num)[0]}, 십의 자리 ${String(num)[1]}, 일의 자리 ${String(num)[2]}입니다. ${place}의 자리 숫자는 ${val}입니다.` },
+            { q: `📚 학교 도서관에 책이 ${num}권 있어요. ${place}의 자리 숫자는 무엇일까요?`, e: `${num}에서 백의 자리 ${String(num)[0]}, 십의 자리 ${String(num)[1]}, 일의 자리 ${String(num)[2]}입니다. ${place}의 자리 숫자는 ${val}입니다.` },
+            { q: `🏠 태희네 아파트는 ${num}동이에요. ${place}의 자리 숫자는 무엇일까요?`, e: `${num}에서 백의 자리 ${String(num)[0]}, 십의 자리 ${String(num)[1]}, 일의 자리 ${String(num)[2]}입니다. ${place}의 자리 숫자는 ${val}입니다.` },
+            { q: `🎟️ 영화표 번호가 ${num}번이에요. ${place}의 자리 숫자는 무엇일까요?`, e: `${num}에서 백의 자리 ${String(num)[0]}, 십의 자리 ${String(num)[1]}, 일의 자리 ${String(num)[2]}입니다. ${place}의 자리 숫자는 ${val}입니다.` }
         ];
 
         const t = templates[Math.floor(Math.random() * templates.length)];
@@ -310,7 +317,7 @@ function genNumberProblem(diff) {
             if (String(w) !== answer) wrongs.add(String(w));
         }
     } else {
-        // 뛰어 세기
+        // 뛰어 세기 (100% 문장제, 이모지 포함)
         const start = Math.floor(Math.random() * 50) + 1;
         const step = [2, 5, 10][Math.floor(Math.random() * 3)];
         const targetIdx = 3;
@@ -319,9 +326,10 @@ function genNumberProblem(diff) {
         for (let i = 0; i < 5; i++) seq.push(start + i * step);
 
         const templates = [
-            { q: `버스 정류장 번호가 ${start}부터 ${step}씩 커져요. 네 번째 정류장 번호는? (${start}, ${seq[1]}, ${seq[2]}, ?)`, e: `${start}부터 ${step}씩 커지므로: ${start} → ${seq[1]} → ${seq[2]} → ${seq[3]}. 네 번째 번호는 ${seq[targetIdx]}입니다.` },
-            { q: `${name1}이(가) ${step}개씩 묶어서 사탕을 세어요. ${start}부터 시작하면 네 번째 수는?`, e: `${start}부터 ${step}씩 커지므로: ${start} → ${seq[1]} → ${seq[2]} → ${seq[3]}. 네 번째 수는 ${seq[targetIdx]}입니다.` },
-            { q: `계단 번호가 ${start}, ${seq[1]}, ${seq[2]}, ? 순서예요. ?에 알맞은 수는?`, e: `${start}부터 ${step}씩 커지므로: ${start} → ${seq[1]} → ${seq[2]} → ${seq[3]}. 네 번째 수는 ${seq[targetIdx]}입니다.` }
+            { q: `🚌 버스 정류장 번호가 ${start}부터 ${step}씩 커져요. 네 번째 정류장 번호는? (${start}, ${seq[1]}, ${seq[2]}, ?)`, e: `${start}부터 ${step}씩 커지므로: ${start} → ${seq[1]} → ${seq[2]} → ${seq[3]}. 네 번째 번호는 ${seq[targetIdx]}입니다.` },
+            { q: `🍬 ${name1}이(가) ${step}개씩 묶어서 사탕을 세어요. ${start}부터 시작하면 네 번째 수는 몇일까요?`, e: `${start}부터 ${step}씩 커지므로: ${start} → ${seq[1]} → ${seq[2]} → ${seq[3]}. 네 번째 수는 ${seq[targetIdx]}입니다.` },
+            { q: `🪜 계단 번호가 ${start}, ${seq[1]}, ${seq[2]}, ? 순서예요. ?에 알맞은 수는 몇일까요?`, e: `${start}부터 ${step}씩 커지므로: ${start} → ${seq[1]} → ${seq[2]} → ${seq[3]}. 네 번째 수는 ${seq[targetIdx]}입니다.` },
+            { q: `🔢 ${name1}이(가) 수를 세고 있어요. ${step}씩 뛰어 세면 ${start}, ${seq[1]}, ${seq[2]}, ?가 돼요. ?는 몇일까요?`, e: `${step}씩 뛰어 세므로: ${start} → ${seq[1]} → ${seq[2]} → ${seq[3]}. ?는 ${seq[targetIdx]}입니다.` }
         ];
 
         const t = templates[Math.floor(Math.random() * templates.length)];
@@ -354,27 +362,25 @@ function genAdditionProblem(diff) {
     const name1 = names[Math.floor(Math.random() * names.length)];
     const name2 = names[(names.indexOf(name1) + 1 + Math.floor(Math.random() * (names.length - 1))) % names.length];
 
-    // 문장제 템플릿 (80% 문장제)
+    // 100% 문장제 템플릿 (시각적 이모지 포함)
     const templates = [
-        { q: `${name1}이(가) 사탕 ${a}개를 가지고 있었어요. ${name2}이(가) ${b}개를 더 주었다면, 사탕은 모두 몇 개일까요?`, e: `${name1}의 사탕 ${a}개에 ${name2}이(가) 준 ${b}개를 더하면 ${a} + ${b} = ${answer}개입니다.` },
-        { q: `버스에 ${a}명이 타고 있었어요. 다음 정류장에서 ${b}명이 더 탔다면, 버스에는 모두 몇 명이 있을까요?`, e: `처음 ${a}명에 새로 탄 ${b}명을 더하면 ${a} + ${b} = ${answer}명입니다.` },
-        { q: `태희가 동화책을 아침에 ${a}쪽, 저녁에 ${b}쪽 읽었어요. 오늘 모두 몇 쪽을 읽었을까요?`, e: `아침에 읽은 ${a}쪽과 저녁에 읽은 ${b}쪽을 더하면 ${a} + ${b} = ${answer}쪽입니다.` },
-        { q: `운동장에 남학생 ${a}명과 여학생 ${b}명이 있어요. 학생은 모두 몇 명일까요?`, e: `남학생 ${a}명과 여학생 ${b}명을 더하면 ${a} + ${b} = ${answer}명입니다.` },
-        { q: `${name1}이(가) 스티커 ${a}장을 모았어요. 퀴즈를 맞혀서 ${b}장을 더 받았다면, 스티커는 모두 몇 장일까요?`, e: `원래 ${a}장에 받은 ${b}장을 더하면 ${a} + ${b} = ${answer}장입니다.` },
-        { q: `빨간 풍선 ${a}개와 파란 풍선 ${b}개가 있어요. 풍선은 모두 몇 개일까요?`, e: `빨간 풍선 ${a}개와 파란 풍선 ${b}개를 더하면 ${a} + ${b} = ${answer}개입니다.` },
-        { q: `과일 바구니에 사과 ${a}개가 있었어요. 엄마가 ${b}개를 더 넣었다면, 사과는 모두 몇 개일까요?`, e: `원래 ${a}개에 추가된 ${b}개를 더하면 ${a} + ${b} = ${answer}개입니다.` }
+        { q: `🍬 ${name1}이(가) 사탕 ${a}개를 가지고 있었어요. ${name2}이(가) ${b}개를 더 주었다면, 사탕은 모두 몇 개일까요?`, e: `${name1}의 사탕 ${a}개에 ${name2}이(가) 준 ${b}개를 더하면 ${a} + ${b} = ${answer}개입니다.` },
+        { q: `🚌 버스에 ${a}명이 타고 있었어요. 다음 정류장에서 ${b}명이 더 탔다면, 버스에는 모두 몇 명이 있을까요?`, e: `처음 ${a}명에 새로 탄 ${b}명을 더하면 ${a} + ${b} = ${answer}명입니다.` },
+        { q: `📖 태희가 동화책을 아침에 ${a}쪽, 저녁에 ${b}쪽 읽었어요. 오늘 모두 몇 쪽을 읽었을까요?`, e: `아침에 읽은 ${a}쪽과 저녁에 읽은 ${b}쪽을 더하면 ${a} + ${b} = ${answer}쪽입니다.` },
+        { q: `👧👦 운동장에 남학생 ${a}명과 여학생 ${b}명이 있어요. 학생은 모두 몇 명일까요?`, e: `남학생 ${a}명과 여학생 ${b}명을 더하면 ${a} + ${b} = ${answer}명입니다.` },
+        { q: `⭐ ${name1}이(가) 스티커 ${a}장을 모았어요. 퀴즈를 맞혀서 ${b}장을 더 받았다면, 스티커는 모두 몇 장일까요?`, e: `원래 ${a}장에 받은 ${b}장을 더하면 ${a} + ${b} = ${answer}장입니다.` },
+        { q: `🎈 빨간 풍선 ${a}개와 파란 풍선 ${b}개가 있어요. 풍선은 모두 몇 개일까요?`, e: `빨간 풍선 ${a}개와 파란 풍선 ${b}개를 더하면 ${a} + ${b} = ${answer}개입니다.` },
+        { q: `🍎 과일 바구니에 사과 ${a}개가 있었어요. 엄마가 ${b}개를 더 넣었다면, 사과는 모두 몇 개일까요?`, e: `원래 ${a}개에 추가된 ${b}개를 더하면 ${a} + ${b} = ${answer}개입니다.` },
+        { q: `🌸 정원에 꽃이 ${a}송이 피었어요. 오늘 ${b}송이가 더 피었다면, 꽃은 모두 몇 송이일까요?`, e: `처음 ${a}송이에 새로 핀 ${b}송이를 더하면 ${a} + ${b} = ${answer}송이입니다.` },
+        { q: `🦋 나비 ${a}마리가 날아왔어요. 잠시 후 ${b}마리가 더 왔다면, 나비는 모두 몇 마리일까요?`, e: `처음 ${a}마리에 ${b}마리를 더하면 ${a} + ${b} = ${answer}마리입니다.` },
+        { q: `🏠 ${name1}이(가) 블록으로 집을 만들고 있어요. 빨간 블록 ${a}개와 파란 블록 ${b}개를 사용했다면, 블록은 모두 몇 개일까요?`, e: `빨간 블록 ${a}개와 파란 블록 ${b}개를 더하면 ${a} + ${b} = ${answer}개입니다.` },
+        { q: `🐟 수족관에 물고기가 ${a}마리 있었어요. ${b}마리를 더 넣었다면, 물고기는 모두 몇 마리일까요?`, e: `원래 ${a}마리에 ${b}마리를 더하면 ${a} + ${b} = ${answer}마리입니다.` },
+        { q: `✏️ 연필통에 연필이 ${a}자루 있었어요. 새 연필 ${b}자루를 더 넣었다면, 연필은 모두 몇 자루일까요?`, e: `원래 ${a}자루에 ${b}자루를 더하면 ${a} + ${b} = ${answer}자루입니다.` }
     ];
 
-    let question, explanation;
-    if (Math.random() < 0.2) {
-        question = `다음 덧셈의 정답은 무엇일까요?
-${a} + ${b} = ?`;
-        explanation = buildSimpleExplanation(a, b, '+', answer);
-    } else {
-        const t = templates[Math.floor(Math.random() * templates.length)];
-        question = t.q;
-        explanation = t.e;
-    }
+    const t = templates[Math.floor(Math.random() * templates.length)];
+    const question = t.q;
+    const explanation = t.e;
 
     const wrongs = new Set();
     while (wrongs.size < 4) {
@@ -404,26 +410,25 @@ function genSubtractionProblem(diff) {
     const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑', '해핑'];
     const name1 = names[Math.floor(Math.random() * names.length)];
 
+    // 100% 문장제 템플릿 (시각적 이모지 포함)
     const templates = [
-        { q: `${name1}이(가) 사탕 ${a}개를 가지고 있었어요. 친구에게 ${b}개를 주었다면, 남은 사탕은 몇 개일까요?`, e: `원래 ${a}개에서 준 ${b}개를 빼면 ${a} - ${b} = ${answer}개가 남습니다.` },
-        { q: `버스에 ${a}명이 타고 있었어요. 정류장에서 ${b}명이 내렸다면, 남은 사람은 몇 명일까요?`, e: `처음 ${a}명에서 내린 ${b}명을 빼면 ${a} - ${b} = ${answer}명입니다.` },
-        { q: `책상 위에 연필이 ${a}자루 있었어요. 동생이 ${b}자루를 가져갔다면, 남은 연필은 몇 자루일까요?`, e: `원래 ${a}자루에서 가져간 ${b}자루를 빼면 ${a} - ${b} = ${answer}자루입니다.` },
-        { q: `과자가 ${a}개 있었는데 ${b}개를 먹었어요. 남은 과자는 몇 개일까요?`, e: `원래 ${a}개에서 먹은 ${b}개를 빼면 ${a} - ${b} = ${answer}개입니다.` },
-        { q: `${name1}이(가) 스티커 ${a}장을 가지고 있었어요. 친구에게 ${b}장을 선물했다면, 남은 스티커는 몇 장일까요?`, e: `원래 ${a}장에서 선물한 ${b}장을 빼면 ${a} - ${b} = ${answer}장입니다.` },
-        { q: `풍선이 ${a}개 있었는데 ${b}개가 터졌어요. 남은 풍선은 몇 개일까요?`, e: `원래 ${a}개에서 터진 ${b}개를 빼면 ${a} - ${b} = ${answer}개입니다.` },
-        { q: `태희가 동화책 ${a}쪽을 읽으려고 해요. 이미 ${b}쪽을 읽었다면, 남은 쪽수는?`, e: `전체 ${a}쪽에서 읽은 ${b}쪽을 빼면 ${a} - ${b} = ${answer}쪽 남았습니다.` }
+        { q: `🍬 ${name1}이(가) 사탕 ${a}개를 가지고 있었어요. 친구에게 ${b}개를 주었다면, 남은 사탕은 몇 개일까요?`, e: `원래 ${a}개에서 준 ${b}개를 빼면 ${a} - ${b} = ${answer}개가 남습니다.` },
+        { q: `🚌 버스에 ${a}명이 타고 있었어요. 정류장에서 ${b}명이 내렸다면, 남은 사람은 몇 명일까요?`, e: `처음 ${a}명에서 내린 ${b}명을 빼면 ${a} - ${b} = ${answer}명입니다.` },
+        { q: `✏️ 책상 위에 연필이 ${a}자루 있었어요. 동생이 ${b}자루를 가져갔다면, 남은 연필은 몇 자루일까요?`, e: `원래 ${a}자루에서 가져간 ${b}자루를 빼면 ${a} - ${b} = ${answer}자루입니다.` },
+        { q: `🍪 과자가 ${a}개 있었는데 ${b}개를 먹었어요. 남은 과자는 몇 개일까요?`, e: `원래 ${a}개에서 먹은 ${b}개를 빼면 ${a} - ${b} = ${answer}개입니다.` },
+        { q: `⭐ ${name1}이(가) 스티커 ${a}장을 가지고 있었어요. 친구에게 ${b}장을 선물했다면, 남은 스티커는 몇 장일까요?`, e: `원래 ${a}장에서 선물한 ${b}장을 빼면 ${a} - ${b} = ${answer}장입니다.` },
+        { q: `🎈 풍선이 ${a}개 있었는데 ${b}개가 터졌어요. 남은 풍선은 몇 개일까요?`, e: `원래 ${a}개에서 터진 ${b}개를 빼면 ${a} - ${b} = ${answer}개입니다.` },
+        { q: `📖 태희가 동화책 ${a}쪽을 읽으려고 해요. 이미 ${b}쪽을 읽었다면, 남은 쪽수는?`, e: `전체 ${a}쪽에서 읽은 ${b}쪽을 빼면 ${a} - ${b} = ${answer}쪽 남았습니다.` },
+        { q: `🍎 바구니에 사과가 ${a}개 있었어요. ${b}개를 먹었다면, 남은 사과는 몇 개일까요?`, e: `원래 ${a}개에서 먹은 ${b}개를 빼면 ${a} - ${b} = ${answer}개입니다.` },
+        { q: `🌸 정원에 꽃이 ${a}송이 있었어요. ${b}송이가 시들었다면, 남은 꽃은 몇 송이일까요?`, e: `원래 ${a}송이에서 시든 ${b}송이를 빼면 ${a} - ${b} = ${answer}송이입니다.` },
+        { q: `🐟 수족관에 물고기가 ${a}마리 있었어요. ${b}마리를 다른 곳으로 옮겼다면, 남은 물고기는 몇 마리일까요?`, e: `원래 ${a}마리에서 옮긴 ${b}마리를 빼면 ${a} - ${b} = ${answer}마리입니다.` },
+        { q: `🎁 선물 상자에 초콜릿이 ${a}개 있었어요. ${b}개를 나눠줬다면, 남은 초콜릿은 몇 개일까요?`, e: `원래 ${a}개에서 나눠준 ${b}개를 빼면 ${a} - ${b} = ${answer}개입니다.` },
+        { q: `🏠 ${name1}이(가) 블록 ${a}개로 탑을 쌓았어요. ${b}개가 떨어졌다면, 남은 블록은 몇 개일까요?`, e: `원래 ${a}개에서 떨어진 ${b}개를 빼면 ${a} - ${b} = ${answer}개입니다.` }
     ];
 
-    let question, explanation;
-    if (Math.random() < 0.2) {
-        question = `다음 뺄셈의 정답은 무엇일까요?
-${a} - ${b} = ?`;
-        explanation = buildSimpleExplanation(a, b, '-', answer);
-    } else {
-        const t = templates[Math.floor(Math.random() * templates.length)];
-        question = t.q;
-        explanation = t.e;
-    }
+    const t = templates[Math.floor(Math.random() * templates.length)];
+    const question = t.q;
+    const explanation = t.e;
 
     const wrongs = new Set();
     while (wrongs.size < 4) {
@@ -451,26 +456,25 @@ function genMultiplicationProblem(diff) {
     const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑', '해핑'];
     const name1 = names[Math.floor(Math.random() * names.length)];
 
+    // 100% 문장제 템플릿 (시각적 이모지 포함)
     const templates = [
-        { q: `한 봉지에 사탕이 ${a}개씩 들어 있어요. ${b}봉지에는 사탕이 모두 몇 개 있을까요?`, e: `한 봉지에 ${a}개씩 ${b}봉지이므로 ${a} × ${b} = ${answer}개입니다.` },
-        { q: `${name1}이(가) 하루에 스티커를 ${a}장씩 모아요. ${b}일 동안 모으면 스티커는 모두 몇 장일까요?`, e: `하루에 ${a}장씩 ${b}일이므로 ${a} × ${b} = ${answer}장입니다.` },
-        { q: `한 상자에 귤이 ${a}개씩 들어 있어요. ${b}상자에는 귤이 모두 몇 개 있을까요?`, e: `한 상자에 ${a}개씩 ${b}상자이므로 ${a} × ${b} = ${answer}개입니다.` },
-        { q: `버스 한 대에 ${a}명씩 탈 수 있어요. 버스 ${b}대에는 모두 몇 명이 탈 수 있을까요?`, e: `한 대에 ${a}명씩 ${b}대이므로 ${a} × ${b} = ${answer}명입니다.` },
-        { q: `연필 한 묶음에 ${a}자루씩 있어요. ${b}묶음에는 연필이 모두 몇 자루 있을까요?`, e: `한 묶음에 ${a}자루씩 ${b}묶음이므로 ${a} × ${b} = ${answer}자루입니다.` },
-        { q: `${name1}이(가) 친구 ${b}명에게 초콜릿을 ${a}개씩 나눠주려고 해요. 초콜릿은 모두 몇 개 필요할까요?`, e: `친구 한 명에게 ${a}개씩 ${b}명이므로 ${a} × ${b} = ${answer}개입니다.` },
-        { q: `한 줄에 의자가 ${a}개씩 놓여 있어요. ${b}줄에는 의자가 모두 몇 개 있을까요?`, e: `한 줄에 ${a}개씩 ${b}줄이므로 ${a} × ${b} = ${answer}개입니다.` }
+        { q: `🍬 한 봉지에 사탕이 ${a}개씩 들어 있어요. ${b}봉지에는 사탕이 모두 몇 개 있을까요?`, e: `한 봉지에 ${a}개씩 ${b}봉지이므로 ${a} × ${b} = ${answer}개입니다.` },
+        { q: `⭐ ${name1}이(가) 하루에 스티커를 ${a}장씩 모아요. ${b}일 동안 모으면 스티커는 모두 몇 장일까요?`, e: `하루에 ${a}장씩 ${b}일이므로 ${a} × ${b} = ${answer}장입니다.` },
+        { q: `🍊 한 상자에 귤이 ${a}개씩 들어 있어요. ${b}상자에는 귤이 모두 몇 개 있을까요?`, e: `한 상자에 ${a}개씩 ${b}상자이므로 ${a} × ${b} = ${answer}개입니다.` },
+        { q: `🚌 버스 한 대에 ${a}명씩 탈 수 있어요. 버스 ${b}대에는 모두 몇 명이 탈 수 있을까요?`, e: `한 대에 ${a}명씩 ${b}대이므로 ${a} × ${b} = ${answer}명입니다.` },
+        { q: `✏️ 연필 한 묶음에 ${a}자루씩 있어요. ${b}묶음에는 연필이 모두 몇 자루 있을까요?`, e: `한 묶음에 ${a}자루씩 ${b}묶음이므로 ${a} × ${b} = ${answer}자루입니다.` },
+        { q: `🍫 ${name1}이(가) 친구 ${b}명에게 초콜릿을 ${a}개씩 나눠주려고 해요. 초콜릿은 모두 몇 개 필요할까요?`, e: `친구 한 명에게 ${a}개씩 ${b}명이므로 ${a} × ${b} = ${answer}개입니다.` },
+        { q: `🪑 한 줄에 의자가 ${a}개씩 놓여 있어요. ${b}줄에는 의자가 모두 몇 개 있을까요?`, e: `한 줄에 ${a}개씩 ${b}줄이므로 ${a} × ${b} = ${answer}개입니다.` },
+        { q: `🌸 꽃밭에 꽃이 한 줄에 ${a}송이씩 심어져 있어요. ${b}줄이면 꽃은 모두 몇 송이일까요?`, e: `한 줄에 ${a}송이씩 ${b}줄이므로 ${a} × ${b} = ${answer}송이입니다.` },
+        { q: `🎁 선물 상자 하나에 사탕이 ${a}개씩 들어있어요. 상자 ${b}개에는 사탕이 모두 몇 개일까요?`, e: `한 상자에 ${a}개씩 ${b}상자이므로 ${a} × ${b} = ${answer}개입니다.` },
+        { q: `🐟 수족관 한 칸에 물고기가 ${a}마리씩 있어요. ${b}칸에는 물고기가 모두 몇 마리일까요?`, e: `한 칸에 ${a}마리씩 ${b}칸이므로 ${a} × ${b} = ${answer}마리입니다.` },
+        { q: `📚 책장 한 칸에 책이 ${a}권씩 꽂혀 있어요. ${b}칸에는 책이 모두 몇 권일까요?`, e: `한 칸에 ${a}권씩 ${b}칸이므로 ${a} × ${b} = ${answer}권입니다.` },
+        { q: `🧁 접시 하나에 컵케이크가 ${a}개씩 있어요. ${b}접시에는 컵케이크가 모두 몇 개일까요?`, e: `한 접시에 ${a}개씩 ${b}접시이므로 ${a} × ${b} = ${answer}개입니다.` }
     ];
 
-    let question, explanation;
-    if (Math.random() < 0.2) {
-        question = `다음 곱셈의 정답은 무엇일까요?
-${a} × ${b} = ?`;
-        explanation = buildSimpleExplanation(a, b, '×', answer);
-    } else {
-        const t = templates[Math.floor(Math.random() * templates.length)];
-        question = t.q;
-        explanation = t.e;
-    }
+    const t = templates[Math.floor(Math.random() * templates.length)];
+    const question = t.q;
+    const explanation = t.e;
 
     const wrongs = new Set();
     while (wrongs.size < 4) {
@@ -508,23 +512,25 @@ function genDivisionProblem(diff) {
 
         if (STATE.usedProblems.includes(problemKey)) continue;
 
-        const isFillBlank = Math.random() < 0.5;
-        let question, answer;
+        // 100% 문장제 템플릿 (시각적 이모지 포함)
+        const templates = [
+            { q: `🍰 케이크 ${dividend}개를 ${divisor}명에게 똑같이 나누어 주면 한 명은 몇 개를 받을까요?`, e: `${dividend}개를 ${divisor}명에게 똑같이 나누면 ${dividend} ÷ ${divisor} = ${quotient}개입니다.` },
+            { q: `⭐ 티니핑 스티커 ${dividend}개를 ${divisor}개씩 묶으면 몇 묶음이 될까요?`, e: `${dividend}개를 ${divisor}개씩 묶으면 ${dividend} ÷ ${divisor} = ${quotient}묶음입니다.` },
+            { q: `✏️ 색연필 ${dividend}자루를 ${divisor}명이 똑같이 나누면 한 명은 몇 자루를 받을까요?`, e: `${dividend}자루를 ${divisor}명에게 나누면 ${dividend} ÷ ${divisor} = ${quotient}자루입니다.` },
+            { q: `🍬 사탕 ${dividend}개를 ${divisor}봉지에 똑같이 담으면 한 봉지에 몇 개가 들어갈까요?`, e: `${dividend}개를 ${divisor}봉지에 나누면 ${dividend} ÷ ${divisor} = ${quotient}개입니다.` },
+            { q: `🍎 사과 ${dividend}개를 친구 ${divisor}명에게 똑같이 나눠주면 한 명이 몇 개를 받을까요?`, e: `${dividend}개를 ${divisor}명에게 나누면 ${dividend} ÷ ${divisor} = ${quotient}개입니다.` },
+            { q: `📚 책 ${dividend}권을 책장 ${divisor}칸에 똑같이 나눠 꽂으면 한 칸에 몇 권이 들어갈까요?`, e: `${dividend}권을 ${divisor}칸에 나누면 ${dividend} ÷ ${divisor} = ${quotient}권입니다.` },
+            { q: `🎈 풍선 ${dividend}개를 ${divisor}묶음으로 나누면 한 묶음에 몇 개일까요?`, e: `${dividend}개를 ${divisor}묶음으로 나누면 ${dividend} ÷ ${divisor} = ${quotient}개입니다.` },
+            { q: `🌸 꽃 ${dividend}송이를 꽃병 ${divisor}개에 똑같이 나눠 꽂으면 한 꽃병에 몇 송이일까요?`, e: `${dividend}송이를 ${divisor}개에 나누면 ${dividend} ÷ ${divisor} = ${quotient}송이입니다.` },
+            { q: `🍪 쿠키 ${dividend}개를 접시 ${divisor}개에 똑같이 나눠 담으면 한 접시에 몇 개일까요?`, e: `${dividend}개를 ${divisor}접시에 나누면 ${dividend} ÷ ${divisor} = ${quotient}개입니다.` },
+            { q: `🐟 물고기 ${dividend}마리를 수조 ${divisor}개에 똑같이 나눠 넣으면 한 수조에 몇 마리일까요?`, e: `${dividend}마리를 ${divisor}개에 나누면 ${dividend} ÷ ${divisor} = ${quotient}마리입니다.` },
+            { q: `🎁 선물 ${dividend}개를 ${divisor}명에게 똑같이 나눠주면 한 명이 몇 개를 받을까요?`, e: `${dividend}개를 ${divisor}명에게 나누면 ${dividend} ÷ ${divisor} = ${quotient}개입니다.` },
+            { q: `👧👦 학생 ${dividend}명을 ${divisor}모둠으로 나누면 한 모둠은 몇 명일까요?`, e: `${dividend}명을 ${divisor}모둠으로 나누면 ${dividend} ÷ ${divisor} = ${quotient}명입니다.` }
+        ];
 
-        if (isFillBlank) {
-            const pos = Math.floor(Math.random() * 3);
-            if (pos === 0) { question = `( ) ÷ ${divisor} = ${quotient}`; answer = dividend; }
-            else if (pos === 1) { question = `${dividend} ÷ ( ) = ${quotient}`; answer = divisor; }
-            else { question = `${dividend} ÷ ${divisor} = ( )`; answer = quotient; }
-        } else {
-            const templates = [
-                `태희야, 케이크 ${dividend}개를 ${divisor}명에게 똑같이 나누어 주면 한 명은 몇 개를 받을까?`,
-                `태희야, 티니핑 스티커 ${dividend}개를 ${divisor}개씩 묶으면 몇 묶음이 될까?`,
-                `태희야, 색연필 ${dividend}자루를 ${divisor}명이 똑같이 나누면 한 명은 몇 자루를 받을까?`
-            ];
-            question = templates[Math.floor(Math.random() * templates.length)];
-            answer = quotient;
-        }
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        const question = t.q;
+        const answer = quotient;
 
         const wrongs = new Set();
         while (wrongs.size < 4) {
@@ -533,20 +539,20 @@ function genDivisionProblem(diff) {
             if (w !== answer) wrongs.add(w);
         }
         const options = shuffleArray([answer, ...[...wrongs]].slice(0, 4));
-        const explanation = buildExplanation(dividend, divisor, quotient, answer);
+        const explanation = t.e;
 
         STATE.usedProblems.push(problemKey);
         return { question, options, answer, explanation, problemKey };
     }
 
-    // Fallback
+    // Fallback - 100% 문장제로 변경
     const divisor = dan;
     const quotient = Math.floor(Math.random() * 9) + 1;
     const dividend = divisor * quotient;
-    const question = `${dividend} ÷ ${divisor} = ( )`;
+    const question = `🍰 케이크 ${dividend}개를 친구 ${divisor}명에게 똑같이 나눠주면 한 명이 몇 개를 받을까요?`;
     const answer = quotient;
     const options = [answer, answer + 1, answer - 1, answer + 2, answer - 2].filter(n => n > 0).slice(0, 5);
-    return { question, options, answer, explanation: `정답은 ${answer}이야!` };
+    return { question, options, answer, explanation: `${dividend}개를 ${divisor}명에게 나누면 ${dividend} ÷ ${divisor} = ${answer}개입니다.`, problemKey: `div-fallback-${dividend}-${divisor}` };
 }
 
 function genFractionProblem(diff) {
@@ -558,9 +564,6 @@ function genFractionProblem(diff) {
     const name1 = names[Math.floor(Math.random() * names.length)];
     const name2 = names[(names.indexOf(name1) + 1) % names.length];
 
-    const items = ['피자', '케이크', '사과 파이', '초콜릿'];
-    const item = items[Math.floor(Math.random() * items.length)];
-
     const isAdd = Math.random() < 0.5;
     let question, answerStr, explanation;
 
@@ -568,21 +571,19 @@ function genFractionProblem(diff) {
         const sumNum = num1 + num2;
         answerStr = `${sumNum}/${denom}`;
 
+        // 100% 문장제 템플릿 (시각적 이모지 포함)
         const templates = [
-            { q: `${item}를 ${denom}조각으로 똑같이 나누었어요. ${name1}이(가) ${num1}조각, ${name2}이(가) ${num2}조각을 먹었다면, 둘이 먹은 양은 전체의 얼마일까요?`, e: `${name1}이 먹은 ${num1}/${denom}과 ${name2}이 먹은 ${num2}/${denom}을 더하면 ${num1}/${denom} + ${num2}/${denom} = ${sumNum}/${denom}입니다.` },
-            { q: `리본을 ${denom}등분 했어요. ${num1}만큼 빨간색, ${num2}만큼 파란색으로 칠했다면, 색칠한 부분은 전체의 얼마일까요?`, e: `빨간색 ${num1}/${denom}과 파란색 ${num2}/${denom}을 더하면 ${sumNum}/${denom}입니다.` },
-            { q: `${item}를 ${denom}조각으로 나누어 어제 ${num1}조각, 오늘 ${num2}조각을 먹었어요. 먹은 양은 전체의 얼마일까요?`, e: `어제 ${num1}/${denom}과 오늘 ${num2}/${denom}을 더하면 ${sumNum}/${denom}입니다.` }
+            { q: `🍕 피자를 ${denom}조각으로 똑같이 나누었어요. ${name1}이(가) ${num1}조각, ${name2}이(가) ${num2}조각을 먹었다면, 둘이 먹은 양은 전체의 얼마일까요?`, e: `${name1}이 먹은 ${num1}/${denom}과 ${name2}이 먹은 ${num2}/${denom}을 더하면 ${num1}/${denom} + ${num2}/${denom} = ${sumNum}/${denom}입니다.` },
+            { q: `🎀 리본을 ${denom}등분 했어요. ${num1}만큼 빨간색, ${num2}만큼 파란색으로 칠했다면, 색칠한 부분은 전체의 얼마일까요?`, e: `빨간색 ${num1}/${denom}과 파란색 ${num2}/${denom}을 더하면 ${sumNum}/${denom}입니다.` },
+            { q: `🍰 케이크를 ${denom}조각으로 나누어 어제 ${num1}조각, 오늘 ${num2}조각을 먹었어요. 먹은 양은 전체의 얼마일까요?`, e: `어제 ${num1}/${denom}과 오늘 ${num2}/${denom}을 더하면 ${sumNum}/${denom}입니다.` },
+            { q: `🍫 초콜릿을 ${denom}조각으로 나눴어요. 아침에 ${num1}조각, 저녁에 ${num2}조각을 먹었다면, 먹은 양은 전체의 얼마일까요?`, e: `아침 ${num1}/${denom}과 저녁 ${num2}/${denom}을 더하면 ${sumNum}/${denom}입니다.` },
+            { q: `🥧 사과 파이를 ${denom}조각으로 나눴어요. ${name1}이(가) ${num1}조각, ${name2}이(가) ${num2}조각을 먹었다면, 먹은 양은?`, e: `${num1}/${denom} + ${num2}/${denom} = ${sumNum}/${denom}입니다.` },
+            { q: `📐 색종이를 ${denom}등분 했어요. ${num1}부분에 별을, ${num2}부분에 하트를 그렸다면, 그림을 그린 부분은 전체의 얼마일까요?`, e: `별 ${num1}/${denom}과 하트 ${num2}/${denom}을 더하면 ${sumNum}/${denom}입니다.` }
         ];
 
-        if (Math.random() < 0.2) {
-            question = `다음 분수의 덧셈 결과는?
-${num1}/${denom} + ${num2}/${denom} = ?`;
-            explanation = `분모가 같은 분수는 분자끼리 더합니다. ${num1} + ${num2} = ${sumNum}이므로 정답은 ${sumNum}/${denom}입니다.`;
-        } else {
-            const t = templates[Math.floor(Math.random() * templates.length)];
-            question = t.q;
-            explanation = t.e;
-        }
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        question = t.q;
+        explanation = t.e;
     } else {
         const big = Math.max(num1, num2);
         const small = Math.min(num1, num2);
@@ -590,21 +591,19 @@ ${num1}/${denom} + ${num2}/${denom} = ?`;
         if (diffNum === 0) return genFractionProblem(diff);
         answerStr = `${diffNum}/${denom}`;
 
+        // 100% 문장제 템플릿 (시각적 이모지 포함)
         const templates = [
-            { q: `${item}를 ${denom}조각으로 나누었어요. ${big}조각이 있었는데 ${small}조각을 먹었다면, 남은 양은 전체의 얼마일까요?`, e: `있던 ${big}/${denom}에서 먹은 ${small}/${denom}을 빼면 ${diffNum}/${denom}입니다.` },
-            { q: `물통에 물이 전체의 ${big}/${denom}만큼 있었어요. ${small}/${denom}만큼 마셨다면, 남은 물은 전체의 얼마일까요?`, e: `있던 ${big}/${denom}에서 마신 ${small}/${denom}을 빼면 ${diffNum}/${denom}입니다.` },
-            { q: `색종이의 ${big}/${denom}에 그림을 그리고 ${small}/${denom}만큼 잘라냈어요. 그림이 남은 부분은 전체의 얼마일까요?`, e: `그린 부분 ${big}/${denom}에서 자른 ${small}/${denom}을 빼면 ${diffNum}/${denom}입니다.` }
+            { q: `🍕 피자를 ${denom}조각으로 나누었어요. ${big}조각이 있었는데 ${small}조각을 먹었다면, 남은 양은 전체의 얼마일까요?`, e: `있던 ${big}/${denom}에서 먹은 ${small}/${denom}을 빼면 ${diffNum}/${denom}입니다.` },
+            { q: `💧 물통에 물이 전체의 ${big}/${denom}만큼 있었어요. ${small}/${denom}만큼 마셨다면, 남은 물은 전체의 얼마일까요?`, e: `있던 ${big}/${denom}에서 마신 ${small}/${denom}을 빼면 ${diffNum}/${denom}입니다.` },
+            { q: `📐 색종이의 ${big}/${denom}에 그림을 그리고 ${small}/${denom}만큼 잘라냈어요. 그림이 남은 부분은 전체의 얼마일까요?`, e: `그린 부분 ${big}/${denom}에서 자른 ${small}/${denom}을 빼면 ${diffNum}/${denom}입니다.` },
+            { q: `🍰 케이크가 전체의 ${big}/${denom}만큼 남아있었어요. ${small}/${denom}만큼 먹었다면, 남은 케이크는 전체의 얼마일까요?`, e: `있던 ${big}/${denom}에서 먹은 ${small}/${denom}을 빼면 ${diffNum}/${denom}입니다.` },
+            { q: `🎀 리본의 ${big}/${denom}만큼 사용할 수 있었어요. ${small}/${denom}만큼 사용했다면, 남은 리본은 전체의 얼마일까요?`, e: `있던 ${big}/${denom}에서 사용한 ${small}/${denom}을 빼면 ${diffNum}/${denom}입니다.` },
+            { q: `🍫 초콜릿이 전체의 ${big}/${denom}만큼 있었어요. ${name1}이(가) ${small}/${denom}만큼 먹었다면, 남은 초콜릿은?`, e: `${big}/${denom} - ${small}/${denom} = ${diffNum}/${denom}입니다.` }
         ];
 
-        if (Math.random() < 0.2) {
-            question = `다음 분수의 뺄셈 결과는?
-${big}/${denom} - ${small}/${denom} = ?`;
-            explanation = `분모가 같은 분수는 분자끼리 뺍니다. ${big} - ${small} = ${diffNum}이므로 정답은 ${diffNum}/${denom}입니다.`;
-        } else {
-            const t = templates[Math.floor(Math.random() * templates.length)];
-            question = t.q;
-            explanation = t.e;
-        }
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        question = t.q;
+        explanation = t.e;
     }
 
     const wrongs = new Set();
@@ -625,42 +624,47 @@ ${big}/${denom} - ${small}/${denom} = ?`;
 }
 
 function genGeometryProblem(diff) {
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑'];
+    const name1 = names[Math.floor(Math.random() * names.length)];
     let quizzes = [];
 
-    // 난이도 1-5: 기본 도형 이름 맞추기
+    // 난이도 1-5: 기본 도형 이름 맞추기 (100% 문장제)
     if (diff <= 5) {
         quizzes = [
-            { q: "이 도형의 이름은?", a: "삼각형", type: "triangle", wrong: ["사각형", "원", "오각형", "육각형"] },
-            { q: "이 도형의 이름은?", a: "사각형", type: "rectangle", wrong: ["삼각형", "원", "오각형", "육각형"] },
-            { q: "이 도형의 이름은?", a: "원", type: "circle", wrong: ["삼각형", "사각형", "오각형", "육각형"] },
-            { q: "변이 3개인 도형은?", a: "삼각형", type: "triangle", wrong: ["사각형", "원", "오각형"] },
-            { q: "변이 4개인 도형은?", a: "사각형", type: "rectangle", wrong: ["삼각형", "원", "오각형"] }
+            { q: `📐 ${name1}이(가) 색종이를 접어서 도형을 만들었어요. 이 도형의 이름은 무엇일까요?`, a: "삼각형", type: "triangle", wrong: ["사각형", "원", "오각형", "육각형"], e: `세 개의 변과 세 개의 꼭짓점을 가진 도형은 삼각형입니다.` },
+            { q: `🖼️ 태희가 그린 그림 액자 모양이에요. 이 도형의 이름은 무엇일까요?`, a: "사각형", type: "rectangle", wrong: ["삼각형", "원", "오각형", "육각형"], e: `네 개의 변과 네 개의 꼭짓점을 가진 도형은 사각형입니다.` },
+            { q: `⭕ ${name1}이(가) 동그란 쿠키를 만들었어요. 이 도형의 이름은 무엇일까요?`, a: "원", type: "circle", wrong: ["삼각형", "사각형", "오각형", "육각형"], e: `변과 꼭짓점이 없고 둥근 도형은 원입니다.` },
+            { q: `🏠 지붕 모양처럼 변이 3개인 도형은 무엇일까요?`, a: "삼각형", type: "triangle", wrong: ["사각형", "원", "오각형"], e: `변이 3개인 도형은 삼각형입니다.` },
+            { q: `📺 TV 화면처럼 변이 4개인 도형은 무엇일까요?`, a: "사각형", type: "rectangle", wrong: ["삼각형", "원", "오각형"], e: `변이 4개인 도형은 사각형입니다.` },
+            { q: `🍕 피자 한 조각 모양과 가장 비슷한 도형은 무엇일까요?`, a: "삼각형", type: "triangle", wrong: ["사각형", "원", "육각형"], e: `피자 한 조각은 삼각형 모양과 비슷합니다.` },
+            { q: `🪟 창문 모양과 가장 비슷한 도형은 무엇일까요?`, a: "사각형", type: "rectangle", wrong: ["삼각형", "원", "오각형"], e: `창문은 보통 사각형 모양입니다.` }
         ];
     }
-    // 난이도 6-10: 도형의 성질 (변, 꼭짓점)
+    // 난이도 6-10: 도형의 성질 (변, 꼭짓점) - 문장제
     else if (diff <= 10) {
         quizzes = [
-            { q: "삼각형의 변의 개수는?", a: "3개", type: "triangle", wrong: ["4개", "5개", "6개", "0개"] },
-            { q: "사각형의 꼭짓점의 개수는?", a: "4개", type: "rectangle", wrong: ["3개", "5개", "6개", "0개"] },
-            { q: "육각형의 변의 개수는?", a: "6개", type: "hexagon", wrong: ["4개", "5개", "8개", "10개"] },
-            { q: "오각형의 꼭짓점의 개수는?", a: "5개", type: "pentagon", wrong: ["4개", "6개", "8개", "3개"] }
+            { q: `📐 ${name1}이(가) 삼각형 모양 깃발을 만들려고 해요. 변은 몇 개가 필요할까요?`, a: "3개", type: "triangle", wrong: ["4개", "5개", "6개", "0개"], e: `삼각형은 변이 3개인 도형입니다.` },
+            { q: `🖼️ 태희가 사각형 액자에 스티커를 붙이려고 해요. 꼭짓점은 몇 개일까요?`, a: "4개", type: "rectangle", wrong: ["3개", "5개", "6개", "0개"], e: `사각형은 꼭짓점이 4개인 도형입니다.` },
+            { q: `🐝 벌집 모양(육각형)으로 종이를 자르려고 해요. 변은 몇 개일까요?`, a: "6개", type: "hexagon", wrong: ["4개", "5개", "8개", "10개"], e: `육각형은 변이 6개인 도형입니다.` },
+            { q: `⭐ ${name1}이(가) 오각형 모양 별을 그리려고 해요. 꼭짓점은 몇 개일까요?`, a: "5개", type: "pentagon", wrong: ["4개", "6개", "8개", "3개"], e: `오각형은 꼭짓점이 5개인 도형입니다.` },
+            { q: `🔺 삼각형 모양의 텐트를 세우려면 기둥이 꼭짓점에 필요해요. 기둥은 몇 개 필요할까요?`, a: "3개", type: "triangle", wrong: ["4개", "5개", "6개", "2개"], e: `삼각형은 꼭짓점이 3개이므로 기둥도 3개 필요합니다.` }
         ];
     }
-    // 난이도 11+: 심화 (내각, 대각선, 특수 사각형)
+    // 난이도 11+: 심화 (내각, 대각선, 특수 사각형) - 문장제
     else {
         quizzes = [
-            { q: "삼각형의 세 내각의 합은?", a: "180도", type: "triangle", wrong: ["360도", "90도", "270도", "540도"] },
-            { q: "사각형의 네 내각의 합은?", a: "360도", type: "rectangle", wrong: ["180도", "540도", "720도", "90도"] },
-            { q: "오각형의 대각선 개수는?", a: "5개", type: "pentagon", wrong: ["2개", "9개", "14개", "0개"] },
-            { q: "육각형의 대각선 개수는?", a: "9개", type: "hexagon", wrong: ["5개", "14개", "20개", "6개"] },
-            { q: "네 변의 길이가 같고 네 각이 직각인 사각형은?", a: "정사각형", type: "square", wrong: ["직사각형", "마름모", "평행사변형", "사다리꼴"] },
-            { q: "네 변의 길이가 모두 같은 사각형은?", a: "마름모", type: "rhombus", wrong: ["직사각형", "사다리꼴", "평행사변형", "등변사다리꼴"] }
+            { q: `📐 ${name1}이(가) 삼각형의 세 각을 모두 재어 더했어요. 합은 몇 도일까요?`, a: "180도", type: "triangle", wrong: ["360도", "90도", "270도", "540도"], e: `삼각형의 세 내각의 합은 항상 180도입니다.` },
+            { q: `🖼️ 태희가 사각형 색종이의 네 각을 모두 잰다면, 합은 몇 도일까요?`, a: "360도", type: "rectangle", wrong: ["180도", "540도", "720도", "90도"], e: `사각형의 네 내각의 합은 항상 360도입니다.` },
+            { q: `⭐ 오각형에서 꼭짓점을 연결하는 대각선을 모두 그으면 몇 개일까요?`, a: "5개", type: "pentagon", wrong: ["2개", "9개", "14개", "0개"], e: `오각형의 대각선 개수는 5개입니다.` },
+            { q: `🐝 육각형에서 대각선을 모두 그으면 몇 개일까요?`, a: "9개", type: "hexagon", wrong: ["5개", "14개", "20개", "6개"], e: `육각형의 대각선 개수는 9개입니다.` },
+            { q: `📏 ${name1}이(가) 네 변의 길이가 같고 네 각이 모두 직각인 도형을 그렸어요. 이 도형은?`, a: "정사각형", type: "square", wrong: ["직사각형", "마름모", "평행사변형", "사다리꼴"], e: `네 변의 길이가 같고 네 각이 직각인 사각형은 정사각형입니다.` },
+            { q: `💎 네 변의 길이가 모두 같지만 각이 직각이 아닌 사각형은 무엇일까요?`, a: "마름모", type: "rhombus", wrong: ["직사각형", "사다리꼴", "평행사변형", "등변사다리꼴"], e: `네 변의 길이가 모두 같은 사각형은 마름모입니다.` }
         ];
     }
 
     // Fallback if quizzes is empty
     if (quizzes.length === 0) {
-        quizzes = [{ q: "이 도형의 이름은?", a: "삼각형", type: "triangle", wrong: ["사각형", "원", "오각형", "육각형"] }];
+        quizzes = [{ q: `📐 ${name1}이(가) 만든 도형이에요. 이 도형의 이름은 무엇일까요?`, a: "삼각형", type: "triangle", wrong: ["사각형", "원", "오각형", "육각형"], e: `세 개의 변을 가진 도형은 삼각형입니다.` }];
     }
 
     const quiz = quizzes[Math.floor(Math.random() * quizzes.length)];
@@ -670,13 +674,16 @@ function genGeometryProblem(diff) {
         question: quiz.q,
         options,
         answer: quiz.a,
-        explanation: `정답은 ${quiz.a}이야!`,
+        explanation: quiz.e || `정답은 ${quiz.a}입니다!`,
         problemKey: `geo-${quiz.q}-${quiz.type}`,
         shapeType: quiz.type
     };
 }
 
 function genMeasurementProblem(diff) {
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑'];
+    const name1 = names[Math.floor(Math.random() * names.length)];
+
     // 시계 보기 문제
     let h, m;
 
@@ -699,7 +706,17 @@ function genMeasurementProblem(diff) {
     }
 
     const answer = `${h}시` + (m > 0 ? ` ${m}분` : '');
-    const question = "이 시계는 몇 시 몇 분을 가리키고 있나요?";
+
+    // 100% 문장제 템플릿 (시각적 이모지 포함)
+    const templates = [
+        `🕐 ${name1}이(가) 시계를 보고 있어요. 지금 몇 시 몇 분일까요?`,
+        `⏰ 태희가 학교에 가려고 시계를 봤어요. 지금 시간은 몇 시 몇 분일까요?`,
+        `🕐 ${name1}의 방에 있는 시계가 가리키는 시간은 몇 시 몇 분일까요?`,
+        `⏰ 점심을 먹으려고 시계를 봤어요. 지금 몇 시 몇 분일까요?`,
+        `🕐 ${name1}이(가) 친구와 만나기로 한 시간을 확인해요. 시계가 가리키는 시간은?`,
+        `⏰ 태희가 숙제를 시작하려고 시계를 봤어요. 지금 시간을 읽어볼까요?`
+    ];
+    const question = templates[Math.floor(Math.random() * templates.length)];
 
     // 오답 생성
     const wrongs = new Set();
@@ -726,7 +743,7 @@ function genMeasurementProblem(diff) {
         question,
         options: shuffleArray([answer, ...wrongs].slice(0, 4)),
         answer,
-        explanation: `짧은 바늘이 ${h} 근처, 긴 바늘이 ${m}분을 가리키고 있어!\n정답은 ${answer}이야.`,
+        explanation: `짧은 바늘(시침)이 ${h} 근처를 가리키고, 긴 바늘(분침)이 ${m === 0 ? '12' : Math.floor(m/5)}을 가리키고 있어요!\n정답은 ${answer}입니다.`,
         problemKey: `clock-${h}-${m}`,
         clockTime: { h, m }
     };
@@ -747,27 +764,24 @@ function genPatternProblem(diff) {
     const displaySeq = [...seq];
     displaySeq[blankIdx] = '?';
 
-    const names = ['하츄핑', '바로핑', '아자핑', '차차핑'];
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑'];
     const name1 = names[Math.floor(Math.random() * names.length)];
 
+    // 100% 문장제 템플릿 (시각적 이모지 포함)
     const templates = [
-        { q: `${name1}이(가) 매일 저금통에 동전을 ${step}개씩 더 넣어요. 첫째 날부터 다섯째 날까지 동전 수가 ${displaySeq.join(', ')}일 때, ?는?`, e: `매일 ${step}개씩 늘어나는 규칙입니다. ${answer - step} 다음은 ${step}을 더해 ${answer}이 됩니다.` },
-        { q: `엘리베이터가 ${step}층씩 올라가요. ${displaySeq.join(', ')}에서 ?는 몇 층?`, e: `${step}층씩 올라가는 규칙입니다. ${answer - step} 다음 층은 ${answer}층입니다.` },
-        { q: `줄넘기 기록이 매일 ${step}번씩 늘었어요. ${displaySeq.join(', ')}번에서 ?는?`, e: `매일 ${step}번씩 늘어나는 규칙입니다. ${answer - step} 다음은 ${answer}번입니다.` },
-        { q: `화분에 꽃잎이 매일 ${step}장씩 피어요. ${displaySeq.join(', ')}장에서 ?는?`, e: `매일 ${step}장씩 늘어나는 규칙입니다. ${answer - step} 다음은 ${answer}장입니다.` },
-        { q: `버스 번호가 ${step}씩 커지는 규칙이에요. ${displaySeq.join(', ')}에서 ?는?`, e: `${step}씩 커지는 규칙입니다. ${answer - step} 다음 번호는 ${answer}입니다.` }
+        { q: `💰 ${name1}이(가) 매일 저금통에 동전을 ${step}개씩 더 넣어요. 첫째 날부터 다섯째 날까지 동전 수가 ${displaySeq.join(', ')}일 때, ?는 몇 개일까요?`, e: `매일 ${step}개씩 늘어나는 규칙입니다. ?는 ${answer}개입니다.` },
+        { q: `🛗 엘리베이터가 ${step}층씩 올라가요. ${displaySeq.join(', ')}에서 ?는 몇 층일까요?`, e: `${step}층씩 올라가는 규칙입니다. ?는 ${answer}층입니다.` },
+        { q: `🏃 줄넘기 기록이 매일 ${step}번씩 늘었어요. ${displaySeq.join(', ')}번에서 ?는 몇 번일까요?`, e: `매일 ${step}번씩 늘어나는 규칙입니다. ?는 ${answer}번입니다.` },
+        { q: `🌸 화분에 꽃잎이 매일 ${step}장씩 피어요. ${displaySeq.join(', ')}장에서 ?는 몇 장일까요?`, e: `매일 ${step}장씩 늘어나는 규칙입니다. ?는 ${answer}장입니다.` },
+        { q: `🚌 버스 번호가 ${step}씩 커지는 규칙이에요. ${displaySeq.join(', ')}에서 ?는 몇 번일까요?`, e: `${step}씩 커지는 규칙입니다. ?는 ${answer}번입니다.` },
+        { q: `⭐ ${name1}이(가) 스티커를 모아요. 매일 ${step}개씩 더 받으면 ${displaySeq.join(', ')}개가 돼요. ?는 몇 개일까요?`, e: `매일 ${step}개씩 늘어나는 규칙입니다. ?는 ${answer}개입니다.` },
+        { q: `📚 책장에 책을 정리해요. 칸마다 ${step}권씩 더 꽂으면 ${displaySeq.join(', ')}권이 돼요. ?는 몇 권일까요?`, e: `${step}권씩 늘어나는 규칙입니다. ?는 ${answer}권입니다.` },
+        { q: `🎯 태희가 점수를 얻고 있어요. ${step}점씩 올라가면 ${displaySeq.join(', ')}점이 돼요. ?는 몇 점일까요?`, e: `${step}점씩 올라가는 규칙입니다. ?는 ${answer}점입니다.` }
     ];
 
-    let question, explanation;
-    if (Math.random() < 0.2) {
-        question = `다음 수의 규칙을 찾아 ?에 알맞은 수를 고르세요.
-${displaySeq.join(', ')}`;
-        explanation = `숫자가 ${step}씩 커지는 규칙입니다. ${answer - step} 다음 수는 ${answer}입니다.`;
-    } else {
-        const t = templates[Math.floor(Math.random() * templates.length)];
-        question = t.q;
-        explanation = t.e;
-    }
+    const t = templates[Math.floor(Math.random() * templates.length)];
+    const question = t.q;
+    const explanation = t.e;
 
     const wrongs = new Set();
     while (wrongs.size < 4) {
@@ -786,12 +800,25 @@ ${displaySeq.join(', ')}`;
 }
 
 function genLengthProblem(diff) {
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑'];
+    const name1 = names[Math.floor(Math.random() * names.length)];
+
     // 길이 재기 (자 눈금 읽기)
     const length = Math.floor(Math.random() * 8) + 2; // 2~9cm
     const start = Math.floor(Math.random() * 3); // 0, 1, 2cm에서 시작 (난이도)
 
     const answer = `${length}cm`;
-    const question = "연필의 길이는 몇 cm일까요?";
+
+    // 100% 문장제 템플릿 (시각적 이모지 포함)
+    const templates = [
+        `✏️ ${name1}이(가) 연필의 길이를 재고 있어요. 이 연필의 길이는 몇 cm일까요?`,
+        `📏 태희가 자로 크레파스의 길이를 재요. 크레파스의 길이는 몇 cm일까요?`,
+        `✏️ ${name1}의 새 연필이에요! 이 연필의 길이를 자로 재면 몇 cm일까요?`,
+        `📏 미술 시간에 색연필의 길이를 재요. 색연필의 길이는 몇 cm일까요?`,
+        `✏️ 태희가 필통에서 연필을 꺼내 길이를 재요. 몇 cm일까요?`,
+        `📏 ${name1}이(가) 리본의 길이를 재고 있어요. 리본의 길이는 몇 cm일까요?`
+    ];
+    const question = templates[Math.floor(Math.random() * templates.length)];
 
     const wrongs = new Set();
     while (wrongs.size < 4) {
@@ -809,15 +836,25 @@ function genLengthProblem(diff) {
         question,
         options: [answer, ...Array.from(wrongs)].slice(0, 4),
         answer,
-        explanation: `물건의 한쪽 끝을 눈금 ${start}에 맞췄으니까,\n끝 눈금 ${start + length}에서 시작 눈금 ${start}을 빼면 ${length}cm야!`,
+        explanation: `물건의 한쪽 끝이 눈금 ${start}에 있고, 다른 쪽 끝이 눈금 ${start + length}에 있으니까,\n${start + length} - ${start} = ${length}cm입니다!`,
         problemKey: `length-${length}-${start}`,
         rulerData: { length, start }
     };
 }
 
 function genGraphProblem(diff) {
-    // 막대그래프 해석
-    const items = ['사과', '바나나', '포도', '귤'];
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑'];
+    const name1 = names[Math.floor(Math.random() * names.length)];
+
+    // 막대그래프 해석 - 다양한 주제
+    const themes = [
+        { items: ['🍎 사과', '🍌 바나나', '🍇 포도', '🍊 귤'], topic: '과일', unit: '개' },
+        { items: ['🐶 강아지', '🐱 고양이', '🐰 토끼', '🐹 햄스터'], topic: '좋아하는 동물', unit: '명' },
+        { items: ['⚽ 축구', '🏀 농구', '⚾ 야구', '🎾 테니스'], topic: '좋아하는 운동', unit: '명' },
+        { items: ['🍦 바닐라', '🍫 초콜릿', '🍓 딸기', '🍵 녹차'], topic: '좋아하는 아이스크림', unit: '명' }
+    ];
+    const theme = themes[Math.floor(Math.random() * themes.length)];
+    const items = theme.items;
     const counts = items.map(() => Math.floor(Math.random() * 8) + 2); // 2~9개
 
     // 질문 유형 랜덤 선택
@@ -827,22 +864,23 @@ function genGraphProblem(diff) {
     if (qType === 0) {
         // 가장 많은 것 찾기
         const maxVal = Math.max(...counts);
-        const maxItems = items.filter((_, i) => counts[i] === maxVal);
-        question = "가장 많은 과일은 무엇인가요?";
-        answer = maxItems[0]; // 복수 정답 방지 위해 하나만
-        explanation = `${answer}가 ${maxVal}개로 가장 많아!`;
+        const maxIdx = counts.indexOf(maxVal);
+        const maxItem = items[maxIdx];
+        question = `📊 ${name1}이(가) 반 친구들이 좋아하는 ${theme.topic}을 조사해서 그래프로 나타냈어요. 가장 많은 것은 무엇일까요?`;
+        answer = maxItem;
+        explanation = `그래프에서 막대가 가장 높은 것은 ${maxItem}이에요. ${maxVal}${theme.unit}으로 가장 많습니다!`;
     } else if (qType === 1) {
         // 특정 항목 개수 묻기
         const targetIdx = Math.floor(Math.random() * items.length);
-        question = `${items[targetIdx]}는 몇 개일까요?`;
-        answer = `${counts[targetIdx]}개`;
-        explanation = `그래프의 막대 높이를 보면 ${items[targetIdx]}는 ${counts[targetIdx]}개야.`;
+        question = `📊 태희네 반에서 좋아하는 ${theme.topic}을 조사했어요. ${items[targetIdx]}을(를) 좋아하는 친구는 몇 ${theme.unit}일까요?`;
+        answer = `${counts[targetIdx]}${theme.unit}`;
+        explanation = `그래프에서 ${items[targetIdx]}의 막대 높이를 보면 ${counts[targetIdx]}${theme.unit}입니다.`;
     } else {
         // 전체 개수 묻기
         const total = counts.reduce((a, b) => a + b, 0);
-        question = "과일은 모두 몇 개일까요?";
-        answer = `${total}개`;
-        explanation = `모든 막대의 수를 더하면 ${counts.join(' + ')} = ${total}개야.`;
+        question = `📊 ${name1}이(가) 조사한 ${theme.topic} 그래프를 보세요. 조사에 참여한 친구는 모두 몇 ${theme.unit}일까요?`;
+        answer = `${total}${theme.unit}`;
+        explanation = `모든 막대의 수를 더하면 ${counts.join(' + ')} = ${total}${theme.unit}입니다.`;
     }
 
     const wrongs = new Set();
@@ -852,10 +890,13 @@ function genGraphProblem(diff) {
         while (wrongs.size < 4) {
             let wVal = parseInt(answer) + Math.floor(Math.random() * 7) - 3;
             if (wVal < 1) wVal = 1;
-            const wStr = `${wVal}개`;
+            const wStr = `${wVal}${theme.unit}`;
             if (wStr !== answer) wrongs.add(wStr);
         }
     }
+
+    // graphData에서 이모지 제거하여 렌더링 호환
+    const cleanItems = items.map(i => i.replace(/^[^\s]+\s/, ''));
 
     return {
         question,
@@ -863,58 +904,230 @@ function genGraphProblem(diff) {
         answer,
         explanation,
         problemKey: `graph-${qType}-${counts.join('-')}`,
-        graphData: { items, counts }
+        graphData: { items: cleanItems, counts }
     };
 }
 
 function genCreativeProblem(diff) {
-    // 영재/사고력 수학 문제 (복면산, 논리 등)
-    const type = Math.floor(Math.random() * 2);
+    // 영재/사고력 수학 문제 (복면산, 논리 등) - 100% 문장제
+    const type = Math.floor(Math.random() * 3);
     let question, answer, explanation;
     const wrongs = new Set();
 
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑'];
+
     if (type === 0) {
         // 간단한 복면산 (모양으로 수 찾기)
-        // ★ + ★ = 10, ★ = ?
         const val = Math.floor(Math.random() * 9) + 1;
         const sum = val * 2;
-        const symbol = ['★', '♥', '●', '■'][Math.floor(Math.random() * 4)];
+        const symbols = [
+            { s: '⭐', name: '별' },
+            { s: '💎', name: '보석' },
+            { s: '🌸', name: '꽃' },
+            { s: '🎈', name: '풍선' }
+        ];
+        const sym = symbols[Math.floor(Math.random() * symbols.length)];
+        const name1 = names[Math.floor(Math.random() * names.length)];
 
-        question = `${symbol} + ${symbol} = ${sum}일 때,\n${symbol}이 나타내는 수는?`;
+        question = `🧩 ${name1}이(가) 비밀 암호를 풀고 있어요!\n${sym.s} + ${sym.s} = ${sum}일 때, ${sym.s}(${sym.name})이 나타내는 수는 무엇일까요?`;
         answer = String(val);
-        explanation = `${symbol}이 두 번 더해져서 ${sum}이 되었으니,\n${symbol}은 ${sum}의 절반인 ${val}이야.`;
+        explanation = `${sym.s}이 두 번 더해져서 ${sum}이 되었으니,\n${sym.s}은 ${sum}의 절반인 ${val}입니다!`;
 
         while (wrongs.size < 3) {
             const w = Math.floor(Math.random() * 10);
             if (String(w) !== answer && w > 0) wrongs.add(String(w));
         }
-    } else {
+    } else if (type === 1) {
         // 논리 퀴즈 (나이 비교)
-        // A는 B보다 2살 많고, B는 5살이야. A는 몇 살?
         const ageB = Math.floor(Math.random() * 5) + 5; // 5~9살
         const diffAge = Math.floor(Math.random() * 3) + 1; // 1~3살 차이
         const ageA = ageB + diffAge;
 
-        const names = ['하츄핑', '바로핑', '아자핑', '차차핑'];
         const nameA = names[Math.floor(Math.random() * names.length)];
         let nameB = names[Math.floor(Math.random() * names.length)];
         while (nameA === nameB) nameB = names[Math.floor(Math.random() * names.length)];
 
-        question = `${nameA}은(는) ${nameB}보다 ${diffAge}살 많아.\n${nameB}이(가) ${ageB}살이라면, ${nameA}은(는) 몇 살일까?`;
+        question = `🎂 ${nameA}은(는) ${nameB}보다 ${diffAge}살 많아요.\n${nameB}이(가) ${ageB}살이라면, ${nameA}은(는) 몇 살일까요?`;
         answer = `${ageA}살`;
-        explanation = `${nameB}가 ${ageB}살이고, ${nameA}은 ${diffAge}살 더 많으니까\n${ageB} + ${diffAge} = ${ageA}살이야.`;
+        explanation = `${nameB}가 ${ageB}살이고, ${nameA}은 ${diffAge}살 더 많으니까\n${ageB} + ${diffAge} = ${ageA}살입니다!`;
 
         wrongs.add(`${ageB}살`);
         wrongs.add(`${ageB - diffAge}살`);
         wrongs.add(`${ageA + 1}살`);
+    } else {
+        // 순서 맞추기 논리
+        const name1 = names[Math.floor(Math.random() * names.length)];
+        let name2 = names[Math.floor(Math.random() * names.length)];
+        let name3 = names[Math.floor(Math.random() * names.length)];
+        while (name1 === name2) name2 = names[Math.floor(Math.random() * names.length)];
+        while (name3 === name1 || name3 === name2) name3 = names[Math.floor(Math.random() * names.length)];
+
+        const templates = [
+            {
+                q: `🏃 달리기 시합을 했어요. ${name1}이(가) 1등, ${name2}이(가) 3등이에요. ${name3}은(는) ${name1}보다 늦고 ${name2}보다 빨랐어요. ${name3}은(는) 몇 등일까요?`,
+                a: '2등',
+                e: `${name1}이 1등, ${name2}이 3등이고, ${name3}은 그 사이이므로 2등입니다!`
+            },
+            {
+                q: `📏 키 순서대로 줄을 섰어요. ${name1}이(가) 맨 앞, ${name2}이(가) 맨 뒤예요. ${name3}은(는) ${name1}과 ${name2} 사이에 섰어요. ${name3}은(는) 앞에서 몇 번째일까요?`,
+                a: '2번째',
+                e: `맨 앞이 ${name1}, 맨 뒤가 ${name2}이면, ${name3}은 가운데인 2번째입니다!`
+            }
+        ];
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        question = t.q;
+        answer = t.a;
+        explanation = t.e;
+
+        wrongs.add('1등'); wrongs.add('3등'); wrongs.add('4등');
+        wrongs.add('1번째'); wrongs.add('3번째'); wrongs.add('4번째');
     }
 
     return {
         question,
-        options: [answer, ...Array.from(wrongs)].slice(0, 4),
+        options: shuffleArray([answer, ...Array.from(wrongs)].slice(0, 4)),
         answer,
         explanation,
         problemKey: `creative-${type}-${Math.random()}`
+    };
+}
+
+// 들이(용량) 문제 - 새로 추가
+function genCapacityProblem(diff) {
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑'];
+    const name1 = names[Math.floor(Math.random() * names.length)];
+
+    const type = Math.floor(Math.random() * 3);
+    let question, answer, explanation;
+    const wrongs = new Set();
+
+    if (type === 0) {
+        // L와 mL 변환
+        const liters = Math.floor(Math.random() * 5) + 1;
+        const ml = liters * 1000;
+        const templates = [
+            { q: `🧴 ${name1}이(가) 물 ${liters}L를 가지고 있어요. 이것은 몇 mL일까요?`, a: `${ml}mL`, e: `1L = 1000mL이므로, ${liters}L = ${liters} × 1000 = ${ml}mL입니다.` },
+            { q: `🥛 우유팩에 ${liters}L가 들어 있어요. 이것은 몇 mL일까요?`, a: `${ml}mL`, e: `1L = 1000mL이므로, ${liters}L = ${ml}mL입니다.` }
+        ];
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        question = t.q;
+        answer = t.a;
+        explanation = t.e;
+        wrongs.add(`${ml/10}mL`); wrongs.add(`${ml*10}mL`); wrongs.add(`${ml+100}mL`);
+    } else if (type === 1) {
+        // 들이 비교
+        const a = Math.floor(Math.random() * 500) + 200;
+        const b = a + Math.floor(Math.random() * 200) + 50;
+        question = `🧃 ${name1}의 컵에는 물이 ${a}mL, 태희의 컵에는 ${b}mL가 있어요. 누구의 컵에 물이 더 많을까요?`;
+        answer = '태희';
+        explanation = `${b}mL > ${a}mL이므로, 태희의 컵에 물이 더 많습니다.`;
+        wrongs.add(name1); wrongs.add('같다'); wrongs.add('모른다');
+    } else {
+        // 들이 덧셈
+        const a = Math.floor(Math.random() * 300) + 100;
+        const b = Math.floor(Math.random() * 300) + 100;
+        const total = a + b;
+        question = `🥤 ${name1}이(가) 주스 ${a}mL를 마시고, 또 ${b}mL를 더 마셨어요. 모두 몇 mL를 마셨을까요?`;
+        answer = `${total}mL`;
+        explanation = `${a}mL + ${b}mL = ${total}mL입니다.`;
+        wrongs.add(`${total+50}mL`); wrongs.add(`${total-50}mL`); wrongs.add(`${a}mL`);
+    }
+
+    return {
+        question,
+        options: shuffleArray([answer, ...Array.from(wrongs)].slice(0, 4)),
+        answer,
+        explanation,
+        problemKey: `capacity-${type}-${Math.random()}`
+    };
+}
+
+// 무게 문제 - 새로 추가
+function genWeightProblem(diff) {
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑'];
+    const name1 = names[Math.floor(Math.random() * names.length)];
+
+    const type = Math.floor(Math.random() * 3);
+    let question, answer, explanation;
+    const wrongs = new Set();
+
+    if (type === 0) {
+        // kg와 g 변환
+        const kg = Math.floor(Math.random() * 5) + 1;
+        const g = kg * 1000;
+        const templates = [
+            { q: `⚖️ ${name1}의 강아지 몸무게가 ${kg}kg이에요. 이것은 몇 g일까요?`, a: `${g}g`, e: `1kg = 1000g이므로, ${kg}kg = ${kg} × 1000 = ${g}g입니다.` },
+            { q: `🎒 태희의 가방 무게가 ${kg}kg이에요. 이것은 몇 g일까요?`, a: `${g}g`, e: `1kg = 1000g이므로, ${kg}kg = ${g}g입니다.` }
+        ];
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        question = t.q;
+        answer = t.a;
+        explanation = t.e;
+        wrongs.add(`${g/10}g`); wrongs.add(`${g*10}g`); wrongs.add(`${g+100}g`);
+    } else if (type === 1) {
+        // 무게 비교
+        const a = Math.floor(Math.random() * 500) + 200;
+        const b = a + Math.floor(Math.random() * 200) + 50;
+        const items = [['🍎 사과', '🍊 귤'], ['📚 책', '📓 공책'], ['🧸 곰인형', '🪆 인형']];
+        const pair = items[Math.floor(Math.random() * items.length)];
+        question = `⚖️ ${pair[0]}의 무게는 ${a}g, ${pair[1]}의 무게는 ${b}g이에요. 어느 것이 더 무거울까요?`;
+        answer = pair[1];
+        explanation = `${b}g > ${a}g이므로, ${pair[1]}이 더 무겁습니다.`;
+        wrongs.add(pair[0]); wrongs.add('같다'); wrongs.add('모른다');
+    } else {
+        // 무게 덧셈
+        const a = Math.floor(Math.random() * 300) + 100;
+        const b = Math.floor(Math.random() * 300) + 100;
+        const total = a + b;
+        question = `⚖️ ${name1}이(가) 사과 ${a}g과 바나나 ${b}g을 샀어요. 과일의 무게는 모두 몇 g일까요?`;
+        answer = `${total}g`;
+        explanation = `${a}g + ${b}g = ${total}g입니다.`;
+        wrongs.add(`${total+50}g`); wrongs.add(`${total-50}g`); wrongs.add(`${a}g`);
+    }
+
+    return {
+        question,
+        options: shuffleArray([answer, ...Array.from(wrongs)].slice(0, 4)),
+        answer,
+        explanation,
+        problemKey: `weight-${type}-${Math.random()}`
+    };
+}
+
+// 부피 문제 - 새로 추가
+function genVolumeProblem(diff) {
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑'];
+    const name1 = names[Math.floor(Math.random() * names.length)];
+
+    const type = Math.floor(Math.random() * 2);
+    let question, answer, explanation;
+    const wrongs = new Set();
+
+    if (type === 0) {
+        // 쌓기나무 세기
+        const base = Math.floor(Math.random() * 3) + 2;
+        const height = Math.floor(Math.random() * 2) + 1;
+        const total = base * base * height;
+        question = `🧊 ${name1}이(가) 쌓기나무로 탑을 쌓았어요. 가로 ${base}개, 세로 ${base}개, 높이 ${height}층이면 쌓기나무는 모두 몇 개일까요?`;
+        answer = `${total}개`;
+        explanation = `${base} × ${base} × ${height} = ${total}개입니다.`;
+        wrongs.add(`${total+2}개`); wrongs.add(`${total-2}개`); wrongs.add(`${base*base}개`);
+    } else {
+        // 상자 비교
+        const a = Math.floor(Math.random() * 10) + 5;
+        const b = a + Math.floor(Math.random() * 5) + 2;
+        question = `📦 ${name1}의 상자에는 공 ${a}개가 들어가고, 태희의 상자에는 ${b}개가 들어가요. 누구의 상자가 더 클까요?`;
+        answer = '태희의 상자';
+        explanation = `${b}개 > ${a}개가 들어가므로, 태희의 상자가 더 큽니다.`;
+        wrongs.add(`${name1}의 상자`); wrongs.add('같다'); wrongs.add('모른다');
+    }
+
+    return {
+        question,
+        options: shuffleArray([answer, ...Array.from(wrongs)].slice(0, 4)),
+        answer,
+        explanation,
+        problemKey: `volume-${type}-${Math.random()}`
     };
 }
 
