@@ -624,59 +624,337 @@ function genFractionProblem(diff) {
 }
 
 function genGeometryProblem(diff) {
-    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑'];
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑', '해핑'];
     const name1 = names[Math.floor(Math.random() * names.length)];
-    let quizzes = [];
+    const name2 = names[(names.indexOf(name1) + 1) % names.length];
 
-    // 난이도 1-5: 기본 도형 이름 맞추기 (100% 문장제)
+    // 난이도별 문제 유형 풀 정의
+    let problemTypes = [];
+
     if (diff <= 5) {
-        quizzes = [
-            { q: `📐 ${name1}이(가) 색종이를 접어서 도형을 만들었어요. 이 도형의 이름은 무엇일까요?`, a: "삼각형", type: "triangle", wrong: ["사각형", "원", "오각형", "육각형"], e: `세 개의 변과 세 개의 꼭짓점을 가진 도형은 삼각형입니다.` },
-            { q: `🖼️ 태희가 그린 그림 액자 모양이에요. 이 도형의 이름은 무엇일까요?`, a: "사각형", type: "rectangle", wrong: ["삼각형", "원", "오각형", "육각형"], e: `네 개의 변과 네 개의 꼭짓점을 가진 도형은 사각형입니다.` },
-            { q: `⭕ ${name1}이(가) 동그란 쿠키를 만들었어요. 이 도형의 이름은 무엇일까요?`, a: "원", type: "circle", wrong: ["삼각형", "사각형", "오각형", "육각형"], e: `변과 꼭짓점이 없고 둥근 도형은 원입니다.` },
-            { q: `🏠 지붕 모양처럼 변이 3개인 도형은 무엇일까요?`, a: "삼각형", type: "triangle", wrong: ["사각형", "원", "오각형"], e: `변이 3개인 도형은 삼각형입니다.` },
-            { q: `📺 TV 화면처럼 변이 4개인 도형은 무엇일까요?`, a: "사각형", type: "rectangle", wrong: ["삼각형", "원", "오각형"], e: `변이 4개인 도형은 사각형입니다.` },
-            { q: `🍕 피자 한 조각 모양과 가장 비슷한 도형은 무엇일까요?`, a: "삼각형", type: "triangle", wrong: ["사각형", "원", "육각형"], e: `피자 한 조각은 삼각형 모양과 비슷합니다.` },
-            { q: `🪟 창문 모양과 가장 비슷한 도형은 무엇일까요?`, a: "사각형", type: "rectangle", wrong: ["삼각형", "원", "오각형"], e: `창문은 보통 사각형 모양입니다.` }
-        ];
-    }
-    // 난이도 6-10: 도형의 성질 (변, 꼭짓점) - 문장제
-    else if (diff <= 10) {
-        quizzes = [
-            { q: `📐 ${name1}이(가) 삼각형 모양 깃발을 만들려고 해요. 변은 몇 개가 필요할까요?`, a: "3개", type: "triangle", wrong: ["4개", "5개", "6개", "0개"], e: `삼각형은 변이 3개인 도형입니다.` },
-            { q: `🖼️ 태희가 사각형 액자에 스티커를 붙이려고 해요. 꼭짓점은 몇 개일까요?`, a: "4개", type: "rectangle", wrong: ["3개", "5개", "6개", "0개"], e: `사각형은 꼭짓점이 4개인 도형입니다.` },
-            { q: `🐝 벌집 모양(육각형)으로 종이를 자르려고 해요. 변은 몇 개일까요?`, a: "6개", type: "hexagon", wrong: ["4개", "5개", "8개", "10개"], e: `육각형은 변이 6개인 도형입니다.` },
-            { q: `⭐ ${name1}이(가) 오각형 모양 별을 그리려고 해요. 꼭짓점은 몇 개일까요?`, a: "5개", type: "pentagon", wrong: ["4개", "6개", "8개", "3개"], e: `오각형은 꼭짓점이 5개인 도형입니다.` },
-            { q: `🔺 삼각형 모양의 텐트를 세우려면 기둥이 꼭짓점에 필요해요. 기둥은 몇 개 필요할까요?`, a: "3개", type: "triangle", wrong: ["4개", "5개", "6개", "2개"], e: `삼각형은 꼭짓점이 3개이므로 기둥도 3개 필요합니다.` }
-        ];
-    }
-    // 난이도 11+: 심화 (내각, 대각선, 특수 사각형) - 문장제
-    else {
-        quizzes = [
-            { q: `📐 ${name1}이(가) 삼각형의 세 각을 모두 재어 더했어요. 합은 몇 도일까요?`, a: "180도", type: "triangle", wrong: ["360도", "90도", "270도", "540도"], e: `삼각형의 세 내각의 합은 항상 180도입니다.` },
-            { q: `🖼️ 태희가 사각형 색종이의 네 각을 모두 잰다면, 합은 몇 도일까요?`, a: "360도", type: "rectangle", wrong: ["180도", "540도", "720도", "90도"], e: `사각형의 네 내각의 합은 항상 360도입니다.` },
-            { q: `⭐ 오각형에서 꼭짓점을 연결하는 대각선을 모두 그으면 몇 개일까요?`, a: "5개", type: "pentagon", wrong: ["2개", "9개", "14개", "0개"], e: `오각형의 대각선 개수는 5개입니다.` },
-            { q: `🐝 육각형에서 대각선을 모두 그으면 몇 개일까요?`, a: "9개", type: "hexagon", wrong: ["5개", "14개", "20개", "6개"], e: `육각형의 대각선 개수는 9개입니다.` },
-            { q: `📏 ${name1}이(가) 네 변의 길이가 같고 네 각이 모두 직각인 도형을 그렸어요. 이 도형은?`, a: "정사각형", type: "square", wrong: ["직사각형", "마름모", "평행사변형", "사다리꼴"], e: `네 변의 길이가 같고 네 각이 직각인 사각형은 정사각형입니다.` },
-            { q: `💎 네 변의 길이가 모두 같지만 각이 직각이 아닌 사각형은 무엇일까요?`, a: "마름모", type: "rhombus", wrong: ["직사각형", "사다리꼴", "평행사변형", "등변사다리꼴"], e: `네 변의 길이가 모두 같은 사각형은 마름모입니다.` }
-        ];
+        problemTypes = ['basic', 'counting_simple', 'pattern_basic', 'symmetry_basic'];
+    } else if (diff <= 10) {
+        problemTypes = ['counting_medium', 'area_unit', 'perimeter', 'pattern_medium', 'symmetry', 'rotation'];
+    } else if (diff <= 15) {
+        problemTypes = ['counting_hard', 'area_compare', 'angle', 'diagonal', 'special_quad', 'net'];
+    } else {
+        problemTypes = ['counting_expert', 'area_advanced', 'angle_advanced', 'combination', 'transform', 'net_advanced'];
     }
 
-    // Fallback if quizzes is empty
-    if (quizzes.length === 0) {
-        quizzes = [{ q: `📐 ${name1}이(가) 만든 도형이에요. 이 도형의 이름은 무엇일까요?`, a: "삼각형", type: "triangle", wrong: ["사각형", "원", "오각형", "육각형"], e: `세 개의 변을 가진 도형은 삼각형입니다.` }];
+    const problemType = problemTypes[Math.floor(Math.random() * problemTypes.length)];
+    let question, answer, explanation, shapeType = 'mixed';
+    const wrongs = new Set();
+
+    switch (problemType) {
+        // ===== 기본 도형 (난이도 1-5) =====
+        case 'basic': {
+            const quizzes = [
+                { q: `📐 ${name1}이(가) 색종이를 접어서 꼭짓점 3개인 도형을 만들었어요. 이 도형은?`, a: "삼각형", wrong: ["사각형", "오각형", "육각형"], e: `꼭짓점이 3개인 도형은 삼각형입니다.` },
+                { q: `🏠 ${name1}이(가) 집을 그렸어요. 지붕 모양은 변이 3개예요. 이 도형은?`, a: "삼각형", wrong: ["사각형", "원", "오각형"], e: `변이 3개인 도형은 삼각형입니다.` },
+                { q: `📺 TV 화면, 창문, 책... 모두 변이 4개예요. 이 도형의 이름은?`, a: "사각형", wrong: ["삼각형", "원", "오각형"], e: `변이 4개인 도형은 사각형입니다.` },
+                { q: `⚽ 축구공은 어떤 도형들로 이루어져 있을까요? 검은 부분은?`, a: "오각형", wrong: ["삼각형", "사각형", "육각형"], e: `축구공의 검은 부분은 오각형입니다.` },
+                { q: `🐝 벌집은 어떤 도형이 빈틈없이 모여 있을까요?`, a: "육각형", wrong: ["사각형", "오각형", "삼각형"], e: `벌집은 육각형들이 빈틈없이 모여 있습니다.` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 도형 세기 (초급) =====
+        case 'counting_simple': {
+            const total = Math.floor(Math.random() * 3) + 3; // 3~5개
+            const templates = [
+                { q: `🔺 ${name1}이(가) 삼각형을 ${total}개 그렸어요. 꼭짓점은 모두 몇 개일까요?`, a: total * 3, e: `삼각형 1개에 꼭짓점 3개 × ${total}개 = ${total * 3}개` },
+                { q: `◻️ 사각형 ${total}개를 그렸어요. 변은 모두 몇 개일까요?`, a: total * 4, e: `사각형 1개에 변 4개 × ${total}개 = ${total * 4}개` },
+                { q: `⬡ ${name1}이(가) 오각형 ${total}개를 오렸어요. 꼭짓점은 모두 몇 개일까요?`, a: total * 5, e: `오각형 1개에 꼭짓점 5개 × ${total}개 = ${total * 5}개` }
+            ];
+            const t = templates[Math.floor(Math.random() * templates.length)];
+            question = t.q; answer = `${t.a}개`; explanation = t.e;
+            wrongs.add(`${t.a - 3}개`); wrongs.add(`${t.a + 3}개`); wrongs.add(`${t.a + 1}개`);
+            break;
+        }
+
+        // ===== 패턴 기본 =====
+        case 'pattern_basic': {
+            const shapes = ['🔺', '◻️', '⭕'];
+            const pattern = [shapes[0], shapes[1], shapes[0], shapes[1], '?'];
+            question = `🧩 ${name1}이(가) 도형을 규칙적으로 늘어놓았어요.\n${pattern.join(' ')} \n?에 올 도형은?`;
+            answer = "삼각형";
+            explanation = `삼각형, 사각형이 반복되는 규칙이에요. 다음은 삼각형!`;
+            wrongs.add("사각형"); wrongs.add("원"); wrongs.add("오각형");
+            break;
+        }
+
+        // ===== 대칭 기본 =====
+        case 'symmetry_basic': {
+            const quizzes = [
+                { q: `🦋 나비 날개처럼 반으로 접으면 똑같이 겹치는 도형이 있어요. 정사각형을 반으로 접으면?`, a: "직사각형", wrong: ["삼각형", "정사각형", "원"], e: `정사각형을 반으로 접으면 직사각형이 됩니다.` },
+                { q: `✂️ ${name1}이(가) 종이를 반으로 접고 삼각형을 오렸어요. 펼치면 어떤 모양일까요?`, a: "마름모", wrong: ["삼각형", "사각형", "원"], e: `반으로 접은 삼각형을 펼치면 마름모 모양이 됩니다.` },
+                { q: `🪞 거울에 비친 것처럼 좌우가 똑같은 도형은?`, a: "정삼각형", wrong: ["직각삼각형", "평행사변형", "사다리꼴"], e: `정삼각형은 좌우 대칭입니다.` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 도형 세기 (중급) - 숨은 도형 찾기 =====
+        case 'counting_medium': {
+            const quizzes = [
+                { q: `📐 큰 삼각형 안에 선을 2개 그어 작은 삼각형들을 만들었어요.\n🔺 안에 선 2개를 그으면 삼각형이 최대 몇 개 생길까요?`, a: "4개", wrong: ["3개", "5개", "6개"], e: `큰 삼각형 1개 + 작은 삼각형 3개 = 4개 (또는 배치에 따라 다름)` },
+                { q: `◻️ 2×2 정사각형 격자가 있어요. 크고 작은 정사각형이 모두 몇 개일까요?`, a: "5개", wrong: ["4개", "6개", "9개"], e: `작은 정사각형 4개 + 큰 정사각형 1개 = 5개` },
+                { q: `📏 직사각형 안에 대각선을 1개 그으면 삼각형이 몇 개 생길까요?`, a: "2개", wrong: ["1개", "3개", "4개"], e: `대각선 1개는 직사각형을 삼각형 2개로 나눕니다.` },
+                { q: `🔷 정사각형 안에 대각선을 2개 모두 그으면 삼각형이 몇 개 생길까요?`, a: "4개", wrong: ["2개", "3개", "8개"], e: `대각선 2개가 정사각형을 삼각형 4개로 나눕니다.` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 넓이 (단위 넓이 세기) =====
+        case 'area_unit': {
+            const width = Math.floor(Math.random() * 3) + 2;
+            const height = Math.floor(Math.random() * 3) + 2;
+            const area = width * height;
+            question = `📐 ${name1}이(가) 가로 ${width}칸, 세로 ${height}칸인 직사각형을 그렸어요.\n작은 정사각형이 모두 몇 개 들어갈까요?`;
+            answer = `${area}개`;
+            explanation = `가로 ${width}칸 × 세로 ${height}칸 = ${area}개`;
+            wrongs.add(`${area + 1}개`); wrongs.add(`${area - 1}개`); wrongs.add(`${width + height}개`);
+            break;
+        }
+
+        // ===== 둘레 =====
+        case 'perimeter': {
+            const side = Math.floor(Math.random() * 4) + 2;
+            const templates = [
+                { q: `🏃 ${name1}이(가) 한 변이 ${side}cm인 정사각형 운동장을 한 바퀴 돌았어요. 몇 cm를 걸었을까요?`, a: side * 4, e: `정사각형 둘레 = ${side} × 4 = ${side * 4}cm` },
+                { q: `🎀 정삼각형 모양 액자에 리본을 둘러요. 한 변이 ${side}cm면 리본이 몇 cm 필요할까요?`, a: side * 3, e: `정삼각형 둘레 = ${side} × 3 = ${side * 3}cm` },
+                { q: `⬡ 정육각형 모양 벌집 한 칸의 둘레를 재요. 한 변이 ${side}cm면 둘레는?`, a: side * 6, e: `정육각형 둘레 = ${side} × 6 = ${side * 6}cm` }
+            ];
+            const t = templates[Math.floor(Math.random() * templates.length)];
+            question = t.q; answer = `${t.a}cm`; explanation = t.e;
+            wrongs.add(`${t.a + 2}cm`); wrongs.add(`${t.a - 2}cm`); wrongs.add(`${t.a + side}cm`);
+            break;
+        }
+
+        // ===== 패턴 중급 =====
+        case 'pattern_medium': {
+            const n = Math.floor(Math.random() * 3) + 3;
+            const quizzes = [
+                { q: `🔺 ${name1}이(가) 삼각형을 1층에 1개, 2층에 2개, 3층에 3개... 이렇게 쌓아요.\n${n}층까지 쌓으면 삼각형이 모두 몇 개일까요?`, a: (n * (n + 1)) / 2, e: `1+2+3+...+${n} = ${(n * (n + 1)) / 2}개` },
+                { q: `◻️ 정사각형으로 계단을 만들어요. 1층 1개, 2층 2개... ${n}층까지 만들면?`, a: (n * (n + 1)) / 2, e: `1+2+...+${n} = ${(n * (n + 1)) / 2}개` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = `${q.a}개`; explanation = q.e;
+            wrongs.add(`${q.a + 1}개`); wrongs.add(`${q.a - 1}개`); wrongs.add(`${n * n}개`);
+            break;
+        }
+
+        // ===== 대칭 =====
+        case 'symmetry': {
+            const quizzes = [
+                { q: `🪞 ${name1}이(가) 대칭축을 찾고 있어요. 정사각형의 대칭축은 몇 개일까요?`, a: "4개", wrong: ["1개", "2개", "8개"], e: `정사각형은 가로, 세로, 대각선 2개 = 대칭축 4개` },
+                { q: `🦋 직사각형(정사각형 아님)의 대칭축은 몇 개일까요?`, a: "2개", wrong: ["1개", "4개", "0개"], e: `직사각형은 가로, 세로 대칭축 2개` },
+                { q: `⬡ 정육각형의 대칭축은 몇 개일까요?`, a: "6개", wrong: ["3개", "4개", "12개"], e: `정육각형은 대칭축이 6개입니다.` },
+                { q: `🔶 마름모의 대칭축은 몇 개일까요?`, a: "2개", wrong: ["1개", "4개", "0개"], e: `마름모는 두 대각선이 대칭축이므로 2개` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 회전 =====
+        case 'rotation': {
+            const quizzes = [
+                { q: `🔄 정사각형을 90° 돌리면 어떻게 보일까요?`, a: "똑같은 정사각형", wrong: ["직사각형", "마름모", "평행사변형"], e: `정사각형은 90° 회전해도 같은 모양입니다.` },
+                { q: `🔄 정삼각형을 120° 돌리면 어떻게 보일까요?`, a: "똑같은 정삼각형", wrong: ["이등변삼각형", "직각삼각형", "다른 모양"], e: `정삼각형은 120° 회전해도 같은 모양입니다.` },
+                { q: `🔄 직사각형(정사각형 아님)을 90° 돌리면?`, a: "가로세로가 바뀐 직사각형", wrong: ["정사각형", "마름모", "똑같은 직사각형"], e: `직사각형은 90° 회전하면 가로세로가 바뀝니다.` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 도형 세기 (고급) =====
+        case 'counting_hard': {
+            const quizzes = [
+                { q: `📐 3×3 정사각형 격자에서 찾을 수 있는 모든 정사각형은 몇 개일까요?\n(1×1, 2×2, 3×3 모두 포함)`, a: "14개", wrong: ["9개", "10개", "13개"], e: `1×1: 9개 + 2×2: 4개 + 3×3: 1개 = 14개` },
+                { q: `🔺 큰 삼각형을 4개의 작은 정삼각형으로 나눴어요. 찾을 수 있는 모든 삼각형은?`, a: "5개", wrong: ["4개", "6개", "8개"], e: `작은 삼각형 4개 + 큰 삼각형 1개 = 5개` },
+                { q: `◻️ ${name1}이(가) 2×3 직사각형 격자를 그렸어요. 직사각형이 모두 몇 개일까요?`, a: "18개", wrong: ["6개", "12개", "15개"], e: `가로선 3개 중 2개 선택 × 세로선 4개 중 2개 선택 = 3×6 = 18개` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 넓이 비교 =====
+        case 'area_compare': {
+            const quizzes = [
+                { q: `📐 ${name1}이(가) 직사각형 2개를 비교해요.\n🅰️ 가로 6cm, 세로 4cm\n🅱️ 가로 5cm, 세로 5cm\n어느 것이 더 넓을까요?`, a: "🅱️", wrong: ["🅰️", "같다", "알 수 없다"], e: `🅰️: 6×4=24cm² / 🅱️: 5×5=25cm² → 🅱️가 더 넓음` },
+                { q: `◻️ 한 변이 4cm인 정사각형과 가로 8cm, 세로 2cm인 직사각형의 넓이를 비교하면?`, a: "같다", wrong: ["정사각형이 넓다", "직사각형이 넓다", "알 수 없다"], e: `정사각형: 4×4=16cm² / 직사각형: 8×2=16cm² → 같음` },
+                { q: `🔺 밑변 6cm, 높이 4cm인 삼각형과 한 변 3cm인 정사각형, 어느 것이 더 넓을까요?`, a: "삼각형", wrong: ["정사각형", "같다", "알 수 없다"], e: `삼각형: 6×4÷2=12cm² / 정사각형: 3×3=9cm² → 삼각형이 넓음` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 각도 =====
+        case 'angle': {
+            const quizzes = [
+                { q: `📐 삼각형의 세 내각의 합은 몇 도일까요?`, a: "180도", wrong: ["90도", "270도", "360도"], e: `삼각형의 내각의 합은 항상 180°입니다.` },
+                { q: `◻️ 사각형의 네 내각의 합은 몇 도일까요?`, a: "360도", wrong: ["180도", "270도", "540도"], e: `사각형의 내각의 합은 항상 360°입니다.` },
+                { q: `📐 ${name1}이(가) 삼각형에서 두 각이 60°, 70°예요. 나머지 한 각은?`, a: "50도", wrong: ["60도", "70도", "80도"], e: `180° - 60° - 70° = 50°` },
+                { q: `◻️ 직사각형의 한 각은 몇 도일까요?`, a: "90도", wrong: ["60도", "120도", "180도"], e: `직사각형의 모든 각은 90°(직각)입니다.` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 대각선 =====
+        case 'diagonal': {
+            const n = Math.floor(Math.random() * 4) + 4; // 4~7각형
+            const diag = n * (n - 3) / 2;
+            question = `📐 ${name1}이(가) ${n}각형의 대각선을 모두 그리려고 해요. 대각선은 몇 개일까요?`;
+            answer = `${diag}개`;
+            explanation = `${n}각형의 대각선 = ${n}×(${n}-3)÷2 = ${diag}개`;
+            wrongs.add(`${diag + 1}개`); wrongs.add(`${diag - 1}개`); wrongs.add(`${n}개`);
+            break;
+        }
+
+        // ===== 특수 사각형 =====
+        case 'special_quad': {
+            const quizzes = [
+                { q: `💎 ${name1}이(가) 네 변의 길이가 같고 네 각이 직각인 도형을 그렸어요. 이 도형은?`, a: "정사각형", wrong: ["직사각형", "마름모", "평행사변형"], e: `네 변이 같고 네 각이 직각인 사각형은 정사각형입니다.` },
+                { q: `🔶 네 변의 길이가 모두 같지만 각이 직각이 아닌 사각형은?`, a: "마름모", wrong: ["정사각형", "직사각형", "사다리꼴"], e: `네 변이 같은 사각형은 마름모입니다.` },
+                { q: `📏 마주보는 두 쌍의 변이 각각 평행한 사각형은?`, a: "평행사변형", wrong: ["사다리꼴", "마름모", "직사각형"], e: `두 쌍의 대변이 평행한 사각형은 평행사변형입니다.` },
+                { q: `🪜 한 쌍의 대변만 평행한 사각형은?`, a: "사다리꼴", wrong: ["평행사변형", "직사각형", "마름모"], e: `한 쌍의 대변만 평행한 사각형은 사다리꼴입니다.` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 전개도 =====
+        case 'net': {
+            const quizzes = [
+                { q: `📦 정육면체 전개도를 접으면 면이 몇 개인 도형이 될까요?`, a: "6개", wrong: ["4개", "8개", "12개"], e: `정육면체는 면이 6개입니다.` },
+                { q: `🎲 주사위 전개도에서 마주보는 면의 눈의 합은 항상?`, a: "7", wrong: ["6", "8", "12"], e: `주사위에서 마주보는 면의 합은 항상 7입니다.` },
+                { q: `📦 직육면체를 펼치면 어떤 도형이 몇 개 나올까요?`, a: "직사각형 6개", wrong: ["정사각형 6개", "직사각형 4개", "삼각형 6개"], e: `직육면체를 펼치면 직사각형 6개가 나옵니다.` },
+                { q: `🔺 삼각기둥을 펼치면 삼각형이 몇 개 나올까요?`, a: "2개", wrong: ["3개", "4개", "6개"], e: `삼각기둥의 밑면 2개가 삼각형입니다.` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 도형 세기 (전문가) =====
+        case 'counting_expert': {
+            const quizzes = [
+                { q: `📐 4×4 정사각형 격자에서 찾을 수 있는 모든 정사각형은 몇 개일까요?`, a: "30개", wrong: ["16개", "25개", "36개"], e: `1×1:16 + 2×2:9 + 3×3:4 + 4×4:1 = 30개` },
+                { q: `🔺 정삼각형을 16개의 작은 정삼각형으로 나눴어요. 찾을 수 있는 모든 정삼각형은?`, a: "27개", wrong: ["16개", "20개", "25개"], e: `1칸:16 + 4칸:7 + 9칸:3 + 16칸:1 = 27개` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 넓이 고급 =====
+        case 'area_advanced': {
+            const quizzes = [
+                { q: `📐 한 변이 10cm인 정사각형에서 한 변이 4cm인 정사각형을 잘라냈어요. 남은 넓이는?`, a: "84cm²", wrong: ["60cm²", "96cm²", "100cm²"], e: `10×10 - 4×4 = 100 - 16 = 84cm²` },
+                { q: `🔺 밑변 8cm, 높이 6cm인 평행사변형의 넓이는?`, a: "48cm²", wrong: ["24cm²", "14cm²", "42cm²"], e: `평행사변형 넓이 = 밑변×높이 = 8×6 = 48cm²` },
+                { q: `🔶 대각선이 6cm, 8cm인 마름모의 넓이는?`, a: "24cm²", wrong: ["48cm²", "14cm²", "28cm²"], e: `마름모 넓이 = 대각선×대각선÷2 = 6×8÷2 = 24cm²` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 각도 고급 =====
+        case 'angle_advanced': {
+            const quizzes = [
+                { q: `📐 정오각형의 한 내각의 크기는 몇 도일까요?`, a: "108도", wrong: ["100도", "120도", "135도"], e: `정오각형 내각 = (5-2)×180÷5 = 108°` },
+                { q: `⬡ 정육각형의 한 내각의 크기는 몇 도일까요?`, a: "120도", wrong: ["108도", "135도", "150도"], e: `정육각형 내각 = (6-2)×180÷6 = 120°` },
+                { q: `📐 ${name1}이(가) 삼각형에서 한 외각이 110°예요. 이웃하지 않은 두 내각의 합은?`, a: "110도", wrong: ["70도", "180도", "250도"], e: `외각 = 이웃하지 않은 두 내각의 합 = 110°` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 도형 조합 =====
+        case 'combination': {
+            const quizzes = [
+                { q: `🧩 ${name1}이(가) 정삼각형 2개를 붙여 새 도형을 만들었어요. 만들 수 있는 도형은?`, a: "마름모", wrong: ["정사각형", "직사각형", "사다리꼴"], e: `정삼각형 2개를 붙이면 마름모가 됩니다.` },
+                { q: `🧩 직각이등변삼각형 2개를 붙이면 어떤 도형이 될까요?`, a: "정사각형", wrong: ["직사각형", "마름모", "평행사변형"], e: `직각이등변삼각형 2개를 빗변끼리 붙이면 정사각형이 됩니다.` },
+                { q: `🧩 정사각형을 대각선으로 자르면 어떤 삼각형 2개가 될까요?`, a: "직각이등변삼각형", wrong: ["정삼각형", "직각삼각형", "이등변삼각형"], e: `정사각형을 대각선으로 자르면 직각이등변삼각형 2개가 됩니다.` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 변환 =====
+        case 'transform': {
+            const quizzes = [
+                { q: `🔄 ${name1}이(가) 도형을 밀고, 돌리고, 뒤집었어요. 도형의 모양이 변하지 않는 것은?`, a: "밀기", wrong: ["늘이기", "줄이기", "찌그러뜨리기"], e: `밀기(평행이동)는 도형의 모양과 크기가 변하지 않습니다.` },
+                { q: `🪞 ${name1}이(가) 도형을 거울에 비춰봤어요. 바뀌지 않는 것은?`, a: "넓이", wrong: ["방향", "좌우", "앞뒤"], e: `거울에 비춰도 도형의 넓이는 변하지 않습니다.` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 전개도 고급 =====
+        case 'net_advanced': {
+            const quizzes = [
+                { q: `📦 정육면체 전개도에서 한 면과 마주보는 면을 찾으려면 몇 칸 떨어져 있어야 할까요?`, a: "2칸", wrong: ["1칸", "3칸", "바로 옆"], e: `전개도에서 마주보는 면은 한 면을 사이에 두고 2칸 떨어져 있습니다.` },
+                { q: `🔺 정사면체(삼각뿔)의 면은 모두 몇 개일까요?`, a: "4개", wrong: ["3개", "5개", "6개"], e: `정사면체는 정삼각형 4개로 이루어져 있습니다.` },
+                { q: `📦 정육면체의 모서리는 몇 개일까요?`, a: "12개", wrong: ["6개", "8개", "10개"], e: `정육면체는 모서리가 12개입니다.` },
+                { q: `📦 정육면체의 꼭짓점은 몇 개일까요?`, a: "8개", wrong: ["4개", "6개", "12개"], e: `정육면체는 꼭짓점이 8개입니다.` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q; answer = q.a; explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        default: {
+            // 기본 문제
+            question = `📐 ${name1}이(가) 세 변의 길이가 모두 같은 삼각형을 그렸어요. 이 삼각형의 이름은?`;
+            answer = "정삼각형";
+            explanation = `세 변의 길이가 같은 삼각형은 정삼각형입니다.`;
+            wrongs.add("이등변삼각형"); wrongs.add("직각삼각형"); wrongs.add("둔각삼각형");
+        }
     }
 
-    const quiz = quizzes[Math.floor(Math.random() * quizzes.length)];
-    const options = [quiz.a, ...quiz.wrong.slice(0, 4)];
+    // 오답 배열로 변환 및 정답 포함하여 셔플
+    const wrongsArray = Array.from(wrongs).filter(w => w !== answer).slice(0, 3);
+    const options = shuffleArray([answer, ...wrongsArray]);
 
     return {
-        question: quiz.q,
+        question,
         options,
-        answer: quiz.a,
-        explanation: quiz.e || `정답은 ${quiz.a}입니다!`,
-        problemKey: `geo-${quiz.q}-${quiz.type}`,
-        shapeType: quiz.type
+        answer,
+        explanation: explanation || `정답은 ${answer}입니다!`,
+        problemKey: `geo-${problemType}-${Math.random()}`,
+        shapeType
     };
 }
 
@@ -750,52 +1028,205 @@ function genMeasurementProblem(diff) {
 }
 
 function genPatternProblem(diff) {
-    const start = Math.floor(Math.random() * 20) + 1;
-    const step = Math.floor(Math.random() * Math.min(diff, 10)) + 1;
-    const length = 5;
-    const seq = [];
-
-    for (let i = 0; i < length; i++) {
-        seq.push(start + i * step);
-    }
-
-    const blankIdx = Math.floor(Math.random() * length);
-    const answer = seq[blankIdx];
-    const displaySeq = [...seq];
-    displaySeq[blankIdx] = '?';
-
-    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑'];
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑', '해핑'];
     const name1 = names[Math.floor(Math.random() * names.length)];
 
-    // 100% 문장제 템플릿 (시각적 이모지 포함)
-    const templates = [
-        { q: `💰 ${name1}이(가) 매일 저금통에 동전을 ${step}개씩 더 넣어요. 첫째 날부터 다섯째 날까지 동전 수가 ${displaySeq.join(', ')}일 때, ?는 몇 개일까요?`, e: `매일 ${step}개씩 늘어나는 규칙입니다. ?는 ${answer}개입니다.` },
-        { q: `🛗 엘리베이터가 ${step}층씩 올라가요. ${displaySeq.join(', ')}에서 ?는 몇 층일까요?`, e: `${step}층씩 올라가는 규칙입니다. ?는 ${answer}층입니다.` },
-        { q: `🏃 줄넘기 기록이 매일 ${step}번씩 늘었어요. ${displaySeq.join(', ')}번에서 ?는 몇 번일까요?`, e: `매일 ${step}번씩 늘어나는 규칙입니다. ?는 ${answer}번입니다.` },
-        { q: `🌸 화분에 꽃잎이 매일 ${step}장씩 피어요. ${displaySeq.join(', ')}장에서 ?는 몇 장일까요?`, e: `매일 ${step}장씩 늘어나는 규칙입니다. ?는 ${answer}장입니다.` },
-        { q: `🚌 버스 번호가 ${step}씩 커지는 규칙이에요. ${displaySeq.join(', ')}에서 ?는 몇 번일까요?`, e: `${step}씩 커지는 규칙입니다. ?는 ${answer}번입니다.` },
-        { q: `⭐ ${name1}이(가) 스티커를 모아요. 매일 ${step}개씩 더 받으면 ${displaySeq.join(', ')}개가 돼요. ?는 몇 개일까요?`, e: `매일 ${step}개씩 늘어나는 규칙입니다. ?는 ${answer}개입니다.` },
-        { q: `📚 책장에 책을 정리해요. 칸마다 ${step}권씩 더 꽂으면 ${displaySeq.join(', ')}권이 돼요. ?는 몇 권일까요?`, e: `${step}권씩 늘어나는 규칙입니다. ?는 ${answer}권입니다.` },
-        { q: `🎯 태희가 점수를 얻고 있어요. ${step}점씩 올라가면 ${displaySeq.join(', ')}점이 돼요. ?는 몇 점일까요?`, e: `${step}점씩 올라가는 규칙입니다. ?는 ${answer}점입니다.` }
-    ];
-
-    const t = templates[Math.floor(Math.random() * templates.length)];
-    const question = t.q;
-    const explanation = t.e;
-
-    const wrongs = new Set();
-    while (wrongs.size < 4) {
-        let w = answer + Math.floor(Math.random() * 10) - 5;
-        if (w < 0) w = answer + 1;
-        if (w !== answer) wrongs.add(w);
+    // 난이도별 패턴 유형 선택
+    let patternTypes = [];
+    if (diff <= 5) {
+        patternTypes = ['arithmetic_simple', 'repeat'];
+    } else if (diff <= 10) {
+        patternTypes = ['arithmetic', 'skip_count', 'decreasing'];
+    } else if (diff <= 15) {
+        patternTypes = ['arithmetic_hard', 'geometric_simple', 'fibonacci_simple', 'alternating'];
+    } else {
+        patternTypes = ['geometric', 'fibonacci', 'square', 'triangle_num'];
     }
+
+    const patternType = patternTypes[Math.floor(Math.random() * patternTypes.length)];
+    let question, answer, explanation;
+    const wrongs = new Set();
+
+    switch (patternType) {
+        // 등차수열 (간단)
+        case 'arithmetic_simple': {
+            const start = Math.floor(Math.random() * 5) + 1;
+            const step = Math.floor(Math.random() * 3) + 1;
+            const seq = [start, start + step, start + 2 * step, '?', start + 4 * step];
+            answer = start + 3 * step;
+            question = `🔢 ${name1}이(가) 규칙을 찾고 있어요!\n${seq.join(', ')}\n?에 알맞은 수는?`;
+            explanation = `${step}씩 커지는 규칙이에요. ?는 ${answer}`;
+            wrongs.add(answer + step); wrongs.add(answer - step); wrongs.add(answer + 1);
+            break;
+        }
+
+        // 반복 패턴
+        case 'repeat': {
+            const patterns = [
+                { seq: [1, 2, 1, 2, '?'], a: 1, e: '1, 2가 반복되는 규칙이에요.' },
+                { seq: [3, 3, 5, 3, 3, '?'], a: 5, e: '3, 3, 5가 반복되는 규칙이에요.' },
+                { seq: [2, 4, 2, 4, '?'], a: 2, e: '2, 4가 반복되는 규칙이에요.' },
+                { seq: [1, 2, 3, 1, 2, '?'], a: 3, e: '1, 2, 3이 반복되는 규칙이에요.' }
+            ];
+            const p = patterns[Math.floor(Math.random() * patterns.length)];
+            question = `🔁 ${name1}이(가) 반복되는 규칙을 찾아요!\n${p.seq.join(', ')}\n?에 알맞은 수는?`;
+            answer = p.a;
+            explanation = p.e;
+            wrongs.add(p.a + 1); wrongs.add(p.a + 2); wrongs.add(p.a - 1 > 0 ? p.a - 1 : p.a + 3);
+            break;
+        }
+
+        // 등차수열 (일반)
+        case 'arithmetic': {
+            const start = Math.floor(Math.random() * 10) + 1;
+            const step = Math.floor(Math.random() * 5) + 2;
+            const blankIdx = Math.floor(Math.random() * 4) + 1;
+            const seq = [];
+            for (let i = 0; i < 5; i++) seq.push(start + i * step);
+            answer = seq[blankIdx];
+            seq[blankIdx] = '?';
+            question = `💰 ${name1}이(가) ${step}원씩 저금해요.\n${seq.join(', ')}\n?에 알맞은 수는?`;
+            explanation = `${step}씩 커지는 규칙이에요. ?는 ${answer}`;
+            wrongs.add(answer + step); wrongs.add(answer - step); wrongs.add(answer + 1);
+            break;
+        }
+
+        // 뛰어 세기
+        case 'skip_count': {
+            const skip = [2, 3, 5, 10][Math.floor(Math.random() * 4)];
+            const start = skip;
+            const seq = [start, start + skip, start + 2 * skip, start + 3 * skip, '?'];
+            answer = start + 4 * skip;
+            question = `🦘 ${skip}씩 뛰어 세기를 해요!\n${seq.join(', ')}\n?에 알맞은 수는?`;
+            explanation = `${skip}씩 뛰어 세면 ?는 ${answer}`;
+            wrongs.add(answer + skip); wrongs.add(answer - skip); wrongs.add(answer + 1);
+            break;
+        }
+
+        // 감소 수열
+        case 'decreasing': {
+            const start = Math.floor(Math.random() * 10) + 20;
+            const step = Math.floor(Math.random() * 3) + 2;
+            const seq = [start, start - step, start - 2 * step, '?', start - 4 * step];
+            answer = start - 3 * step;
+            question = `📉 수가 ${step}씩 줄어들어요!\n${seq.join(', ')}\n?에 알맞은 수는?`;
+            explanation = `${step}씩 작아지는 규칙이에요. ?는 ${answer}`;
+            wrongs.add(answer + step); wrongs.add(answer - step); wrongs.add(answer + 1);
+            break;
+        }
+
+        // 등차수열 (고급)
+        case 'arithmetic_hard': {
+            const start = Math.floor(Math.random() * 5) + 1;
+            const step = Math.floor(Math.random() * 7) + 3;
+            const seq = [start, start + step, '?', start + 3 * step, start + 4 * step];
+            answer = start + 2 * step;
+            question = `🧠 규칙을 찾아 ?에 알맞은 수를 구하세요.\n${seq.join(', ')}`;
+            explanation = `첫째항 ${start}, 공차 ${step}인 등차수열이에요. ?는 ${answer}`;
+            wrongs.add(answer + step); wrongs.add(answer - step); wrongs.add(start + step + 1);
+            break;
+        }
+
+        // 등비수열 (간단)
+        case 'geometric_simple': {
+            const start = Math.floor(Math.random() * 2) + 1;
+            const ratio = 2;
+            const seq = [start, start * ratio, start * ratio * ratio, '?'];
+            answer = start * ratio * ratio * ratio;
+            question = `📈 ${name1}이(가) 세균을 관찰해요. 2배씩 늘어나요!\n${seq.join(', ')}\n?에 알맞은 수는?`;
+            explanation = `2배씩 커지는 규칙이에요. ?는 ${answer}`;
+            wrongs.add(answer / 2); wrongs.add(answer * 2); wrongs.add(answer + start);
+            break;
+        }
+
+        // 피보나치 (간단)
+        case 'fibonacci_simple': {
+            const seq = [1, 1, 2, 3, '?'];
+            answer = 5;
+            question = `🌀 앞의 두 수를 더하면 다음 수가 되는 신기한 규칙!\n${seq.join(', ')}\n?에 알맞은 수는?`;
+            explanation = `2 + 3 = 5이므로 ?는 5`;
+            wrongs.add(4); wrongs.add(6); wrongs.add(8);
+            break;
+        }
+
+        // 교대 패턴
+        case 'alternating': {
+            const a = Math.floor(Math.random() * 3) + 1;
+            const b = a + Math.floor(Math.random() * 5) + 3;
+            const seq = [a, b, a + 1, b + 1, a + 2, '?'];
+            answer = b + 2;
+            question = `🔀 두 줄기로 나뉘어 커지는 규칙이에요!\n${seq.join(', ')}\n?에 알맞은 수는?`;
+            explanation = `홀수 번째는 ${a}부터 1씩, 짝수 번째는 ${b}부터 1씩 커져요. ?는 ${answer}`;
+            wrongs.add(a + 3); wrongs.add(b + 1); wrongs.add(b + 3);
+            break;
+        }
+
+        // 등비수열
+        case 'geometric': {
+            const start = Math.floor(Math.random() * 2) + 1;
+            const ratio = 3;
+            const seq = [start, start * ratio, '?', start * ratio * ratio * ratio];
+            answer = start * ratio * ratio;
+            question = `📈 세균이 3배씩 증식해요!\n${seq.join(', ')}\n?에 알맞은 수는?`;
+            explanation = `3배씩 커지는 규칙이에요. ?는 ${answer}`;
+            wrongs.add(answer / 3); wrongs.add(answer * 3); wrongs.add(answer + 3);
+            break;
+        }
+
+        // 피보나치
+        case 'fibonacci': {
+            const seq = [1, 1, 2, 3, 5, '?'];
+            answer = 8;
+            question = `🌀 ${name1}이(가) 피보나치 수열을 찾았어요! 앞의 두 수를 더하면 다음 수!\n${seq.join(', ')}\n?에 알맞은 수는?`;
+            explanation = `3 + 5 = 8이므로 ?는 8`;
+            wrongs.add(7); wrongs.add(9); wrongs.add(10);
+            break;
+        }
+
+        // 제곱수
+        case 'square': {
+            const seq = [1, 4, 9, 16, '?'];
+            answer = 25;
+            question = `⬛ 1×1=1, 2×2=4, 3×3=9, 4×4=16, 5×5=?\n정사각형 수를 찾아보세요!`;
+            explanation = `5×5 = 25이므로 ?는 25`;
+            wrongs.add(20); wrongs.add(24); wrongs.add(36);
+            break;
+        }
+
+        // 삼각수
+        case 'triangle_num': {
+            const seq = [1, 3, 6, 10, '?'];
+            answer = 15;
+            question = `🔺 삼각형으로 점을 쌓아요!\n1층: 1개, 2층: 1+2=3개, 3층: 1+2+3=6개...\n${seq.join(', ')}\n5층까지 쌓으면 점은 몇 개?`;
+            explanation = `1+2+3+4+5 = 15이므로 ?는 15`;
+            wrongs.add(14); wrongs.add(16); wrongs.add(21);
+            break;
+        }
+
+        default: {
+            const start = 2;
+            const step = 3;
+            const seq = [start, start + step, start + 2 * step, start + 3 * step, '?'];
+            answer = start + 4 * step;
+            question = `🔢 규칙을 찾아보세요!\n${seq.join(', ')}\n?에 알맞은 수는?`;
+            explanation = `${step}씩 커지는 규칙이에요. ?는 ${answer}`;
+            wrongs.add(answer + 1); wrongs.add(answer - 1); wrongs.add(answer + step);
+        }
+    }
+
+    const wrongsArray = Array.from(wrongs).filter(w => w !== answer && w > 0).slice(0, 3);
+    while (wrongsArray.length < 3) {
+        const w = answer + wrongsArray.length + 1;
+        if (w !== answer && !wrongsArray.includes(w)) wrongsArray.push(w);
+    }
+    const options = shuffleArray([answer, ...wrongsArray]);
 
     return {
         question,
-        options: shuffleArray([answer, ...wrongs].slice(0, 4)),
+        options,
         answer,
         explanation,
-        problemKey: `pattern-${start}-${step}-${blankIdx}`
+        problemKey: `pattern-${patternType}-${Math.random()}`
     };
 }
 
@@ -834,7 +1265,7 @@ function genLengthProblem(diff) {
 
     return {
         question,
-        options: [answer, ...Array.from(wrongs)].slice(0, 4),
+        options: shuffleArray([answer, ...Array.from(wrongs)].slice(0, 4)),
         answer,
         explanation: `물건의 한쪽 끝이 눈금 ${start}에 있고, 다른 쪽 끝이 눈금 ${start + length}에 있으니까,\n${start + length} - ${start} = ${length}cm입니다!`,
         problemKey: `length-${length}-${start}`,
@@ -855,7 +1286,38 @@ function genGraphProblem(diff) {
     ];
     const theme = themes[Math.floor(Math.random() * themes.length)];
     const items = theme.items;
-    const counts = items.map(() => Math.floor(Math.random() * 8) + 2); // 2~9개
+
+    // 최대/최소값이 유일하도록 counts 생성 (버그 수정)
+    let counts;
+    let attempts = 0;
+    do {
+        counts = items.map(() => Math.floor(Math.random() * 8) + 2); // 2~9개
+        attempts++;
+    } while (attempts < 10 && (
+        counts.filter(c => c === Math.max(...counts)).length > 1 ||
+        counts.filter(c => c === Math.min(...counts)).length > 1
+    ));
+
+    // 여전히 중복이면 강제로 유일하게 만듦
+    const maxVal = Math.max(...counts);
+    const minVal = Math.min(...counts);
+    const maxIndices = counts.map((c, i) => c === maxVal ? i : -1).filter(i => i >= 0);
+    const minIndices = counts.map((c, i) => c === minVal ? i : -1).filter(i => i >= 0);
+
+    if (maxIndices.length > 1) {
+        // 첫 번째를 제외하고 나머지 최대값들을 조정
+        for (let i = 1; i < maxIndices.length; i++) {
+            counts[maxIndices[i]] = maxVal - 1 - i;
+            if (counts[maxIndices[i]] < 1) counts[maxIndices[i]] = 1;
+        }
+    }
+    if (minIndices.length > 1) {
+        // 첫 번째를 제외하고 나머지 최소값들을 조정
+        for (let i = 1; i < minIndices.length; i++) {
+            counts[minIndices[i]] = minVal + 1 + i;
+            if (counts[minIndices[i]] > 9) counts[minIndices[i]] = 9;
+        }
+    }
 
     // 질문 유형 랜덤 선택
     const qType = Math.floor(Math.random() * 3);
@@ -900,7 +1362,7 @@ function genGraphProblem(diff) {
 
     return {
         question,
-        options: [answer, ...Array.from(wrongs)].slice(0, 4),
+        options: shuffleArray([answer, ...Array.from(wrongs)].slice(0, 4)),
         answer,
         explanation,
         problemKey: `graph-${qType}-${counts.join('-')}`,
@@ -909,86 +1371,548 @@ function genGraphProblem(diff) {
 }
 
 function genCreativeProblem(diff) {
-    // 영재/사고력 수학 문제 (복면산, 논리 등) - 100% 문장제
-    const type = Math.floor(Math.random() * 3);
+    // 영재/사고력 수학 문제 - 난이도별 다양한 유형
+    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑', '해핑'];
+    const name1 = names[Math.floor(Math.random() * names.length)];
+    const name2 = names[(names.indexOf(name1) + 1) % names.length];
+    const name3 = names[(names.indexOf(name1) + 2) % names.length];
+
+    let problemTypes = [];
+    if (diff <= 5) {
+        // 1~2학년 영재교육 수준 문제 유형 확대
+        problemTypes = [
+            'cryptarithm_simple', 'age_simple', 'order_simple', 'pyramid_simple', 'pattern_simple',
+            'blocks_counting', 'number_decompose', 'reverse_think', 'shape_logic', 'balance_scale',
+            'number_box', 'hidden_number', 'compare_logic', 'simple_sequence'
+        ];
+    } else if (diff <= 10) {
+        problemTypes = [
+            'cryptarithm_medium', 'age_medium', 'order_medium', 'pyramid_medium', 'magic_simple', 'logic_simple',
+            'blocks_advanced', 'number_relation', 'magic_box', 'path_counting'
+        ];
+    } else if (diff <= 15) {
+        problemTypes = [
+            'cryptarithm_hard', 'age_hard', 'order_hard', 'magic_medium', 'logic_medium', 'combinatorics_simple',
+            'spatial_rotation', 'number_puzzle'
+        ];
+    } else {
+        problemTypes = ['cryptarithm_expert', 'magic_hard', 'logic_hard', 'combinatorics_medium', 'cipher', 'optimization'];
+    }
+
+    const problemType = problemTypes[Math.floor(Math.random() * problemTypes.length)];
     let question, answer, explanation;
     const wrongs = new Set();
 
-    const names = ['하츄핑', '바로핑', '아자핑', '차차핑', '라라핑'];
+    const symbols = [
+        { s: '⭐', name: '별' }, { s: '💎', name: '보석' },
+        { s: '🌸', name: '꽃' }, { s: '🎈', name: '풍선' },
+        { s: '🍎', name: '사과' }, { s: '🌙', name: '달' }
+    ];
 
-    if (type === 0) {
-        // 간단한 복면산 (모양으로 수 찾기)
-        const val = Math.floor(Math.random() * 9) + 1;
-        const sum = val * 2;
-        const symbols = [
-            { s: '⭐', name: '별' },
-            { s: '💎', name: '보석' },
-            { s: '🌸', name: '꽃' },
-            { s: '🎈', name: '풍선' }
-        ];
-        const sym = symbols[Math.floor(Math.random() * symbols.length)];
-        const name1 = names[Math.floor(Math.random() * names.length)];
-
-        question = `🧩 ${name1}이(가) 비밀 암호를 풀고 있어요!\n${sym.s} + ${sym.s} = ${sum}일 때, ${sym.s}(${sym.name})이 나타내는 수는 무엇일까요?`;
-        answer = String(val);
-        explanation = `${sym.s}이 두 번 더해져서 ${sum}이 되었으니,\n${sym.s}은 ${sum}의 절반인 ${val}입니다!`;
-
-        while (wrongs.size < 3) {
-            const w = Math.floor(Math.random() * 10);
-            if (String(w) !== answer && w > 0) wrongs.add(String(w));
-        }
-    } else if (type === 1) {
-        // 논리 퀴즈 (나이 비교)
-        const ageB = Math.floor(Math.random() * 5) + 5; // 5~9살
-        const diffAge = Math.floor(Math.random() * 3) + 1; // 1~3살 차이
-        const ageA = ageB + diffAge;
-
-        const nameA = names[Math.floor(Math.random() * names.length)];
-        let nameB = names[Math.floor(Math.random() * names.length)];
-        while (nameA === nameB) nameB = names[Math.floor(Math.random() * names.length)];
-
-        question = `🎂 ${nameA}은(는) ${nameB}보다 ${diffAge}살 많아요.\n${nameB}이(가) ${ageB}살이라면, ${nameA}은(는) 몇 살일까요?`;
-        answer = `${ageA}살`;
-        explanation = `${nameB}가 ${ageB}살이고, ${nameA}은 ${diffAge}살 더 많으니까\n${ageB} + ${diffAge} = ${ageA}살입니다!`;
-
-        wrongs.add(`${ageB}살`);
-        wrongs.add(`${ageB - diffAge}살`);
-        wrongs.add(`${ageA + 1}살`);
-    } else {
-        // 순서 맞추기 논리
-        const name1 = names[Math.floor(Math.random() * names.length)];
-        let name2 = names[Math.floor(Math.random() * names.length)];
-        let name3 = names[Math.floor(Math.random() * names.length)];
-        while (name1 === name2) name2 = names[Math.floor(Math.random() * names.length)];
-        while (name3 === name1 || name3 === name2) name3 = names[Math.floor(Math.random() * names.length)];
-
-        const templates = [
-            {
-                q: `🏃 달리기 시합을 했어요. ${name1}이(가) 1등, ${name2}이(가) 3등이에요. ${name3}은(는) ${name1}보다 늦고 ${name2}보다 빨랐어요. ${name3}은(는) 몇 등일까요?`,
-                a: '2등',
-                e: `${name1}이 1등, ${name2}이 3등이고, ${name3}은 그 사이이므로 2등입니다!`
-            },
-            {
-                q: `📏 키 순서대로 줄을 섰어요. ${name1}이(가) 맨 앞, ${name2}이(가) 맨 뒤예요. ${name3}은(는) ${name1}과 ${name2} 사이에 섰어요. ${name3}은(는) 앞에서 몇 번째일까요?`,
-                a: '2번째',
-                e: `맨 앞이 ${name1}, 맨 뒤가 ${name2}이면, ${name3}은 가운데인 2번째입니다!`
+    switch (problemType) {
+        // ===== 복면산 (초급) =====
+        case 'cryptarithm_simple': {
+            const val = Math.floor(Math.random() * 8) + 1;
+            const sum = val * 2;
+            const sym = symbols[Math.floor(Math.random() * symbols.length)];
+            question = `🧩 ${name1}이(가) 비밀 암호를 풀고 있어요!\n${sym.s} + ${sym.s} = ${sum}일 때, ${sym.s}(${sym.name})은 얼마일까요?`;
+            answer = String(val);
+            explanation = `${sym.s} + ${sym.s} = ${sum}이므로, ${sym.s} = ${sum}÷2 = ${val}`;
+            while (wrongs.size < 3) {
+                const w = Math.floor(Math.random() * 10) + 1;
+                if (w !== val) wrongs.add(String(w));
             }
-        ];
-        const t = templates[Math.floor(Math.random() * templates.length)];
-        question = t.q;
-        answer = t.a;
-        explanation = t.e;
+            break;
+        }
 
-        wrongs.add('1등'); wrongs.add('3등'); wrongs.add('4등');
-        wrongs.add('1번째'); wrongs.add('3번째'); wrongs.add('4번째');
+        // ===== 복면산 (중급) =====
+        case 'cryptarithm_medium': {
+            const a = Math.floor(Math.random() * 5) + 2;
+            const b = Math.floor(Math.random() * 5) + 2;
+            const sym1 = symbols[0], sym2 = symbols[1];
+            question = `🧩 ${name1}이(가) 암호를 풀어요!\n${sym1.s} + ${sym2.s} = ${a + b}, ${sym1.s} - ${sym2.s} = ${a - b}\n${sym1.s}(${sym1.name})은 얼마일까요?`;
+            answer = String(a);
+            explanation = `두 식을 더하면 2×${sym1.s} = ${2 * a}, ${sym1.s} = ${a}`;
+            wrongs.add(String(b)); wrongs.add(String(a + b)); wrongs.add(String(a + 1));
+            break;
+        }
+
+        // ===== 복면산 (고급) =====
+        case 'cryptarithm_hard': {
+            const x = Math.floor(Math.random() * 4) + 2;
+            const y = Math.floor(Math.random() * 4) + 1;
+            const sym1 = symbols[0], sym2 = symbols[1];
+            question = `🧩 ${sym1.s} × ${sym2.s} = ${x * y}, ${sym1.s} + ${sym2.s} = ${x + y}\n${sym1.s}(${sym1.name})이 ${sym2.s}(${sym2.name})보다 클 때, ${sym1.s}은?`;
+            answer = String(Math.max(x, y));
+            explanation = `곱이 ${x * y}, 합이 ${x + y}인 두 수는 ${x}와 ${y}. 큰 수는 ${Math.max(x, y)}`;
+            wrongs.add(String(Math.min(x, y))); wrongs.add(String(x + y)); wrongs.add(String(x * y));
+            break;
+        }
+
+        // ===== 복면산 (전문가) =====
+        case 'cryptarithm_expert': {
+            const a = Math.floor(Math.random() * 3) + 2;
+            const b = Math.floor(Math.random() * 3) + 1;
+            const c = Math.floor(Math.random() * 3) + 1;
+            const sym1 = symbols[0], sym2 = symbols[1], sym3 = symbols[2];
+            question = `🧩 ${sym1.s}+${sym2.s}+${sym3.s}=${a + b + c}, ${sym1.s}×${sym2.s}=${a * b}\n${sym1.s}=${a}, ${sym2.s}=${b}일 때, ${sym3.s}(${sym3.name})은?`;
+            answer = String(c);
+            explanation = `${a}+${b}+${sym3.s}=${a + b + c}이므로 ${sym3.s}=${c}`;
+            wrongs.add(String(c + 1)); wrongs.add(String(c + 2)); wrongs.add(String(a));
+            break;
+        }
+
+        // ===== 나이 문제 (초급) =====
+        case 'age_simple': {
+            const ageB = Math.floor(Math.random() * 4) + 6;
+            const diffAge = Math.floor(Math.random() * 3) + 1;
+            question = `🎂 ${name1}은(는) ${name2}보다 ${diffAge}살 많아요.\n${name2}이(가) ${ageB}살이면, ${name1}은 몇 살?`;
+            answer = `${ageB + diffAge}살`;
+            explanation = `${ageB} + ${diffAge} = ${ageB + diffAge}살`;
+            wrongs.add(`${ageB}살`); wrongs.add(`${ageB - diffAge}살`); wrongs.add(`${ageB + diffAge + 1}살`);
+            break;
+        }
+
+        // ===== 나이 문제 (중급) =====
+        case 'age_medium': {
+            const ageNow = Math.floor(Math.random() * 5) + 7;
+            const years = Math.floor(Math.random() * 3) + 2;
+            question = `🎂 ${name1}은(는) 지금 ${ageNow}살이에요.\n${years}년 후에는 몇 살이 될까요?`;
+            answer = `${ageNow + years}살`;
+            explanation = `${ageNow} + ${years} = ${ageNow + years}살`;
+            wrongs.add(`${ageNow}살`); wrongs.add(`${ageNow - years}살`); wrongs.add(`${ageNow + years + 1}살`);
+            break;
+        }
+
+        // ===== 나이 문제 (고급) =====
+        case 'age_hard': {
+            const childAge = Math.floor(Math.random() * 4) + 8;
+            const parentAge = childAge + 25;
+            const yearsAgo = Math.floor(Math.random() * 3) + 2;
+            question = `🎂 ${name1}(엄마)는 ${parentAge}살, ${name2}(아이)는 ${childAge}살이에요.\n${yearsAgo}년 전 두 사람의 나이 차이는?`;
+            answer = `${parentAge - childAge}살`;
+            explanation = `나이 차이는 항상 같아요: ${parentAge} - ${childAge} = ${parentAge - childAge}살`;
+            wrongs.add(`${parentAge - childAge - yearsAgo}살`); wrongs.add(`${parentAge - childAge + yearsAgo}살`); wrongs.add(`${parentAge - childAge - 2}살`);
+            break;
+        }
+
+        // ===== 순서 문제 (초급) =====
+        case 'order_simple': {
+            question = `🏃 달리기 시합에서 ${name1}이 1등, ${name3}이 3등이에요.\n${name2}은 ${name1}보다 늦고 ${name3}보다 빨랐어요. ${name2}은 몇 등?`;
+            answer = '2등';
+            explanation = `1등과 3등 사이이므로 ${name2}은 2등!`;
+            wrongs.add('1등'); wrongs.add('3등'); wrongs.add('4등');
+            break;
+        }
+
+        // ===== 순서 문제 (중급) =====
+        case 'order_medium': {
+            question = `📏 ${name1}, ${name2}, ${name3}이 키 순서대로 줄을 섰어요.\n${name1}이 가장 크고, ${name3}이 가장 작아요. ${name2}은 앞에서 몇 번째?`;
+            answer = '2번째';
+            explanation = `가장 큰 사람이 맨 앞이면, ${name2}은 가운데인 2번째!`;
+            wrongs.add('1번째'); wrongs.add('3번째'); wrongs.add('모름');
+            break;
+        }
+
+        // ===== 순서 문제 (고급) =====
+        case 'order_hard': {
+            const n = Math.floor(Math.random() * 3) + 5;
+            const fromFront = Math.floor(Math.random() * 3) + 2;
+            const fromBack = n - fromFront + 1;
+            question = `👧👦 ${name1}은 줄의 앞에서 ${fromFront}번째, 뒤에서 ${fromBack}번째예요.\n줄에 선 사람은 모두 몇 명일까요?`;
+            answer = `${n}명`;
+            explanation = `앞에서 ${fromFront}번째 + 뒤에서 ${fromBack}번째 - 1 = ${n}명`;
+            wrongs.add(`${n + 1}명`); wrongs.add(`${n - 1}명`); wrongs.add(`${fromFront + fromBack}명`);
+            break;
+        }
+
+        // ===== 수 피라미드 (초급) =====
+        case 'pyramid_simple': {
+            const a = Math.floor(Math.random() * 5) + 1;
+            const b = Math.floor(Math.random() * 5) + 1;
+            const c = Math.floor(Math.random() * 5) + 1;
+            question = `🔺 수 피라미드예요! 위 칸은 아래 두 수의 합이에요.\n    [?]\n  [${a + b}] [${b + c}]\n[${a}] [${b}] [${c}]\n맨 위 ?는 얼마?`;
+            answer = String(a + 2 * b + c);
+            explanation = `(${a}+${b}) + (${b}+${c}) = ${a + 2 * b + c}`;
+            wrongs.add(String(a + b + c)); wrongs.add(String(a + b + c + 1)); wrongs.add(String(2 * (a + b + c)));
+            break;
+        }
+
+        // ===== 수 피라미드 (중급) =====
+        case 'pyramid_medium': {
+            const a = Math.floor(Math.random() * 4) + 1;
+            const b = Math.floor(Math.random() * 4) + 1;
+            const top = a + b;
+            question = `🔺 수 피라미드에서 위 칸은 아래 두 수의 합!\n   [${top}]\n [?] [${b}]\n맨 아래 왼쪽 ?는 얼마일까요?`;
+            answer = String(a);
+            explanation = `? + ${b} = ${top}이므로 ? = ${a}`;
+            wrongs.add(String(a + 1)); wrongs.add(String(b)); wrongs.add(String(top));
+            break;
+        }
+
+        // ===== 패턴 (초급) =====
+        case 'pattern_simple': {
+            const start = Math.floor(Math.random() * 5) + 1;
+            const step = Math.floor(Math.random() * 3) + 2;
+            const seq = [start, start + step, start + 2 * step, '?'];
+            question = `🔢 규칙을 찾아보세요!\n${seq.join(', ')}\n?에 알맞은 수는?`;
+            answer = String(start + 3 * step);
+            explanation = `${step}씩 커지는 규칙! ${start + 2 * step} + ${step} = ${start + 3 * step}`;
+            wrongs.add(String(start + 2 * step)); wrongs.add(String(start + 4 * step)); wrongs.add(String(start + 3 * step + 1));
+            break;
+        }
+
+        // ===== 마방진 (초급) =====
+        case 'magic_simple': {
+            // 간단한 3×3 마방진 빈칸
+            question = `🔢 마방진이에요! 가로, 세로, 대각선의 합이 모두 15예요.\n8 1 6\n3 ? 7\n4 9 2\n가운데 ?는 얼마?`;
+            answer = '5';
+            explanation = `가운데 줄: 3 + ? + 7 = 15이므로 ? = 5`;
+            wrongs.add('4'); wrongs.add('6'); wrongs.add('10');
+            break;
+        }
+
+        // ===== 마방진 (중급) =====
+        case 'magic_medium': {
+            question = `🔢 마방진에서 가로, 세로, 대각선의 합이 모두 같아요.\n2 7 6\n9 ? 1\n4 3 8\n?에 알맞은 수는?`;
+            answer = '5';
+            explanation = `첫째 줄 합: 2+7+6=15, 가운데 줄: 9+?+1=15이므로 ?=5`;
+            wrongs.add('4'); wrongs.add('6'); wrongs.add('10');
+            break;
+        }
+
+        // ===== 마방진 (고급) =====
+        case 'magic_hard': {
+            question = `🔢 1부터 9까지 수로 3×3 마방진을 만들면, 각 줄의 합은 얼마일까요?`;
+            answer = '15';
+            explanation = `1+2+...+9=45, 3줄로 나누면 45÷3=15`;
+            wrongs.add('12'); wrongs.add('18'); wrongs.add('21');
+            break;
+        }
+
+        // ===== 논리 (초급) =====
+        case 'logic_simple': {
+            question = `🧠 ${name1}이(가) 말해요: "나는 사과 또는 바나나를 좋아해."\n${name1}이(가) 사과를 싫어한다면, 무엇을 좋아할까요?`;
+            answer = '바나나';
+            explanation = `"또는" 중 하나가 거짓이면, 다른 하나는 참!`;
+            wrongs.add('사과'); wrongs.add('둘 다'); wrongs.add('모름');
+            break;
+        }
+
+        // ===== 논리 (중급) =====
+        case 'logic_medium': {
+            question = `🧠 ${name1}, ${name2}이(가) 말해요.\n${name1}: "나는 사탕을 좋아해."\n${name2}: "나도 ${name1}이(가) 좋아하는 것을 좋아해."\n${name2}은 무엇을 좋아할까요?`;
+            answer = '사탕';
+            explanation = `${name1}이 사탕을 좋아하고, ${name2}은 ${name1}이 좋아하는 것을 좋아하므로 사탕!`;
+            wrongs.add('${name1}'); wrongs.add('초콜릿'); wrongs.add('모름');
+            break;
+        }
+
+        // ===== 논리 (고급) =====
+        case 'logic_hard': {
+            question = `🧠 세 명이 각각 빨강, 파랑, 노랑 모자를 썼어요.\n${name1}은 빨강이 아니에요. ${name2}은 노랑이 아니에요.\n${name3}은 빨강이에요. ${name1}의 모자 색은?`;
+            answer = '노랑';
+            explanation = `${name3}=빨강, ${name1}≠빨강, ${name2}≠노랑\n→ ${name1}=노랑, ${name2}=파랑`;
+            wrongs.add('빨강'); wrongs.add('파랑'); wrongs.add('모름');
+            break;
+        }
+
+        // ===== 경우의 수 (초급) =====
+        case 'combinatorics_simple': {
+            const shirts = Math.floor(Math.random() * 2) + 2;
+            const pants = Math.floor(Math.random() * 2) + 2;
+            question = `👕👖 ${name1}에게 윗옷 ${shirts}벌, 바지 ${pants}벌이 있어요.\n옷을 입는 방법은 모두 몇 가지?`;
+            answer = `${shirts * pants}가지`;
+            explanation = `${shirts} × ${pants} = ${shirts * pants}가지`;
+            wrongs.add(`${shirts + pants}가지`); wrongs.add(`${shirts * pants + 1}가지`); wrongs.add(`${shirts * pants - 1}가지`);
+            break;
+        }
+
+        // ===== 경우의 수 (중급) =====
+        case 'combinatorics_medium': {
+            question = `🎲 1, 2, 3 세 수로 만들 수 있는 두 자리 수는 몇 개?\n(같은 숫자 반복 가능)`;
+            answer = '9개';
+            explanation = `십의 자리 3가지 × 일의 자리 3가지 = 9개`;
+            wrongs.add('6개'); wrongs.add('8개'); wrongs.add('12개');
+            break;
+        }
+
+        // ===== 암호 =====
+        case 'cipher': {
+            const shift = Math.floor(Math.random() * 3) + 1;
+            question = `🔐 암호 규칙: 각 글자를 알파벳 순서로 ${shift}칸 뒤로!\nA→${String.fromCharCode(65 + shift)}, B→${String.fromCharCode(66 + shift)}...\nCAT은 어떻게 될까요?`;
+            const encrypted = 'CAT'.split('').map(c => String.fromCharCode(c.charCodeAt(0) + shift)).join('');
+            answer = encrypted;
+            explanation = `C→${String.fromCharCode(67 + shift)}, A→${String.fromCharCode(65 + shift)}, T→${String.fromCharCode(84 + shift)} = ${encrypted}`;
+            wrongs.add('CAT'); wrongs.add(encrypted.split('').reverse().join('')); wrongs.add(String.fromCharCode(67 + shift + 1) + String.fromCharCode(65 + shift) + String.fromCharCode(84 + shift));
+            break;
+        }
+
+        // ===== 최적화 =====
+        case 'optimization': {
+            const coins = [100, 50, 10];
+            const target = Math.floor(Math.random() * 3) * 50 + 150; // 150, 200, 250
+            const min100 = Math.floor(target / 100);
+            const remaining = target - min100 * 100;
+            const min50 = Math.floor(remaining / 50);
+            const minCoins = min100 + min50 + (remaining - min50 * 50) / 10;
+            question = `💰 ${target}원을 100원, 50원, 10원 동전으로 만들어요.\n동전을 가장 적게 쓰면 몇 개가 필요할까요?`;
+            answer = `${minCoins}개`;
+            explanation = `100원 ${min100}개 + 50원 ${min50}개 = ${minCoins}개`;
+            wrongs.add(`${minCoins + 1}개`); wrongs.add(`${minCoins + 2}개`); wrongs.add(`${Math.floor(target / 10)}개`);
+            break;
+        }
+
+        // ===== 1~2학년 영재교육: 쌓기나무 세기 =====
+        case 'blocks_counting': {
+            const layers = [
+                { desc: '1층에 4개, 2층에 1개', total: 5, visual: '🧱🧱\n🧱🧱\n  🧊' },
+                { desc: '1층에 3개, 2층에 2개', total: 5, visual: '🧱🧱🧱\n 🧊🧊' },
+                { desc: '1층에 6개, 2층에 2개', total: 8, visual: '🧱🧱🧱\n🧱🧱🧱\n 🧊🧊' },
+                { desc: '1층에 4개, 2층에 2개, 3층에 1개', total: 7, visual: '계단 모양' },
+                { desc: '1층에 9개, 2층에 4개, 3층에 1개', total: 14, visual: '피라미드 모양' }
+            ];
+            const layer = layers[Math.floor(Math.random() * 3)]; // 쉬운 것만
+            question = `🧱 ${name1}이(가) 블록을 쌓았어요!\n${layer.desc}로 쌓았어요. 블록은 모두 몇 개일까요?`;
+            answer = `${layer.total}개`;
+            explanation = `${layer.desc}를 더하면 ${layer.total}개입니다!`;
+            wrongs.add(`${layer.total + 1}개`); wrongs.add(`${layer.total - 1}개`); wrongs.add(`${layer.total + 2}개`);
+            break;
+        }
+
+        // ===== 1~2학년 영재교육: 수 분해 =====
+        case 'number_decompose': {
+            const target = Math.floor(Math.random() * 8) + 5; // 5~12
+            const part1 = Math.floor(Math.random() * (target - 2)) + 1;
+            const part2 = target - part1;
+            const templates = [
+                { q: `🎯 ${name1}이(가) 사탕 ${target}개를 두 봉지에 나눠 담았어요.\n한 봉지에 ${part1}개를 담았다면, 다른 봉지에는 몇 개?`, a: part2, e: `${target} - ${part1} = ${part2}개` },
+                { q: `🔢 ${target}을 두 수로 가를 수 있어요.\n한 수가 ${part1}이면, 다른 수는?`, a: part2, e: `${target} = ${part1} + ${part2}이므로 다른 수는 ${part2}` },
+                { q: `🎁 선물 ${target}개를 ${name1}과 ${name2}이(가) 나눠 가져요.\n${name1}이 ${part1}개 가지면, ${name2}은 몇 개?`, a: part2, e: `${target} - ${part1} = ${part2}개` }
+            ];
+            const t = templates[Math.floor(Math.random() * templates.length)];
+            question = t.q;
+            answer = `${t.a}개`;
+            explanation = t.e;
+            wrongs.add(`${part2 + 1}개`); wrongs.add(`${part2 - 1}개`); wrongs.add(`${target}개`);
+            break;
+        }
+
+        // ===== 1~2학년 영재교육: 거꾸로 생각하기 =====
+        case 'reverse_think': {
+            const original = Math.floor(Math.random() * 10) + 3;
+            const change = Math.floor(Math.random() * 5) + 1;
+            const templates = [
+                { q: `🔙 ${name1}이(가) 생각한 수에 ${change}을 더했더니 ${original + change}이 되었어요.\n처음 생각한 수는 얼마일까요?`, a: original, e: `${original + change} - ${change} = ${original}` },
+                { q: `🔙 어떤 수에서 ${change}을 빼면 ${original - change}이 돼요.\n어떤 수는 얼마일까요?`, a: original, e: `${original - change} + ${change} = ${original}` },
+                { q: `🤔 ${name1}이(가) 사탕을 ${change}개 먹었더니 ${original - change}개가 남았어요.\n처음에 몇 개였을까요?`, a: original, e: `${original - change} + ${change} = ${original}개` }
+            ];
+            const t = templates[Math.floor(Math.random() * templates.length)];
+            question = t.q;
+            answer = String(t.a);
+            explanation = t.e;
+            wrongs.add(String(t.a + 1)); wrongs.add(String(t.a - 1)); wrongs.add(String(t.a + change));
+            break;
+        }
+
+        // ===== 1~2학년 영재교육: 도형 논리 =====
+        case 'shape_logic': {
+            const quizzes = [
+                { q: `🔵🔴 파란 동그라미와 빨간 동그라미가 있어요.\n파란 것이 3개, 동그라미가 5개예요.\n빨간 동그라미는 몇 개일까요?`, a: '2개', wrong: ['3개', '5개', '8개'], e: `동그라미 5개 중 파란 것이 3개이므로, 빨간 것은 5-3=2개` },
+                { q: `⬛⬜ 검은 네모와 흰 네모가 모두 7개 있어요.\n검은 네모가 4개면, 흰 네모는 몇 개?`, a: '3개', wrong: ['4개', '7개', '11개'], e: `7 - 4 = 3개` },
+                { q: `🔺🔻 위를 향한 삼각형과 아래를 향한 삼각형이 합쳐서 6개예요.\n위를 향한 것이 2개면, 아래를 향한 것은?`, a: '4개', wrong: ['2개', '6개', '8개'], e: `6 - 2 = 4개` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q;
+            answer = q.a;
+            explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 1~2학년 영재교육: 저울 균형 =====
+        case 'balance_scale': {
+            const unit = Math.floor(Math.random() * 3) + 2; // 2~4
+            const count = Math.floor(Math.random() * 3) + 2; // 2~4
+            const total = unit * count;
+            question = `⚖️ 저울이 균형을 이루고 있어요!\n한쪽에 ${total}g 추가 있고, 다른 쪽에 ${count}개의 같은 추가 있어요.\n추 하나는 몇 g일까요?`;
+            answer = `${unit}g`;
+            explanation = `${total} ÷ ${count} = ${unit}g`;
+            wrongs.add(`${unit + 1}g`); wrongs.add(`${unit - 1}g`); wrongs.add(`${total}g`);
+            break;
+        }
+
+        // ===== 1~2학년 영재교육: 수 상자 =====
+        case 'number_box': {
+            const a = Math.floor(Math.random() * 5) + 1;
+            const b = Math.floor(Math.random() * 5) + 1;
+            const c = Math.floor(Math.random() * 5) + 1;
+            const sum = a + b + c;
+            question = `📦 상자 안에 세 수가 들어있어요.\n${a}, ${b}, ?\n세 수의 합이 ${sum}이면, ?는 얼마일까요?`;
+            answer = String(c);
+            explanation = `${a} + ${b} + ? = ${sum}, ? = ${sum} - ${a} - ${b} = ${c}`;
+            wrongs.add(String(c + 1)); wrongs.add(String(c - 1 > 0 ? c - 1 : c + 2)); wrongs.add(String(sum));
+            break;
+        }
+
+        // ===== 1~2학년 영재교육: 숨은 수 찾기 =====
+        case 'hidden_number': {
+            const a = Math.floor(Math.random() * 8) + 2;
+            const b = Math.floor(Math.random() * 8) + 2;
+            const templates = [
+                { q: `🔍 ? + ${b} = ${a + b}일 때, ?는 얼마일까요?`, ans: a, e: `${a + b} - ${b} = ${a}` },
+                { q: `🔍 ${a} + ? = ${a + b}일 때, ?는 얼마일까요?`, ans: b, e: `${a + b} - ${a} = ${b}` },
+                { q: `🔍 ? - ${b} = ${a}일 때, ?는 얼마일까요?`, ans: a + b, e: `${a} + ${b} = ${a + b}` }
+            ];
+            const t = templates[Math.floor(Math.random() * templates.length)];
+            question = t.q;
+            answer = String(t.ans);
+            explanation = t.e;
+            wrongs.add(String(t.ans + 1)); wrongs.add(String(t.ans - 1)); wrongs.add(String(a + b + 1));
+            break;
+        }
+
+        // ===== 1~2학년 영재교육: 비교 논리 =====
+        case 'compare_logic': {
+            const quizzes = [
+                { q: `🏃 ${name1}이 ${name2}보다 빨라요.\n${name2}가 ${name3}보다 빨라요.\n가장 빠른 사람은 누구일까요?`, a: name1, wrong: [name2, name3, '모름'], e: `${name1} > ${name2} > ${name3}이므로 ${name1}이 가장 빨라요!` },
+                { q: `📏 ${name1}이 ${name2}보다 키가 커요.\n${name3}이 ${name1}보다 키가 커요.\n가장 키가 큰 사람은?`, a: name3, wrong: [name1, name2, '모름'], e: `${name3} > ${name1} > ${name2}이므로 ${name3}이 가장 커요!` },
+                { q: `🎂 ${name1}이 ${name2}보다 나이가 많아요.\n${name2}가 ${name3}보다 나이가 많아요.\n가장 어린 사람은?`, a: name3, wrong: [name1, name2, '모름'], e: `${name1} > ${name2} > ${name3}이므로 ${name3}이 가장 어려요!` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q;
+            answer = q.a;
+            explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 1~2학년 영재교육: 간단한 수열 =====
+        case 'simple_sequence': {
+            const patterns = [
+                { seq: [1, 2, 3, 4, '?'], a: 5, rule: '1씩 커지는' },
+                { seq: [2, 4, 6, 8, '?'], a: 10, rule: '2씩 커지는' },
+                { seq: [5, 10, 15, 20, '?'], a: 25, rule: '5씩 커지는' },
+                { seq: [10, 9, 8, 7, '?'], a: 6, rule: '1씩 작아지는' },
+                { seq: [1, 3, 5, 7, '?'], a: 9, rule: '2씩 커지는 홀수' },
+                { seq: [2, 4, 6, 8, '?'], a: 10, rule: '2씩 커지는 짝수' }
+            ];
+            const p = patterns[Math.floor(Math.random() * patterns.length)];
+            question = `🔢 ${name1}이(가) 규칙을 찾고 있어요!\n${p.seq.join(', ')}\n?에 알맞은 수는?`;
+            answer = String(p.a);
+            explanation = `${p.rule} 규칙이에요. ?는 ${p.a}!`;
+            wrongs.add(String(p.a + 1)); wrongs.add(String(p.a - 1)); wrongs.add(String(p.a + 2));
+            break;
+        }
+
+        // ===== 난이도 6-10: 고급 블록 쌓기 =====
+        case 'blocks_advanced': {
+            const quizzes = [
+                { q: `🧱 ${name1}이(가) 쌓기나무로 정육면체를 만들었어요.\n한 변에 나무가 2개씩 있으면, 나무는 모두 몇 개?`, a: '8개', wrong: ['6개', '4개', '12개'], e: `2×2×2 = 8개` },
+                { q: `🧱 1층에 4개, 2층에 3개, 3층에 2개, 4층에 1개!\n피라미드 모양의 블록은 모두 몇 개?`, a: '10개', wrong: ['9개', '11개', '4개'], e: `4+3+2+1 = 10개` },
+                { q: `🧱 정육면체에서 꼭짓점에 있는 작은 정육면체는 몇 개?`, a: '8개', wrong: ['4개', '6개', '12개'], e: `정육면체의 꼭짓점은 8개!` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q;
+            answer = q.a;
+            explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 난이도 6-10: 수의 관계 =====
+        case 'number_relation': {
+            const a = Math.floor(Math.random() * 10) + 5;
+            const b = Math.floor(Math.random() * 10) + 5;
+            const quizzes = [
+                { q: `🔢 ${name1}과 ${name2}의 나이를 더하면 ${a + b}살이에요.\n${name1}이 ${a}살이면, ${name2}은 몇 살?`, ans: b, e: `${a + b} - ${a} = ${b}살` },
+                { q: `🔢 두 수의 차가 ${Math.abs(a - b)}이고, 큰 수가 ${Math.max(a, b)}예요.\n작은 수는 얼마일까요?`, ans: Math.min(a, b), e: `${Math.max(a, b)} - ${Math.abs(a - b)} = ${Math.min(a, b)}` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q;
+            answer = String(q.ans);
+            explanation = q.e;
+            wrongs.add(String(q.ans + 1)); wrongs.add(String(q.ans - 1)); wrongs.add(String(a + b));
+            break;
+        }
+
+        // ===== 난이도 6-10: 마법 상자 =====
+        case 'magic_box': {
+            const input = Math.floor(Math.random() * 5) + 1;
+            const rule = Math.floor(Math.random() * 3);
+            let output, ruleDesc;
+            if (rule === 0) { output = input * 2; ruleDesc = '2배'; }
+            else if (rule === 1) { output = input + 3; ruleDesc = '+3'; }
+            else { output = input * 2 + 1; ruleDesc = '×2 + 1'; }
+            question = `📦 마법 상자에 숫자를 넣으면 규칙에 따라 바뀌어요!\n1 → ${rule === 0 ? 2 : rule === 1 ? 4 : 3}\n2 → ${rule === 0 ? 4 : rule === 1 ? 5 : 5}\n3 → ${rule === 0 ? 6 : rule === 1 ? 6 : 7}\n4를 넣으면 얼마가 나올까요?`;
+            const answer4 = rule === 0 ? 8 : rule === 1 ? 7 : 9;
+            answer = String(answer4);
+            explanation = `규칙은 '${ruleDesc}'이에요. 4를 넣으면 ${answer4}!`;
+            wrongs.add(String(answer4 + 1)); wrongs.add(String(answer4 - 1)); wrongs.add(String(answer4 + 2));
+            break;
+        }
+
+        // ===== 난이도 6-10: 경로 세기 =====
+        case 'path_counting': {
+            const quizzes = [
+                { q: `🏠 ${name1}이(가) 집에서 학교까지 가는 길이에요.\n오른쪽 또는 위쪽으로만 갈 수 있어요.\n2칸 오른쪽, 1칸 위로 가는 길은 몇 가지?`, a: '3가지', wrong: ['2가지', '4가지', '6가지'], e: `→→↑, →↑→, ↑→→ = 3가지` },
+                { q: `🎯 A에서 B까지 오른쪽(→)과 아래쪽(↓)으로만 가요.\n→ 2번, ↓ 1번 가는 길은 몇 가지?`, a: '3가지', wrong: ['2가지', '4가지', '5가지'], e: `→→↓, →↓→, ↓→→ = 3가지` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q;
+            answer = q.a;
+            explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 난이도 11-15: 공간 회전 =====
+        case 'spatial_rotation': {
+            const quizzes = [
+                { q: `🔄 숫자 6을 거꾸로 뒤집으면 어떤 숫자처럼 보일까요?`, a: '9', wrong: ['6', '8', '0'], e: `6을 180° 돌리면 9처럼 보여요!` },
+                { q: `🔄 알파벳 'b'를 거울에 비추면 어떤 글자처럼 보일까요?`, a: 'd', wrong: ['b', 'p', 'q'], e: `거울에 비추면 좌우가 바뀌어 'd'가 돼요!` },
+                { q: `🔄 시계 방향으로 90° 돌리면 '⬆️'는 어떻게 될까요?`, a: '➡️', wrong: ['⬆️', '⬇️', '⬅️'], e: `시계 방향 90° = 위→오른쪽` }
+            ];
+            const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+            question = q.q;
+            answer = q.a;
+            explanation = q.e;
+            q.wrong.forEach(w => wrongs.add(w));
+            break;
+        }
+
+        // ===== 난이도 11-15: 수 퍼즐 =====
+        case 'number_puzzle': {
+            const target = Math.floor(Math.random() * 10) + 10;
+            const a = Math.floor(Math.random() * 5) + 1;
+            const b = Math.floor(Math.random() * 5) + 1;
+            const c = target - a - b;
+            question = `🧩 1부터 9까지 수 중 서로 다른 세 수를 골라 합이 ${target}이 되게 해요.\n${a}와 ${b}를 골랐다면, 나머지 수는?`;
+            answer = String(c);
+            explanation = `${a} + ${b} + ? = ${target}, ? = ${c}`;
+            wrongs.add(String(c + 1)); wrongs.add(String(c - 1)); wrongs.add(String(target));
+            break;
+        }
+
+        default: {
+            // 기본 문제
+            const val = Math.floor(Math.random() * 8) + 2;
+            question = `🧩 ${name1}이(가) 생각한 수에 2를 곱하면 ${val * 2}이 돼요.\n생각한 수는 무엇일까요?`;
+            answer = String(val);
+            explanation = `${val * 2} ÷ 2 = ${val}`;
+            wrongs.add(String(val + 1)); wrongs.add(String(val - 1)); wrongs.add(String(val * 2));
+        }
     }
+
+    const wrongsArray = Array.from(wrongs).filter(w => w !== answer).slice(0, 3);
+    const options = shuffleArray([answer, ...wrongsArray]);
 
     return {
         question,
-        options: shuffleArray([answer, ...Array.from(wrongs)].slice(0, 4)),
+        options,
         answer,
         explanation,
-        problemKey: `creative-${type}-${Math.random()}`
+        problemKey: `creative-${problemType}-${Math.random()}`
     };
 }
 
@@ -1757,18 +2681,24 @@ function drawExplain() {
     STATE.hitboxes.push({ id: 'btn_next', x: nxX, y: nxY, w: nxW, h: nxH, disabled: !canNext });
 }
 
-function drawEncyclopediaCard(cx, startY, tiniping) {
-    const encyclopedia = ENCYCLOPEDIA.find(e => e.id === tiniping.id);
-    if (!encyclopedia) return;
+function drawEncyclopediaCard(cx, startY, tiniping, canvasHeight) {
+    // 이름으로 매칭 (baseTinipings와 encyclopedia의 ID가 다르기 때문)
+    const encyclopedia = ENCYCLOPEDIA.find(e => e.name === tiniping.name);
 
+    // 도감 데이터가 없어도 기본 카드를 표시
     const typeColors = {
         '로열': { bg: '#fce7f3', border: '#ec4899', text: '#9f1239' },
         '전설': { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' },
         '서포팅': { bg: '#ddd6fe', border: '#8b5cf6', text: '#5b21b6' },
         '일반': { bg: '#e0f2fe', border: '#0ea5e9', text: '#075985' }
     };
-    const colors = typeColors[encyclopedia.type] || typeColors['일반'];
 
+    // 유형 결정: encyclopedia > tiniping > 기본값
+    const displayType = encyclopedia?.type || tiniping.type || '일반';
+    const colors = typeColors[displayType] || typeColors['일반'];
+
+    // canvasHeight 파라미터를 사용하여 H 참조 오류 해결
+    const H = canvasHeight || (CANVAS.height / DPR);
     const cardW = Math.min(360, Math.round(400 * SCALE));
     const cardH = Math.min(Math.round(260 * SCALE), H - (startY + Math.round(120 * SCALE)));
     const cardX = cx - cardW / 2;
@@ -1788,9 +2718,12 @@ function drawEncyclopediaCard(cx, startY, tiniping) {
     CTX.textAlign = 'left';
     let textY = cardY + padding;
 
+    // 이름 표시
+    const displayName = encyclopedia?.name || tiniping.name || '???';
     CTX.font = `bold ${Math.round(20 * SCALE)}px Jua, sans-serif`;
-    CTX.fillText(`${encyclopedia.name}`, cardX + padding, textY);
+    CTX.fillText(`${displayName}`, cardX + padding, textY);
 
+    // 유형 배지
     const typeBadgeX = cardX + cardW - padding - Math.round(60 * SCALE);
     CTX.save();
     roundRect(CTX, typeBadgeX, textY - Math.round(16 * SCALE), Math.round(60 * SCALE), Math.round(24 * SCALE), Math.round(12 * SCALE));
@@ -1800,15 +2733,18 @@ function drawEncyclopediaCard(cx, startY, tiniping) {
     CTX.fillStyle = '#ffffff';
     CTX.font = `bold ${Math.round(12 * SCALE)}px Jua, sans-serif`;
     CTX.textAlign = 'center';
-    CTX.fillText(encyclopedia.type, typeBadgeX + Math.round(30 * SCALE), textY - Math.round(3 * SCALE));
+    CTX.fillText(displayType, typeBadgeX + Math.round(30 * SCALE), textY - Math.round(3 * SCALE));
 
     textY += Math.round(32 * SCALE);
     CTX.textAlign = 'left';
 
     CTX.fillStyle = colors.text;
     CTX.font = `${Math.round(14 * SCALE)}px Jua, sans-serif`;
-    CTX.fillText(`✨ ${encyclopedia.subtitle}`, cardX + padding, textY);
-    textY += Math.round(24 * SCALE);
+    const subtitle = encyclopedia?.subtitle || tiniping.desc || '';
+    if (subtitle) {
+        CTX.fillText(`✨ ${subtitle}`, cardX + padding, textY);
+        textY += Math.round(24 * SCALE);
+    }
 
     CTX.strokeStyle = colors.border;
     CTX.lineWidth = Math.round(1 * SCALE);
@@ -1819,36 +2755,55 @@ function drawEncyclopediaCard(cx, startY, tiniping) {
     textY += Math.round(16 * SCALE);
 
     CTX.font = `${Math.round(12 * SCALE)}px Jua, sans-serif`;
-    const personalityShort = encyclopedia.personality.substring(0, 30) + (encyclopedia.personality.length > 30 ? '...' : '');
-    CTX.fillText(`🎭 ${personalityShort}`, cardX + padding, textY);
-    textY += Math.round(22 * SCALE);
+    const personality = encyclopedia?.personality || '';
+    if (personality) {
+        const personalityShort = personality.substring(0, 30) + (personality.length > 30 ? '...' : '');
+        CTX.fillText(`🎭 ${personalityShort}`, cardX + padding, textY);
+        textY += Math.round(22 * SCALE);
+    }
 
-    if (encyclopedia.magic) {
+    if (encyclopedia?.magic) {
         const magicShort = encyclopedia.magic.substring(0, 35) + (encyclopedia.magic.length > 35 ? '...' : '');
         CTX.fillText(`✨ ${magicShort}`, cardX + padding, textY);
         textY += Math.round(22 * SCALE);
     }
 
-    if (encyclopedia.item) {
+    if (encyclopedia?.item) {
         CTX.fillText(`🔮 아이템: ${encyclopedia.item}`, cardX + padding, textY);
         textY += Math.round(22 * SCALE);
     }
 
-    if (encyclopedia.likes) {
+    if (encyclopedia?.likes) {
         const likesShort = encyclopedia.likes.substring(0, 25) + (encyclopedia.likes.length > 25 ? '...' : '');
         CTX.fillText(`💖 좋아요: ${likesShort}`, cardX + padding, textY);
         textY += Math.round(22 * SCALE);
     }
 
-    if (encyclopedia.dislikes) {
+    if (encyclopedia?.dislikes) {
         const dislikesShort = encyclopedia.dislikes.substring(0, 25) + (encyclopedia.dislikes.length > 25 ? '...' : '');
         CTX.fillText(`💔 싫어요: ${dislikesShort}`, cardX + padding, textY);
     }
 
+    // 도감 데이터가 없는 경우 도메인 정보 표시
+    if (!encyclopedia && tiniping.domain) {
+        CTX.fillText(`📚 영역: ${tiniping.domain}`, cardX + padding, textY);
+    }
+
+    // 시즌 정보 표시
+    const season = encyclopedia?.season || tiniping.season;
+    if (season) {
+        CTX.fillStyle = colors.border;
+        CTX.font = `bold ${Math.round(10 * SCALE)}px Jua, sans-serif`;
+        CTX.textAlign = 'left';
+        CTX.fillText(`시즌 ${season}`, cardX + padding, cardY + cardH - Math.round(12 * SCALE));
+    }
+
+    // ID 번호 표시
+    const displayId = encyclopedia?.id || tiniping.id;
     CTX.fillStyle = colors.border;
     CTX.font = `bold ${Math.round(10 * SCALE)}px Jua, sans-serif`;
     CTX.textAlign = 'right';
-    CTX.fillText(`No. ${String(encyclopedia.id).padStart(3, '0')}`, cardX + cardW - padding, cardY + cardH - Math.round(12 * SCALE));
+    CTX.fillText(`No. ${String(displayId).padStart(3, '0')}`, cardX + cardW - padding, cardY + cardH - Math.round(12 * SCALE));
 }
 
 function drawGeometryShape(ctx, shapeType, cx, cy, size) {
@@ -2207,7 +3162,7 @@ function drawCatch(ts) {
 
         drawTinipingImage(tgt, cx, cy, imageSize);
 
-        drawEncyclopediaCard(cx, cy + baseR + 20, tgt);
+        drawEncyclopediaCard(cx, cy + baseR + 20, tgt, H);
 
         const bw = Math.max(200, Math.round(240 * SCALE));
         const bh = Math.max(50, Math.round(56 * SCALE));
