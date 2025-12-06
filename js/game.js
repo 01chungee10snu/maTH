@@ -235,6 +235,19 @@ function loadState() {
 function genProblem(diff) {
     const topic = STATE.currentCurriculum || 'division';
 
+    // 모듈 시스템 우선 사용 (로드된 경우)
+    if (window.ProblemLoader && window.ProblemBase) {
+        try {
+            const problem = window.ProblemLoader.generate(topic, diff);
+            if (problem && problem.question) {
+                return problem;
+            }
+        } catch (e) {
+            console.warn('모듈 문제 생성 실패, 인라인 함수 사용:', e);
+        }
+    }
+
+    // 폴백: 기존 인라인 함수 사용
     if (topic.includes('덧셈') || topic.includes('합')) return genAdditionProblem(diff);
     if (topic.includes('뺄셈') || topic.includes('차')) return genSubtractionProblem(diff);
     if (topic.includes('곱셈') || topic.includes('구구')) return genMultiplicationProblem(diff);
