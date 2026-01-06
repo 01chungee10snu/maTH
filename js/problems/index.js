@@ -57,6 +57,9 @@ function generateProblem(topic, difficulty) {
     if (topic.includes('부피') || topic.includes('쌓기') || topic.includes('직육면체')) {
         return window.VolumeProblems?.generate(difficulty) || generateFallbackProblem(difficulty);
     }
+    if (topic.includes('미지수') || topic.includes('□') || topic.includes('○') || topic.includes('△') || topic.includes('방정식') || topic === 'symbolEquation') {
+        return window.SymbolEquationProblems?.generate(difficulty) || generateFallbackProblem(difficulty);
+    }
 
     // 높은 난이도에서 창의력 문제 확률적 출제
     if (difficulty >= 15 && Math.random() < 0.2) {
@@ -100,7 +103,8 @@ function checkModulesLoaded() {
         'CreativeProblems',
         'CapacityProblems',
         'WeightProblems',
-        'VolumeProblems'
+        'VolumeProblems',
+        'SymbolEquationProblems'
     ];
 
     const loaded = modules.filter(m => window[m]);

@@ -1034,7 +1034,7 @@ function genMeasurementProblem(diff) {
         question,
         options: shuffleArray([answer, ...wrongs].slice(0, 4)),
         answer,
-        explanation: `짧은 바늘(시침)이 ${h} 근처를 가리키고, 긴 바늘(분침)이 ${m === 0 ? '12' : Math.floor(m/5)}을 가리키고 있어요!\n정답은 ${answer}입니다.`,
+        explanation: `짧은 바늘(시침)이 ${h} 근처를 가리키고, 긴 바늘(분침)이 ${m === 0 ? '12' : Math.floor(m / 5)}을 가리키고 있어요!\n정답은 ${answer}입니다.`,
         problemKey: `clock-${h}-${m}`,
         clockTime: { h, m }
     };
@@ -1950,7 +1950,7 @@ function genCapacityProblem(diff) {
         question = t.q;
         answer = t.a;
         explanation = t.e;
-        wrongs.add(`${ml/10}mL`); wrongs.add(`${ml*10}mL`); wrongs.add(`${ml+100}mL`);
+        wrongs.add(`${ml / 10}mL`); wrongs.add(`${ml * 10}mL`); wrongs.add(`${ml + 100}mL`);
     } else if (type === 1) {
         // 들이 비교
         const a = Math.floor(Math.random() * 500) + 200;
@@ -1967,7 +1967,7 @@ function genCapacityProblem(diff) {
         question = `🥤 ${name1}이(가) 주스 ${a}mL를 마시고, 또 ${b}mL를 더 마셨어요. 모두 몇 mL를 마셨을까요?`;
         answer = `${total}mL`;
         explanation = `${a}mL + ${b}mL = ${total}mL입니다.`;
-        wrongs.add(`${total+50}mL`); wrongs.add(`${total-50}mL`); wrongs.add(`${a}mL`);
+        wrongs.add(`${total + 50}mL`); wrongs.add(`${total - 50}mL`); wrongs.add(`${a}mL`);
     }
 
     return {
@@ -2000,7 +2000,7 @@ function genWeightProblem(diff) {
         question = t.q;
         answer = t.a;
         explanation = t.e;
-        wrongs.add(`${g/10}g`); wrongs.add(`${g*10}g`); wrongs.add(`${g+100}g`);
+        wrongs.add(`${g / 10}g`); wrongs.add(`${g * 10}g`); wrongs.add(`${g + 100}g`);
     } else if (type === 1) {
         // 무게 비교
         const a = Math.floor(Math.random() * 500) + 200;
@@ -2019,7 +2019,7 @@ function genWeightProblem(diff) {
         question = `⚖️ ${name1}이(가) 사과 ${a}g과 바나나 ${b}g을 샀어요. 과일의 무게는 모두 몇 g일까요?`;
         answer = `${total}g`;
         explanation = `${a}g + ${b}g = ${total}g입니다.`;
-        wrongs.add(`${total+50}g`); wrongs.add(`${total-50}g`); wrongs.add(`${a}g`);
+        wrongs.add(`${total + 50}g`); wrongs.add(`${total - 50}g`); wrongs.add(`${a}g`);
     }
 
     return {
@@ -2048,7 +2048,7 @@ function genVolumeProblem(diff) {
         question = `🧊 ${name1}이(가) 쌓기나무로 탑을 쌓았어요. 가로 ${base}개, 세로 ${base}개, 높이 ${height}층이면 쌓기나무는 모두 몇 개일까요?`;
         answer = `${total}개`;
         explanation = `${base} × ${base} × ${height} = ${total}개입니다.`;
-        wrongs.add(`${total+2}개`); wrongs.add(`${total-2}개`); wrongs.add(`${base*base}개`);
+        wrongs.add(`${total + 2}개`); wrongs.add(`${total - 2}개`); wrongs.add(`${base * base}개`);
     } else {
         // 상자 비교
         const a = Math.floor(Math.random() * 10) + 5;
@@ -2441,6 +2441,156 @@ function drawHome() {
     STATE.hitboxes.push({ id: 'btn_start_game', x: btnX, y: layout.btnY, w: layout.btnW, h: layout.btnH });
 }
 
+/* =========================================================================
+   미지수 문제 전용 렌더링 - Symbol Equation Quiz
+   □(네모), ○(동그라미), △(세모) 세 미지수를 추론하는 문제
+   ========================================================================= */
+function drawSymbolEquationQuiz(W, H, cardX, cardY, cardW, cardH) {
+    const problem = STATE.problem;
+    const answers = problem.answers;
+
+    // 타이틀
+    CTX.fillStyle = '#7c3aed';
+    CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'center';
+    CTX.fillText('🧩 미지수 탐정 도전!', cardX + cardW / 2, cardY + 36);
+
+    // 방정식 표시 영역
+    const eqStartY = cardY + 70;
+    const eqHeight = Math.round(32 * SCALE);
+    const eqGap = Math.round(8 * SCALE);
+
+    CTX.fillStyle = '#1f2937';
+    CTX.font = `bold ${Math.round(22 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'center';
+
+    problem.equations.forEach((eq, idx) => {
+        const y = eqStartY + idx * (eqHeight + eqGap);
+        // 방정식 배경
+        roundRect(CTX, cardX + 30, y - 6, cardW - 60, eqHeight + 4, 8);
+        CTX.fillStyle = idx % 2 === 0 ? '#fef3c7' : '#e0e7ff';
+        CTX.fill();
+
+        // 방정식 텍스트
+        CTX.fillStyle = '#1f2937';
+        CTX.font = `bold ${Math.round(20 * SCALE)}px Jua, sans-serif`;
+        CTX.fillText(`(${idx + 1}) ${eq.left} = ${eq.result}`, cardX + cardW / 2, y + eqHeight / 2 + 2);
+    });
+
+    // 미지수 선택 영역
+    const selectStartY = eqStartY + 3 * (eqHeight + eqGap) + 20;
+    const symbolKeys = ['square', 'circle', 'triangle'];
+    const symbolLabels = ['□ 네모', '○ 동그라미', '△ 세모'];
+    const symbolEmojis = ['□', '○', '△'];
+
+    const selectRowH = Math.round(70 * SCALE);
+    const btnSize = Math.round(48 * SCALE);
+    const btnGap = Math.round(8 * SCALE);
+
+    symbolKeys.forEach((key, idx) => {
+        const rowY = selectStartY + idx * selectRowH;
+        const symbolData = answers[key];
+
+        // 미지수 라벨
+        CTX.fillStyle = '#6b21a8';
+        CTX.font = `bold ${Math.round(18 * SCALE)}px Jua, sans-serif`;
+        CTX.textAlign = 'left';
+        CTX.fillText(symbolLabels[idx] + ' =', cardX + 20, rowY + 18);
+
+        // 선택지 버튼들
+        const optionsStartX = cardX + 120;
+        const options = symbolData.options;
+
+        options.forEach((opt, optIdx) => {
+            const ox = optionsStartX + optIdx * (btnSize + btnGap);
+            const oy = rowY;
+
+            roundRect(CTX, ox, oy, btnSize, btnSize, 10);
+
+            const isSelected = STATE.symbolAnswers[key] === opt;
+            if (isSelected) {
+                const g = CTX.createLinearGradient(ox, oy, ox + btnSize, oy + btnSize);
+                g.addColorStop(0, '#a855f7');
+                g.addColorStop(1, '#6366f1');
+                CTX.fillStyle = g;
+                CTX.fill();
+                CTX.fillStyle = '#ffffff';
+            } else {
+                CTX.fillStyle = '#f3e8ff';
+                CTX.fill();
+                CTX.strokeStyle = '#c084fc';
+                CTX.lineWidth = 2;
+                CTX.stroke();
+                CTX.fillStyle = '#1f2937';
+            }
+
+            CTX.font = `bold ${Math.round(18 * SCALE)}px Jua, sans-serif`;
+            CTX.textAlign = 'center';
+            CTX.textBaseline = 'middle';
+            CTX.fillText(opt, ox + btnSize / 2, oy + btnSize / 2);
+            CTX.textBaseline = 'alphabetic';
+
+            STATE.hitboxes.push({
+                id: `symbol_${key}_${optIdx}`,
+                x: ox, y: oy, w: btnSize, h: btnSize,
+                symbolKey: key, value: opt
+            });
+        });
+
+        // 선택된 값 표시
+        if (STATE.symbolAnswers[key] !== null) {
+            CTX.fillStyle = '#059669';
+            CTX.font = `bold ${Math.round(20 * SCALE)}px Jua, sans-serif`;
+            CTX.textAlign = 'left';
+            CTX.fillText(`✓ ${STATE.symbolAnswers[key]}`, optionsStartX + 4 * (btnSize + btnGap) + 10, rowY + 28);
+        }
+    });
+
+    // 정답 확인 버튼
+    const allSelected = STATE.symbolAnswers.square !== null &&
+        STATE.symbolAnswers.circle !== null &&
+        STATE.symbolAnswers.triangle !== null;
+
+    const btnW = Math.max(200, cardW * 0.6);
+    const btnH = Math.round(52 * SCALE);
+    const btnX = cardX + (cardW - btnW) / 2;
+    const btnY = selectStartY + 3 * selectRowH + 20;
+
+    CTX.save();
+    roundRect(CTX, btnX, btnY, btnW, btnH, 14);
+    if (allSelected) {
+        const grad = CTX.createLinearGradient(btnX, btnY, btnX + btnW, btnY + btnH);
+        grad.addColorStop(0, '#f472b6');
+        grad.addColorStop(1, '#8b5cf6');
+        CTX.fillStyle = grad;
+        CTX.shadowColor = 'rgba(139, 92, 246, 0.4)';
+        CTX.shadowBlur = 10;
+    } else {
+        CTX.fillStyle = '#d1d5db';
+    }
+    CTX.fill();
+    CTX.restore();
+
+    CTX.fillStyle = '#ffffff';
+    CTX.font = `bold ${Math.round(20 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'center';
+    CTX.textBaseline = 'middle';
+    CTX.fillText('🔍 정답 확인하기', btnX + btnW / 2, btnY + btnH / 2);
+    CTX.textBaseline = 'alphabetic';
+
+    STATE.hitboxes.push({
+        id: 'btn_check_symbol',
+        x: btnX, y: btnY, w: btnW, h: btnH,
+        disabled: !allSelected
+    });
+
+    // 힌트 텍스트
+    CTX.fillStyle = '#9ca3af';
+    CTX.font = `${Math.round(14 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'center';
+    CTX.fillText('💡 첫 번째 식부터 차근차근 풀어보세요!', cardX + cardW / 2, btnY + btnH + 30);
+}
+
 function drawQuiz() {
     const { W, H } = clear();
     drawBackgroundTiles(W, H, 0.15);
@@ -2458,6 +2608,11 @@ function drawQuiz() {
 
     if (!STATE.problem) return;
 
+    // 미지수 문제인 경우 별도 렌더링
+    if (STATE.problem.type === 'symbolEquation') {
+        drawSymbolEquationQuiz(W, H, cardX, cardY, cardW, cardH);
+        return;
+    }
     const { question, options } = STATE.problem;
 
     // 문제 텍스트
@@ -2553,7 +2708,7 @@ function drawQuiz() {
         CTX.textAlign = 'center';
         CTX.textBaseline = 'middle';
         const circleNums = ['①', '②', '③', '④', '⑤'];
-        const displayText = buttonW < 80 ? `${options[i]}` : `${circleNums[i] || (i+1)+'.'} ${options[i]}`;
+        const displayText = buttonW < 80 ? `${options[i]}` : `${circleNums[i] || (i + 1) + '.'} ${options[i]}`;
         CTX.fillText(displayText, ox + buttonW / 2, oy + buttonH / 2);
         CTX.textBaseline = 'alphabetic';
 
@@ -3073,7 +3228,7 @@ function drawTinipingImage(tgt, cx, cy, imageSize) {
     CTX.lineWidth = 3;
     CTX.stroke();
     CTX.restore();
-    
+
     CTX.fillStyle = '#9f1239';
     CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif`;
     CTX.textAlign = 'center';
@@ -3438,6 +3593,74 @@ function checkAnswer() {
     saveState();
 }
 
+// 미지수 문제 정답 확인
+function checkSymbolAnswer() {
+    if (!STATE.problem || STATE.problem.type !== 'symbolEquation') return;
+
+    const answers = STATE.problem.answers;
+    const userAnswers = STATE.symbolAnswers;
+
+    // 각 미지수별 정답 확인
+    const squareCorrect = String(userAnswers.square) === String(answers.square.value);
+    const circleCorrect = String(userAnswers.circle) === String(answers.circle.value);
+    const triangleCorrect = String(userAnswers.triangle) === String(answers.triangle.value);
+
+    const allCorrect = squareCorrect && circleCorrect && triangleCorrect;
+    const correctCount = [squareCorrect, circleCorrect, triangleCorrect].filter(Boolean).length;
+
+    // 정답 문자열 생성 (기존 시스템과 호환)
+    STATE.problem.answer = `□=${answers.square.value}, ○=${answers.circle.value}, △=${answers.triangle.value}`;
+    STATE.selected = `□=${userAnswers.square}, ○=${userAnswers.circle}, △=${userAnswers.triangle}`;
+
+    STATE.isCorrect = allCorrect;
+    STATE.mode = 'explain';
+
+    if (allCorrect) {
+        STATE.score += 1;
+        STATE.consecutiveCorrect += 1;
+
+        // Confetti 효과
+        if (typeof confetti === 'function') {
+            confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+        }
+
+        const threshold = Math.floor((STATE.caughtIds.length + 1) * 3.5);
+        const canCatchMore = STATE.caughtIds.length < TINIPINGS.length;
+
+        if (STATE.score >= threshold && canCatchMore) {
+            let targetDomain = '수와 연산';
+            let avail = TINIPINGS.filter(t => !STATE.caughtIds.includes(t.id) && t.domain === targetDomain);
+            if (avail.length === 0) {
+                avail = TINIPINGS.filter(t => !STATE.caughtIds.includes(t.id));
+            }
+            if (avail.length > 0) {
+                STATE.newTiniping = avail[Math.floor(Math.random() * avail.length)];
+            }
+        } else {
+            STATE.newTiniping = null;
+        }
+    } else {
+        STATE.consecutiveCorrect = 0;
+        STATE.newTiniping = null;
+
+        // 부분 정답 피드백을 해설에 추가
+        let feedback = `\n\n📊 결과: ${correctCount}/3 정답\n`;
+        feedback += squareCorrect ? '✅ □ 정답!' : `❌ □ 오답 (정답: ${answers.square.value})`;
+        feedback += '\n';
+        feedback += circleCorrect ? '✅ ○ 정답!' : `❌ ○ 오답 (정답: ${answers.circle.value})`;
+        feedback += '\n';
+        feedback += triangleCorrect ? '✅ △ 정답!' : `❌ △ 오답 (정답: ${answers.triangle.value})`;
+
+        STATE.problem.explanation += feedback;
+    }
+
+    saveState();
+}
+
 function afterExplainNext() {
     if (STATE.confirmed === false) {
         STATE.selected = null;
@@ -3475,6 +3698,8 @@ function gotoNextQuestion() {
     STATE.selected = null;
     STATE.isCorrect = null;
     STATE.confirmed = null;
+    // 미지수 상태 초기화
+    STATE.symbolAnswers = { square: null, circle: null, triangle: null };
     STATE.mode = 'quiz';
     saveState();
 }
@@ -3512,7 +3737,8 @@ function resetAll() {
         hitboxes: [],
         currentCurriculum: 'division',
         mapSelection: { grade: null, subGrade: null, domain: null },
-        collectionTab: '전체'
+        collectionTab: '전체',
+        symbolAnswers: { square: null, circle: null, triangle: null }
     };
     saveState();
 }
@@ -3582,9 +3808,19 @@ function onPointer(evt) {
                         STATE.questionIndex = 0;
                         STATE.score = 0;
                         STATE.caughtIds = [];
+                        // 미지수 상태 초기화
+                        STATE.symbolAnswers = { square: null, circle: null, triangle: null };
                         ensureProblem();
                     } else if (b.id.startsWith('opt_')) {
                         STATE.selected = b.value;
+                    } else if (b.id.startsWith('symbol_')) {
+                        // 미지수 문제 선택지 클릭
+                        if (b.symbolKey && b.value !== undefined) {
+                            STATE.symbolAnswers[b.symbolKey] = b.value;
+                        }
+                    } else if (b.id === 'btn_check_symbol') {
+                        // 미지수 문제 정답 확인
+                        checkSymbolAnswer();
                     } else if (b.id.startsWith('tab_')) {
                         STATE.collectionTab = b.id.replace('tab_', '');
                     }

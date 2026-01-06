@@ -1,0 +1,124 @@
+{
+  "description": "티니핑 한글-영문 이름 매핑 (시즌 1-6)",
+  "lastUpdated": "2025-12-05",
+  "source": "Catch! Teenieping Fandom Wiki",
+  "mappings": {
+    "시즌1": {
+      "로열핑": {
+        "하츄핑": {"en": "Heartsping", "meaning": "사랑의 티니핑"},
+        "바로핑": {"en": "Dadaping", "meaning": "올바름의 티니핑"},
+        "아자핑": {"en": "Gogoping", "meaning": "용기의 티니핑"},
+        "차차핑": {"en": "Chachaping", "meaning": "희망의 티니핑"},
+        "라라핑": {"en": "Lalaping", "meaning": "기쁨의 티니핑"},
+        "해피핑": {"en": "Happying", "meaning": "행복의 티니핑"}
+      },
+      "빌런핑": {
+        "키킹": {"en": "Giggleping", "meaning": "장난의 티니핑"},
+        "잘난핑": {"en": "Egoping", "meaning": "이기심의 티니핑"}
+      },
+      "일반핑": {
+        "킥킥핑": {"en": "Kikiping", "meaning": "악의의 티니핑"},
+        "깜찍핑": {"en": "Charmping", "meaning": "귀여움의 티니핑"},
+        "수줍핑": {"en": "Shyping", "meaning": "수줍음의 티니핑"},
+        "으쌰핑": {"en": "Dareping", "meaning": "경쟁심의 티니핑"},
+        "멍때핑": {"en": "Blankping", "meaning": "멍함의 티니핑"},
+        "상상핑": {"en": "Dreamping", "meaning": "상상의 티니핑"},
+        "눈물핑": {"en": "Weeping", "meaning": "슬픔의 티니핑"},
+        "나른핑": {"en": "Moseyping", "meaning": "게으름의 티니핑"},
+        "화르핑": {"en": "Roarping", "meaning": "화남의 티니핑"},
+        "노노핑": {"en": "Nonoping", "meaning": "거절의 티니핑"},
+        "사랑핑": {"en": "Luvping", "meaning": "끌림의 티니핑"},
+        "시리핑": {"en": "Coolping", "meaning": "차가움의 티니핑"}
+      }
+    },
+    "시즌2": {
+      "로열핑": {
+        "조아핑": {"en": "Joahping", "meaning": "친절함의 티니핑"},
+        "방글핑": {"en": "Teeheeping", "meaning": "웃음의 티니핑"},
+        "믿어핑": {"en": "Trustping", "meaning": "믿음의 티니핑"}
+      },
+      "빌런핑": {
+        "마스킹": {"en": "Maskping", "meaning": "가면의 티니핑"}
+      },
+      "보석티니핑": {
+        "간질핑": {"en": "Tickleping", "meaning": "장난의 티니핑"},
+        "소원핑": {"en": "Wishping", "meaning": "소원의 티니핑"}
+      }
+    },
+    "시즌3": {
+      "로열핑": {
+        "꾸래핑": {"en": "Okeydokeyping", "meaning": "평화의 티니핑"},
+        "나나핑": {"en": "Nanaping", "meaning": "열정의 티니핑"},
+        "솔찌핑": {"en": "Trueping", "meaning": "솔직함의 티니핑"}
+      },
+      "레전드핑": {
+        "럭키핑": {"en": "Luckyping", "meaning": "행운의 티니핑"}
+      }
+    },
+    "시즌4": {
+      "로열핑": {
+        "샤샤핑": {"en": "Shashaping", "meaning": "긍정의 티니핑"},
+        "말랑핑": {"en": "Fluffyping", "meaning": "순수함의 티니핑"},
+        "젤리핑": {"en": "Jellyping", "meaning": "열정의 티니핑"}
+      },
+      "레전드핑": {
+        "스위핑": {"en": "Sweetping", "meaning": "달콤함의 티니핑"},
+        "포실핑": {"en": "Posilping", "meaning": "포근함의 티니핑"}
+      }
+    },
+    "시즌5": {
+      "로열핑": {
+        "빛나핑": {"en": "Shimmerping", "meaning": "치유의 티니핑"},
+        "초롱핑": {"en": "Sparkleping", "meaning": "소망의 티니핑"},
+        "빤짝핑": {"en": "Twinkleping", "meaning": "밝음의 티니핑"},
+        "프린스핑": {"en": "Princeping", "meaning": "탁월함의 티니핑"}
+      },
+      "레전드핑": {
+        "오로라핑": {"en": "Auroraping", "meaning": "약속의 티니핑"}
+      }
+    },
+    "시즌6": {
+      "로열핑": {
+        "사뿐핑": {"en": "Graceping", "meaning": "우아함의 티니핑"},
+        "아름핑": {"en": "Claireping", "meaning": "아름다움의 티니핑"},
+        "뽀니핑": {"en": "Bonnyping", "meaning": "자신감의 티니핑"}
+      },
+      "레전드핑": {
+        "다이아나핑": {"en": "Dianaping", "meaning": "영광의 티니핑"},
+        "이클립스핑": {"en": "Eclipseping", "meaning": "고독의 티니핑"}
+      }
+    }
+  },
+  "quickLookup": {
+    "하츄핑": "Heartsping",
+    "바로핑": "Dadaping",
+    "아자핑": "Gogoping",
+    "차차핑": "Chachaping",
+    "라라핑": "Lalaping",
+    "해피핑": "Happying",
+    "키킹": "Giggleping",
+    "잘난핑": "Egoping",
+    "조아핑": "Joahping",
+    "방글핑": "Teeheeping",
+    "믿어핑": "Trustping",
+    "꾸래핑": "Okeydokeyping",
+    "나나핑": "Nanaping",
+    "솔찌핑": "Trueping",
+    "럭키핑": "Luckyping",
+    "샤샤핑": "Shashaping",
+    "말랑핑": "Fluffyping",
+    "젤리핑": "Jellyping",
+    "스위핑": "Sweetping",
+    "포실핑": "Posilping",
+    "빛나핑": "Shimmerping",
+    "초롱핑": "Sparkleping",
+    "빤짝핑": "Twinkleping",
+    "프린스핑": "Princeping",
+    "오로라핑": "Auroraping",
+    "사뿐핑": "Graceping",
+    "아름핑": "Claireping",
+    "뽀니핑": "Bonnyping",
+    "다이아나핑": "Dianaping",
+    "이클립스핑": "Eclipseping"
+  }
+}

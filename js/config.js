@@ -40,7 +40,13 @@ let STATE = {
     domain: null // '수와 연산' 등
   },
   // 컬렉션 탭 상태
-  collectionTab: '전체'
+  collectionTab: '전체',
+  // 미지수 문제 상태
+  symbolAnswers: {
+    square: null,   // □ 선택값
+    circle: null,   // ○ 선택값
+    triangle: null  // △ 선택값
+  }
 };
 
 let TINIPINGS = [];
