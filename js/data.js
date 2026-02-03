@@ -578,6 +578,19 @@ function preloadImage(src) {
 }
 
 async function loadTinipingImages() {
+    const FALLBACK_IMAGE_SRC = './images/tinipings/하츄핑.png';
+    let fallbackImageObj = null;
+
+    // 0단계: 폴백 이미지 로드
+    try {
+        fallbackImageObj = await preloadImage(FALLBACK_IMAGE_SRC);
+        if (!fallbackImageObj) {
+            console.error('치명적 오류: 폴백 이미지 로드 실패');
+        }
+    } catch (e) {
+        console.error('폴백 이미지 로드 중 예외 발생:', e);
+    }
+
     // 1단계: 로컬 이미지 먼저 로드
     const localImagePromises = [];
     const localLoadedNames = new Set();
@@ -646,19 +659,31 @@ async function loadTinipingImages() {
 
     await Promise.all(base64Promises);
 
-    // 이미지가 없는 티니핑은 경고만 출력 (정상 동작에는 영향 없음)
-    const missingNames = baseTinipings.filter(t => !NAME2IMG.has(t.name)).map(t => t.name);
+    // 이미지가 없는 티니핑은 폴백 이미지 할당
+    const missingNames = [];
+    
+    TINIPINGS = baseTinipings.map(t => {
+        let imgObj = IMAGE_CACHE.get(t.name);
+        let imgSrc = NAME2IMG.get(t.name);
+
+        if (!imgObj) {
+            missingNames.push(t.name);
+            imgObj = fallbackImageObj; // 폴백 이미지 사용
+            imgSrc = FALLBACK_IMAGE_SRC;
+        }
+
+        return {
+            ...t,
+            image: imgSrc,
+            imageObj: imgObj
+        };
+    });
+
     if (missingNames.length) {
-        console.log(`이미지 미보유 티니핑 (${missingNames.length}개):`, missingNames.slice(0, 5).join(', ') + (missingNames.length > 5 ? '...' : ''));
+        console.warn(`이미지 로드 실패 (${missingNames.length}개), 기본 이미지로 대체됨:`, missingNames.slice(0, 5).join(', ') + (missingNames.length > 5 ? '...' : ''));
     }
 
-    TINIPINGS = baseTinipings.map(t => ({
-        ...t,
-        image: NAME2IMG.get(t.name) || null,
-        imageObj: IMAGE_CACHE.get(t.name) || null
-    }));
-
-    console.log('티니핑 이미지 로드 완료:', IMAGE_CACHE.size, '/', baseTinipings.length, '개');
+    console.log('티니핑 이미지 로드 완료:', IMAGE_CACHE.size, '/', baseTinipings.length, '개 (폴백 적용 포함)');
 }
 
 async function loadEncyclopedia() {

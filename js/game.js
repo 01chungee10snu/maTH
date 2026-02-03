@@ -2071,9 +2071,11 @@ function genVolumeProblem(diff) {
 function clear() {
     const W = CANVAS.width / DPR;
     const H = CANVAS.height / DPR;
+    // Emotion Castle Theme Gradient
     const g = CTX.createLinearGradient(0, 0, W, H);
-    g.addColorStop(0, '#fff0f6');
-    g.addColorStop(1, '#eef6ff');
+    g.addColorStop(0, '#FFF0F5'); // Lavender Blush
+    g.addColorStop(0.5, '#FFFBEB'); // Cosmic Latte (Soft Yellow)
+    g.addColorStop(1, '#E0E7FF'); // Periwinkle
     CTX.fillStyle = g;
     CTX.fillRect(0, 0, W, H);
     STATE.hitboxes = [];
@@ -2082,29 +2084,40 @@ function clear() {
 
 function drawHeader(W, H) {
     CTX.save();
-    roundRect(CTX, 16, 12, W - 32, 80, 16);
-    CTX.fillStyle = '#ffffff';
+    // Soft White Card Background
+    roundRect(CTX, 16, 12, W - 32, 80, 24);
+    CTX.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    CTX.shadowColor = 'rgba(236, 72, 153, 0.15)'; // Pink shadow
+    CTX.shadowBlur = 15;
+    CTX.shadowOffsetY = 5;
     CTX.fill();
-    CTX.shadowColor = 'rgba(0,0,0,0.06)';
-    CTX.shadowBlur = 10;
     CTX.restore();
 
-    CTX.fillStyle = '#ec4899';
+    // Title
+    CTX.fillStyle = '#EC4899'; // Accent Pink
     CTX.font = 'bold 32px Jua, sans-serif, Segoe UI, Roboto';
     CTX.textAlign = 'center';
     const title = STATE.currentCurriculum === 'division' ? '태희의 도전! 수학꾸러기' : `태희의 ${STATE.currentCurriculum} 도전!`;
-    CTX.fillText(title, W / 2, 45);
+    CTX.fillText(title, W / 2, 48);
     CTX.textAlign = 'left';
 
-    CTX.fillStyle = '#374151';
-    CTX.font = '22px Jua, sans-serif, Segoe UI, Roboto';
-    CTX.fillText(`문제 ${STATE.totalQuestions + 1}/100`, 32, 75);
+    // Subtitle / Info
+    CTX.fillStyle = '#6B7280'; // Soft Dark Grey
+    CTX.font = '20px Jua, sans-serif';
+    CTX.fillText(`문제 ${STATE.totalQuestions + 1}/100`, 36, 76);
 
-    const scoreTxt = `점수 ${STATE.score}`;
+    const scoreTxt = `💎 ${STATE.score}`;
     const diffTxt = `${STATE.difficulty}단`;
     CTX.textAlign = 'right';
-    CTX.fillText(diffTxt, W - 32, 45);
-    CTX.fillText(scoreTxt, W - 32, 75);
+    
+    // Difficulty Badge
+    CTX.fillStyle = '#A78BFA'; // Soft Purple
+    CTX.fillText(diffTxt, W - 36, 48);
+    
+    // Score
+    CTX.fillStyle = '#F59E0B'; // Amber
+    CTX.fillText(scoreTxt, W - 36, 76);
+    
     CTX.textAlign = 'left';
 }
 
@@ -2421,12 +2434,15 @@ function drawHome() {
 
     const btnX = (W - layout.btnW) / 2;
     CTX.save();
-    CTX.shadowColor = 'rgba(236,72,153,0.4)';
-    CTX.shadowBlur = Math.round(12 * SCALE);
-    roundRect(CTX, btnX, layout.btnY, layout.btnW, layout.btnH, Math.round(16 * SCALE));
-    const btnG = CTX.createLinearGradient(btnX, layout.btnY, btnX, layout.btnY + layout.btnH);
-    btnG.addColorStop(0, '#ec4899');
-    btnG.addColorStop(1, '#db2777');
+    CTX.shadowColor = 'rgba(236, 72, 153, 0.4)';
+    CTX.shadowBlur = 20;
+    CTX.shadowOffsetY = 8;
+    roundRect(CTX, btnX, layout.btnY, layout.btnW, layout.btnH, 30); // Pill shape
+    
+    // Emotion Castle Gradient
+    const btnG = CTX.createLinearGradient(btnX, layout.btnY, btnX + layout.btnW, layout.btnY + layout.btnH);
+    btnG.addColorStop(0, '#F472B6'); // Pink
+    btnG.addColorStop(1, '#8B5CF6'); // Purple
     CTX.fillStyle = btnG;
     CTX.fill();
     CTX.restore();
@@ -2590,6 +2606,98 @@ function drawSymbolEquationQuiz(W, H, cardX, cardY, cardW, cardH) {
     CTX.fillText('💡 첫 번째 식부터 차근차근 풀어보세요!', cardX + cardW / 2, btnY + btnH + 35);
 }
 
+// 힌트 버튼 그리기
+function drawHintButton(x, y, size) {
+    CTX.save();
+    CTX.beginPath();
+    CTX.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+    CTX.fillStyle = '#fef08a'; // 노란색 배경
+    CTX.shadowColor = 'rgba(0,0,0,0.1)';
+    CTX.shadowBlur = 5;
+    CTX.fill();
+    CTX.strokeStyle = '#eab308';
+    CTX.lineWidth = 2;
+    CTX.stroke();
+
+    CTX.fillStyle = '#854d0e';
+    CTX.font = `${Math.round(size * 0.6)}px sans-serif`;
+    CTX.textAlign = 'center';
+    CTX.textBaseline = 'middle';
+    CTX.fillText('💡', x + size / 2, y + size / 2);
+    CTX.restore();
+    CTX.textBaseline = 'alphabetic'; // Reset
+
+    STATE.hitboxes.push({ id: 'btn_hint', x, y, w: size, h: size });
+}
+
+// 힌트 팝업 그리기
+function drawHintPopup(x, y, w, text) {
+    if (!text) return;
+    const padding = 15;
+    CTX.save();
+    CTX.font = `bold ${Math.round(20 * SCALE)}px Jua, sans-serif`;
+    const lines = getLines(CTX, text, w - padding * 2);
+    const h = lines.length * 30 + padding * 2;
+
+    roundRect(CTX, x, y, w, h, 10);
+    CTX.fillStyle = '#ffffff';
+    CTX.shadowColor = 'rgba(0,0,0,0.2)';
+    CTX.shadowBlur = 10;
+    CTX.fill();
+    CTX.strokeStyle = '#facc15';
+    CTX.lineWidth = 2;
+    CTX.stroke();
+
+    CTX.fillStyle = '#854d0e';
+    CTX.textAlign = 'left';
+    CTX.textBaseline = 'top';
+    lines.forEach((line, i) => {
+        CTX.fillText(line, x + padding, y + padding + i * 30);
+    });
+    CTX.restore();
+}
+
+// 숫자 키패드 그리기
+function drawKeypad(x, y, w, h) {
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '확인'];
+    const gap = 10;
+    const keyW = (w - gap * 2) / 3;
+    const keyH = (h - gap * 3) / 4;
+
+    keys.forEach((key, i) => {
+        const row = Math.floor(i / 3);
+        const col = i % 3;
+        const kx = x + col * (keyW + gap);
+        const ky = y + row * (keyH + gap);
+
+        CTX.save();
+        roundRect(CTX, kx, ky, keyW, keyH, 10);
+        
+        if (key === '확인') {
+             CTX.fillStyle = '#10b981'; // 녹색
+        } else if (key === 'C') {
+             CTX.fillStyle = '#ef4444'; // 빨간색
+        } else {
+             CTX.fillStyle = '#ffffff';
+        }
+        
+        CTX.shadowColor = 'rgba(0,0,0,0.1)';
+        CTX.shadowBlur = 2;
+        CTX.fill();
+        CTX.strokeStyle = '#e5e7eb';
+        CTX.stroke();
+
+        CTX.fillStyle = (key === '확인' || key === 'C') ? '#ffffff' : '#374151';
+        CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif`;
+        CTX.textAlign = 'center';
+        CTX.textBaseline = 'middle';
+        CTX.fillText(key, kx + keyW / 2, ky + keyH / 2);
+        CTX.restore();
+
+        STATE.hitboxes.push({ id: `key_${key}`, x: kx, y: ky, w: keyW, h: keyH, value: key });
+    });
+}
+
 function drawQuiz() {
     const { W, H } = clear();
     drawBackgroundTiles(W, H, 0.15);
@@ -2612,7 +2720,16 @@ function drawQuiz() {
         drawSymbolEquationQuiz(W, H, cardX, cardY, cardW, cardH);
         return;
     }
-    const { question, options } = STATE.problem;
+    const problem = STATE.problem;
+    const { question, options } = problem;
+
+    // 힌트 버튼 (문제 텍스트 우측 상단)
+    if (problem.hint || problem.explanation) {
+        drawHintButton(cardX + cardW - 60, cardY + 20, 40);
+        if (STATE.showHint) {
+            drawHintPopup(cardX + cardW - 220, cardY + 70, 200, problem.hint || '힌트가 없어요.');
+        }
+    }
 
     // 문제 텍스트
     CTX.fillStyle = '#111827';
@@ -3535,7 +3652,11 @@ function ensureProblem() {
 
 function checkAnswer() {
     if (STATE.selected == null) return;
-    const correct = STATE.selected === STATE.problem.answer;
+    
+    // 정답 비교 로직 개선 (공백 제거 및 숫자/단위 처리)
+    const normalize = (val) => String(val).replace(/\s+/g, '').trim();
+    const correct = normalize(STATE.selected) === normalize(STATE.problem.answer);
+    
     STATE.isCorrect = correct;
     STATE.mode = 'explain';
     if (correct) {
@@ -3699,6 +3820,98 @@ function catchConfirm() {
     gotoNextQuestion();
 }
 
+// 힌트 버튼 그리기
+function drawHintButton(x, y, size) {
+    CTX.save();
+    CTX.beginPath();
+    CTX.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+    CTX.fillStyle = '#fef08a'; // 노란색 배경
+    CTX.shadowColor = 'rgba(0,0,0,0.1)';
+    CTX.shadowBlur = 5;
+    CTX.fill();
+    CTX.strokeStyle = '#eab308';
+    CTX.lineWidth = 2;
+    CTX.stroke();
+
+    CTX.fillStyle = '#854d0e';
+    CTX.font = `${Math.round(size * 0.6)}px sans-serif`;
+    CTX.textAlign = 'center';
+    CTX.textBaseline = 'middle';
+    CTX.fillText('💡', x + size / 2, y + size / 2);
+    CTX.restore();
+    CTX.textBaseline = 'alphabetic'; // Reset
+
+    STATE.hitboxes.push({ id: 'btn_hint', x, y, w: size, h: size });
+}
+
+// 힌트 팝업 그리기
+function drawHintPopup(x, y, w, text) {
+    if (!text) return;
+    const padding = 15;
+    CTX.save();
+    CTX.font = `bold ${Math.round(20 * SCALE)}px Jua, sans-serif`;
+    const lines = getLines(CTX, text, w - padding * 2);
+    const h = lines.length * 30 + padding * 2;
+
+    roundRect(CTX, x, y, w, h, 10);
+    CTX.fillStyle = '#ffffff';
+    CTX.shadowColor = 'rgba(0,0,0,0.2)';
+    CTX.shadowBlur = 10;
+    CTX.fill();
+    CTX.strokeStyle = '#facc15';
+    CTX.lineWidth = 2;
+    CTX.stroke();
+
+    CTX.fillStyle = '#854d0e';
+    CTX.textAlign = 'left';
+    CTX.textBaseline = 'top';
+    lines.forEach((line, i) => {
+        CTX.fillText(line, x + padding, y + padding + i * 30);
+    });
+    CTX.restore();
+}
+
+// 숫자 키패드 그리기
+function drawKeypad(x, y, w, h) {
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '확인'];
+    const gap = 10;
+    const keyW = (w - gap * 2) / 3;
+    const keyH = (h - gap * 3) / 4;
+
+    keys.forEach((key, i) => {
+        const row = Math.floor(i / 3);
+        const col = i % 3;
+        const kx = x + col * (keyW + gap);
+        const ky = y + row * (keyH + gap);
+
+        CTX.save();
+        roundRect(CTX, kx, ky, keyW, keyH, 10);
+        
+        if (key === '확인') {
+             CTX.fillStyle = '#10b981'; // 녹색
+        } else if (key === 'C') {
+             CTX.fillStyle = '#ef4444'; // 빨간색
+        } else {
+             CTX.fillStyle = '#ffffff';
+        }
+        
+        CTX.shadowColor = 'rgba(0,0,0,0.1)';
+        CTX.shadowBlur = 2;
+        CTX.fill();
+        CTX.strokeStyle = '#e5e7eb';
+        CTX.stroke();
+
+        CTX.fillStyle = (key === '확인' || key === 'C') ? '#ffffff' : '#374151';
+        CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif`;
+        CTX.textAlign = 'center';
+        CTX.textBaseline = 'middle';
+        CTX.fillText(key, kx + keyW / 2, ky + keyH / 2);
+        CTX.restore();
+
+        STATE.hitboxes.push({ id: `key_${key}`, x: kx, y: ky, w: keyW, h: keyH, value: key });
+    });
+}
+
 function resetAll() {
     localStorage.removeItem(LS_KEY);
     STATE = {
@@ -3777,8 +3990,24 @@ function onPointer(evt) {
                 case 'btn_reset':
                     resetAll();
                     break;
+                case 'btn_hint':
+                    STATE.showHint = !STATE.showHint;
+                    break;
                 default:
-                    if (b.id.startsWith('grade_')) {
+                    if (b.id.startsWith('key_')) {
+                        const val = b.value;
+                        if (val === 'C') {
+                            STATE.quizInput = '';
+                        } else if (val === '확인') {
+                            STATE.selected = STATE.quizInput;
+                            checkAnswer();
+                        } else {
+                            if (!STATE.quizInput) STATE.quizInput = '';
+                            if (STATE.quizInput.length < 10) {
+                                STATE.quizInput += val;
+                            }
+                        }
+                    } else if (b.id.startsWith('grade_')) {
                         STATE.mapSelection.grade = b.id.replace('grade_', '');
                     } else if (b.id.startsWith('subgrade_')) {
                         STATE.mapSelection.subGrade = b.id.replace('subgrade_', '');

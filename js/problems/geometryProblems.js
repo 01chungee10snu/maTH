@@ -143,6 +143,39 @@ const GEOMETRY_TEMPLATES = {
                 wrongs: ['어느 방향으로든 굴러간다', '굴러가지 않는다', '위아래로만 굴러간다']
             })
         }
+    ],
+
+    // 각도 계산 (4~6학년)
+    angleCalculation: [
+        {
+            context: '삼각형의 각',
+            template: (name1) => {
+                const a = Math.floor(Math.random() * 60) + 30; // 30~90
+                const b = Math.floor(Math.random() * (140 - a)) + 20; // 나머지 중에서
+                const c = 180 - a - b;
+                return {
+                    question: `🔺 ${name1}이(가) 삼각형을 그렸어요.\n두 각의 크기가 ${a}°, ${b}°라면, 나머지 한 각의 크기는 몇 도일까요?`,
+                    explanation: `삼각형의 세 각의 합은 180°예요.\n180° - ${a}° - ${b}° = ${c}°입니다!`,
+                    answer: `${c}°`,
+                    wrongs: [`${c + 10}°`, `${c - 10}°`, `${180 - a}°`]
+                };
+            }
+        },
+        {
+            context: '사각형의 각',
+            template: (name1) => {
+                const a = 90;
+                const b = Math.floor(Math.random() * 80) + 50;
+                const c = Math.floor(Math.random() * 80) + 50;
+                const d = 360 - a - b - c;
+                return {
+                    question: `⬜ ${name1}이(가) 사각형을 그렸어요.\n세 각의 크기가 ${a}°, ${b}°, ${c}°라면, 나머지 한 각의 크기는 몇 도일까요?`,
+                    explanation: `사각형의 네 각의 합은 360°예요.\n360° - ${a}° - ${b}° - ${c}° = ${d}°입니다!`,
+                    answer: `${d}°`,
+                    wrongs: [`${d + 10}°`, `${d - 10}°`, `${360 - a - b}°`]
+                };
+            }
+        }
     ]
 };
 
@@ -162,9 +195,12 @@ function generateGeometryProblem(difficulty) {
         // 도형 분류, 합치기/나누기
         const categories = [GEOMETRY_TEMPLATES.sidesAndVertices, GEOMETRY_TEMPLATES.shapeCombination];
         templates = categories[Math.floor(Math.random() * categories.length)];
-    } else {
+    } else if (difficulty <= 10) {
         // 입체도형
         templates = GEOMETRY_TEMPLATES.solidShapes;
+    } else {
+        // 각도 계산 (고난이도)
+        templates = GEOMETRY_TEMPLATES.angleCalculation;
     }
 
     const template = templates[Math.floor(Math.random() * templates.length)];

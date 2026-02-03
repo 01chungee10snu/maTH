@@ -62,6 +62,18 @@ const PATTERN_TEMPLATES = {
                 answer: answer
             })
         }
+    ],
+
+    // N번째 수 찾기 (4학년 이상)
+    nthTerm: [
+        {
+            context: '등차수열 N번째',
+            template: (start, step, n, answer) => ({
+                question: `🔢 수가 규칙적으로 늘어나고 있어요.\n${start}, ${start + step}, ${start + step * 2}, ...\n${n}번째에 올 수는 무엇일까요?`,
+                explanation: `첫 번째 수가 ${start}이고 ${step}씩 커지는 규칙이에요.\n${n}번째 수는 ${start} + ${step} × ${n - 1} = ${answer}입니다!`,
+                answer: answer
+            })
+        }
     ]
 };
 
@@ -74,7 +86,15 @@ function generatePatternProblem(difficulty) {
     const wrongs = new Set();
 
     // 난이도에 따른 유형 선택
-    const type = Math.floor(Math.random() * 4);
+    // 1~5: 등차수열(다음항), 6~10: 도형/색깔패턴, 11~: N번째 수 찾기
+    let type;
+    if (difficulty <= 5) {
+        type = Math.floor(Math.random() * 2); // 0, 1 (등차수열 다음항)
+    } else if (difficulty <= 10) {
+        type = Math.floor(Math.random() * 2) + 2; // 2, 3 (도형, 색깔)
+    } else {
+        type = 4; // N번째 수
+    }
 
     if (type === 0) {
         // 등차수열 (증가)
@@ -133,7 +153,7 @@ function generatePatternProblem(difficulty) {
 
         group.wrong.forEach(w => wrongs.add(w));
 
-    } else {
+    } else if (type === 3) {
         // 색깔 반복 패턴
         const colorGroups = [
             { colors: ['빨강', '파랑', '빨강', '파랑', '빨강'], answer: '파랑', sequence: '🔴 🔵 🔴 🔵 🔴 ?', wrong: ['빨강', '노랑', '초록'] },
@@ -147,6 +167,25 @@ function generatePatternProblem(difficulty) {
         explanation = `색깔이 순서대로 반복되는 규칙이에요! 다음은 ${group.answer}입니다.`;
 
         group.wrong.forEach(w => wrongs.add(w));
+
+    } else {
+        // N번째 수 찾기
+        const start = Math.floor(Math.random() * 5) + 1;
+        const step = Math.floor(Math.random() * 4) + 2;
+        const n = Math.floor(Math.random() * 5) + 5; // 5~9번째
+        const ans = start + step * (n - 1);
+
+        const template = PATTERN_TEMPLATES.nthTerm[0];
+        const result = template.template(start, step, n, ans);
+
+        question = result.question;
+        answer = result.answer;
+        explanation = result.explanation;
+
+        wrongs.add(ans + step);
+        wrongs.add(ans - step);
+        wrongs.add(ans + 1);
+        wrongs.add(ans * 2);
     }
 
     const wrongsArray = Array.from(wrongs).filter(w => String(w) !== String(answer)).slice(0, 3);

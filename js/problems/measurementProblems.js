@@ -76,6 +76,46 @@ const MEASUREMENT_TEMPLATES = {
                 wrongs: [`${shorter}cm`, `${a + b}cm`, `${Math.abs(a - b)}cm`]
             })
         }
+    ],
+
+    // 단위 변환 (3~4학년)
+    unitConversion: [
+        {
+            context: 'cm to m',
+            template: (m, cm) => {
+                const totalCm = m * 100 + cm;
+                return {
+                    question: `📏 끈의 길이가 ${totalCm}cm예요.\n이것은 몇 m 몇 cm일까요?`,
+                    explanation: `100cm는 1m와 같아요.\n${totalCm}cm = ${m}00cm + ${cm}cm = ${m}m ${cm}cm입니다!`,
+                    answer: `${m}m ${cm}cm`,
+                    wrongs: [`${m}m ${cm+10}cm`, `${m+1}m ${cm}cm`, `${m}0m ${cm}cm`]
+                };
+            }
+        },
+        {
+            context: 'm to cm',
+            template: (m, cm) => {
+                const totalCm = m * 100 + cm;
+                return {
+                    question: `📏 끈의 길이가 ${m}m ${cm}cm예요.\n이것은 몇 cm일까요?`,
+                    explanation: `1m는 100cm와 같아요.\n${m}m ${cm}cm = ${m}00cm + ${cm}cm = ${totalCm}cm입니다!`,
+                    answer: `${totalCm}cm`,
+                    wrongs: [`${totalCm + 10}cm`, `${m}${cm}cm`, `${m * 10 + cm}cm`]
+                };
+            }
+        },
+        {
+            context: 'km to m',
+            template: (km, m) => {
+                const totalM = km * 1000 + m;
+                return {
+                    question: `🏃 마라톤 코스의 길이가 ${km}km ${m}m예요.\n이것은 몇 m일까요?`,
+                    explanation: `1km는 1000m와 같아요.\n${km}km ${m}m = ${km}000m + ${m}m = ${totalM}m입니다!`,
+                    answer: `${totalM}m`,
+                    wrongs: [`${totalM + 100}m`, `${km}${m}m`, `${km * 100 + m}m`]
+                };
+            }
+        }
     ]
 };
 
@@ -86,7 +126,16 @@ function generateMeasurementProblem(difficulty) {
     const [name1, name2] = getTwoCharacters();
 
     // 난이도에 따른 유형 선택
-    const type = Math.floor(Math.random() * 4);
+    // 1~5: 시계, 6~10: 시간계산/길이비교, 11~: 단위변환
+    let type;
+    if (difficulty <= 5) {
+        type = Math.floor(Math.random() * 2); // 0, 1 (시계)
+    } else if (difficulty <= 10) {
+        type = Math.floor(Math.random() * 2) + 2; // 2, 3 (시간계산, 길이비교)
+    } else {
+        type = 4; // 단위 변환
+    }
+
     let result;
 
     if (type === 0) {
@@ -115,7 +164,7 @@ function generateMeasurementProblem(difficulty) {
             result = template.template(startHour, endHour, duration, name1);
         }
 
-    } else {
+    } else if (type === 3) {
         // 길이 비교
         const a = Math.floor(Math.random() * 20) + 5;
         let b;
@@ -127,6 +176,23 @@ function generateMeasurementProblem(difficulty) {
 
         const template = MEASUREMENT_TEMPLATES.lengthComparison[0];
         result = template.template(a, b, longer, shorter, name1, name2);
+
+    } else {
+        // 단위 변환
+        const subtype = Math.floor(Math.random() * 3);
+        if (subtype === 0) { // cm -> m cm
+            const m = Math.floor(Math.random() * 5) + 1;
+            const cm = Math.floor(Math.random() * 90) + 10;
+            result = MEASUREMENT_TEMPLATES.unitConversion[0].template(m, cm);
+        } else if (subtype === 1) { // m cm -> cm
+            const m = Math.floor(Math.random() * 5) + 1;
+            const cm = Math.floor(Math.random() * 90) + 10;
+            result = MEASUREMENT_TEMPLATES.unitConversion[1].template(m, cm);
+        } else { // km m -> m
+            const km = Math.floor(Math.random() * 5) + 1;
+            const m = Math.floor(Math.random() * 800) + 100;
+            result = MEASUREMENT_TEMPLATES.unitConversion[2].template(km, m);
+        }
     }
 
     return createProblemResult(result.question, result.answer, result.explanation, result.wrongs, 'measurement', difficulty);
