@@ -1,0 +1,7 @@
+.codex/
+.env
+.env.*
+!.env.example
+js/supabaseLocalConfig.js
+test-results/
+playwright-report/

@@ -21,6 +21,72 @@ function createContext() {
   return context;
 }
 
+function createConfigContext() {
+  const context = createContext();
+  context.window.devicePixelRatio = 1;
+  context.performance = { now: () => 0 };
+  context.document = {
+    getElementById(id) {
+      if (id === 'app') {
+        return {
+          getContext: () => ({})
+        };
+      }
+      if (id === 'err') {
+        return {
+          setAttribute() {}
+        };
+      }
+      return null;
+    }
+  };
+  return context;
+}
+
+function testSupabasePublicConfigContract() {
+  const context = createConfigContext();
+
+  assert.ok(
+    fs.existsSync(path.join(root, 'js/supabasePublicConfig.js')),
+    'js/supabasePublicConfig.js must hold the public Supabase project config'
+  );
+
+  runScript(context, 'js/supabasePublicConfig.js');
+  runScript(context, 'js/config.js');
+  vm.runInNewContext(
+    'globalThis.__supabaseConfigForTest = { url: SUPABASE_URL, key: SUPABASE_KEY, enabled: SUPABASE_CONFIG.enabled };',
+    context
+  );
+
+  assert.strictEqual(context.window.MATH_APP_SUPABASE.url, 'https://gegwjdcxcarmopiaknwj.supabase.co');
+  assert.strictEqual(context.window.MATH_APP_SUPABASE.publishableKey, 'sb_publishable_jRV8luDjS0JB46ZSDT3-6g_HXM-SUtM');
+  assert.strictEqual(context.__supabaseConfigForTest.url, context.window.MATH_APP_SUPABASE.url);
+  assert.strictEqual(context.__supabaseConfigForTest.key, context.window.MATH_APP_SUPABASE.publishableKey);
+  assert.strictEqual(context.__supabaseConfigForTest.enabled, true);
+}
+
+function testSupabaseClientUsesPublicConfig() {
+  const context = createConfigContext();
+  context.window.supabase = {
+    createClient(url, key, options) {
+      return { url, key, options };
+    }
+  };
+
+  runScript(context, 'js/supabasePublicConfig.js');
+  runScript(context, 'js/config.js');
+  runScript(context, 'js/supabase.js');
+  vm.runInNewContext(
+    'globalThis.__supabaseClientForTest = getSupabaseClient(); globalThis.__supabaseEnabledForTest = isSupabaseConfigured();',
+    context
+  );
+
+  assert.strictEqual(context.__supabaseEnabledForTest, true);
+  assert.strictEqual(context.__supabaseClientForTest.url, 'https://gegwjdcxcarmopiaknwj.supabase.co');
+  assert.strictEqual(context.__supabaseClientForTest.key, 'sb_publishable_jRV8luDjS0JB46ZSDT3-6g_HXM-SUtM');
+  assert.strictEqual(context.__supabaseClientForTest.options.auth.persistSession, true);
+}
+
 function testCurriculumTopicSections() {
   const context = createContext();
   runScript(context, 'js/curriculum.js');
@@ -94,5 +160,7 @@ function testRelationshipCoachProblemContract() {
 testCurriculumTopicSections();
 testProblemOptionsStayUniqueAndComplete();
 testRelationshipCoachProblemContract();
+testSupabasePublicConfigContract();
+testSupabaseClientUsesPublicConfig();
 
 console.log('app contract tests passed');

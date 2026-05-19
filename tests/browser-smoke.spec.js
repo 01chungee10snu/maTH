@@ -15,6 +15,16 @@ test('map and relationship coach smoke test', async ({ page }) => {
       && TINIPINGS.length > 0;
   });
 
+  const supabaseConfig = await page.evaluate(() => ({
+    configured: window.MathAppSupabase?.isConfigured(),
+    url: window.MathAppSupabase?.getConfig().url,
+    keyPrefix: window.MathAppSupabase?.getConfig().publishableKey.slice(0, 15)
+  }));
+
+  expect(supabaseConfig.configured).toBe(true);
+  expect(supabaseConfig.url).toBe('https://gegwjdcxcarmopiaknwj.supabase.co');
+  expect(supabaseConfig.keyPrefix).toBe('sb_publishable_');
+
   const highSchoolMap = await page.evaluate(() => {
     STATE.mode = 'map';
     STATE.mapSelection = { grade: 'high_school', subGrade: '공통과목', domain: null };

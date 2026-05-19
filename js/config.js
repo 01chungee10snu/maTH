@@ -1,8 +1,17 @@
 /* =========================================================================
    전역 설정 및 상수
    ========================================================================= */
-const SUPABASE_URL = 'https://ttuhtceuxrjybfqgutkf.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0dWh0Y2V1eHJqeWJmcWd1dGtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxOTAyMTMsImV4cCI6MjA3OTc2NjIxM30.Qtewubz0SwlO-G9OqDyPVyebiZ11iD3FelBGtl7url8';
+const SUPABASE_PUBLIC_CONFIG = window.MATH_APP_SUPABASE || {};
+const SUPABASE_CONFIG = Object.freeze({
+  projectName: SUPABASE_PUBLIC_CONFIG.projectName || '',
+  environment: SUPABASE_PUBLIC_CONFIG.environment || 'local',
+  url: SUPABASE_PUBLIC_CONFIG.url || '',
+  publishableKey: SUPABASE_PUBLIC_CONFIG.publishableKey || '',
+  enabled: Boolean(SUPABASE_PUBLIC_CONFIG.url && SUPABASE_PUBLIC_CONFIG.publishableKey)
+});
+const SUPABASE_URL = SUPABASE_CONFIG.url;
+const SUPABASE_KEY = SUPABASE_CONFIG.publishableKey;
+window.MATH_APP_SUPABASE_CONFIG = SUPABASE_CONFIG;
 
 const DPR = Math.min(2, window.devicePixelRatio || 1);
 const CANVAS = document.getElementById('app');
