@@ -17,5 +17,56 @@ async function loadCurriculumData() {
     }
 }
 
+function getCurriculumTopicSections(domainData) {
+    if (!domainData || typeof domainData !== 'object') return [];
+
+    const sections = [];
+
+    Object.entries(domainData).forEach(([title, value]) => {
+        appendCurriculumSection(sections, title, value);
+    });
+
+    return sections;
+}
+
+function appendCurriculumSection(sections, title, value, parentTitle = null) {
+    if (Array.isArray(value)) {
+        sections.push({
+            title,
+            parentTitle,
+            topics: value
+        });
+        return;
+    }
+
+    if (!value || typeof value !== 'object') return;
+
+    if (Array.isArray(value.topics)) {
+        sections.push({
+            title,
+            parentTitle,
+            description: value.description || '',
+            topics: value.topics
+        });
+        return;
+    }
+
+    Object.entries(value).forEach(([childTitle, childValue]) => {
+        appendCurriculumSection(sections, childTitle, childValue, title);
+    });
+}
+
+function getCurriculumTopicCount(domainData) {
+    return getCurriculumTopicSections(domainData)
+        .reduce((sum, section) => sum + section.topics.length, 0);
+}
+
+globalThis.getCurriculumTopicSections = getCurriculumTopicSections;
+globalThis.getCurriculumTopicCount = getCurriculumTopicCount;
+if (typeof window !== 'undefined') {
+    window.getCurriculumTopicSections = getCurriculumTopicSections;
+    window.getCurriculumTopicCount = getCurriculumTopicCount;
+}
+
 // 초기 로드 시 실행 (game.js에서 제어하므로 주석 처리)
 // loadCurriculumData();

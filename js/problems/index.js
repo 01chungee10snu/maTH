@@ -11,6 +11,14 @@ function generateProblem(topic, difficulty) {
         return generateFallbackProblem(difficulty);
     }
 
+    if (topic.includes('관계수학') || topic.includes('관계형') || topic.includes('문장제 코치') || topic === 'relationshipCoach') {
+        return window.RelationshipCoachProblems?.generate(difficulty) || generateFallbackProblem(difficulty);
+    }
+
+    if (topic.includes('미지수') || topic.includes('□') || topic.includes('○') || topic.includes('△') || topic.includes('방정식') || topic === 'symbolEquation') {
+        return window.SymbolEquationProblems?.generate(difficulty) || generateFallbackProblem(difficulty);
+    }
+
     // 주제별 문제 생성
     if (topic.includes('덧셈') || topic.includes('합')) {
         return window.AdditionProblems?.generate(difficulty) || generateFallbackProblem(difficulty);
@@ -27,7 +35,7 @@ function generateProblem(topic, difficulty) {
     if (topic.includes('분수')) {
         return window.FractionProblems?.generate(difficulty) || generateFallbackProblem(difficulty);
     }
-    if (topic.includes('도형') || topic.includes('모양') || topic.includes('삼각형') || topic.includes('사각형')) {
+    if (topic.includes('도형') || topic.includes('모양') || topic.includes('삼각형') || topic.includes('사각형') || topic.includes('원') || topic.includes('각')) {
         return window.GeometryProblems?.generate(difficulty) || generateFallbackProblem(difficulty);
     }
     if (topic.includes('시계') || topic.includes('시각') || topic.includes('시간')) {
@@ -57,10 +65,6 @@ function generateProblem(topic, difficulty) {
     if (topic.includes('부피') || topic.includes('쌓기') || topic.includes('직육면체')) {
         return window.VolumeProblems?.generate(difficulty) || generateFallbackProblem(difficulty);
     }
-    if (topic.includes('미지수') || topic.includes('□') || topic.includes('○') || topic.includes('△') || topic.includes('방정식') || topic === 'symbolEquation') {
-        return window.SymbolEquationProblems?.generate(difficulty) || generateFallbackProblem(difficulty);
-    }
-
     // 높은 난이도에서 창의력 문제 확률적 출제
     if (difficulty >= 15 && Math.random() < 0.2) {
         return window.CreativeProblems?.generate(difficulty) || generateFallbackProblem(difficulty);
@@ -104,7 +108,8 @@ function checkModulesLoaded() {
         'CapacityProblems',
         'WeightProblems',
         'VolumeProblems',
-        'SymbolEquationProblems'
+        'SymbolEquationProblems',
+        'RelationshipCoachProblems'
     ];
 
     const loaded = modules.filter(m => window[m]);

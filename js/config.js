@@ -46,7 +46,9 @@ let STATE = {
     square: null,   // □ 선택값
     circle: null,   // ○ 선택값
     triangle: null  // △ 선택값
-  }
+  },
+  // 관계수학 코치 진행 상태
+  relationCoach: null
 };
 
 let TINIPINGS = [];

@@ -77,6 +77,65 @@ function getHomeLayout(width) {
     };
 }
 
+function getMapRequiredHeight(width) {
+    const contentY = Math.round(110 * SCALE);
+    const bottomPad = Math.round(40 * SCALE);
+
+    if (!STATE || !STATE.mapSelection?.grade) {
+        return contentY + Math.round(520 * SCALE);
+    }
+
+    if (!CURRICULUM_DATA) return contentY + Math.round(420 * SCALE);
+
+    const gradeData = CURRICULUM_DATA[STATE.mapSelection.grade];
+    if (!gradeData) return contentY + Math.round(420 * SCALE);
+
+    if (!STATE.mapSelection.subGrade) {
+        const subGradeCount = Object.keys(gradeData).length;
+        return contentY + Math.round(90 * SCALE) + subGradeCount * Math.round(95 * SCALE) + bottomPad;
+    }
+
+    const domainData = gradeData[STATE.mapSelection.subGrade];
+    const sections = typeof getCurriculumTopicSections === 'function'
+        ? getCurriculumTopicSections(domainData)
+        : [];
+    const colCount = Math.max(1, Math.floor((width - 60) / 180));
+    let height = contentY + Math.round(20 * SCALE);
+
+    sections.forEach(section => {
+        const rows = Math.ceil(section.topics.length / colCount);
+        height += Math.round(40 * SCALE) + rows * Math.round(62 * SCALE) + Math.round(30 * SCALE);
+    });
+
+    return height + bottomPad;
+}
+
+function isProblemTopicSupported(topic) {
+    const text = String(topic || '');
+    if (!text) return false;
+
+    if (text.includes('관계수학') || text.includes('미지수') || text.includes('방정식')) return true;
+
+    const unsupportedKeywords = [
+        '다항식', '나머지 정리', '인수분해', '복소수', '부등식', '행렬',
+        '집합', '명제', '함수', '순열', '조합', '이항정리', '확률분포',
+        '통계적 추정', '미분', '적분', '극한', '급수', '벡터', '이차곡선',
+        '공간좌표', '공간벡터', '좌표평면', '소인수분해', '제곱근', '근호', '유리수',
+        '정수', '정비례', '반비례', '피타고라스', '삼각비', '상관관계'
+    ];
+    if (unsupportedKeywords.some(keyword => text.includes(keyword))) return false;
+
+    const supportedKeywords = [
+        '수', '덧셈', '뺄셈', '곱셈', '나눗셈', '분수', '소수',
+        '도형', '모양', '삼각형', '사각형', '원', '각', '길이', '시각', '시간',
+        '들이', '무게', '부피', '쌓기', '직육면체', '규칙',
+        '자료', '그래프', '표', '분류', '평균', '가능성',
+        '창의', '영재', '사고력'
+    ];
+
+    return supportedKeywords.some(keyword => text.includes(keyword));
+}
+
 function setHiDPI() {
     const viewportW = window.innerWidth;
     const viewportH = window.innerHeight;
@@ -87,10 +146,12 @@ function setHiDPI() {
     SCALE = Math.max(0.7, Math.min(1.5, widthScale));
 
     let cssH = Math.round(cssW * (16 / 9));
-    const isHome = typeof STATE !== 'undefined' && STATE.mode === 'home';
-    if (isHome) {
+    const currentMode = typeof STATE !== 'undefined' ? STATE.mode : null;
+    if (currentMode === 'home') {
         const layout = getHomeLayout(cssW);
         cssH = Math.max(cssH, layout.totalHeight);
+    } else if (currentMode === 'map') {
+        cssH = Math.max(cssH, getMapRequiredHeight(cssW), viewportH - 48);
     } else if (viewportH > viewportW) {
         cssH = Math.max(cssH, viewportH - 48);
     }
@@ -204,7 +265,8 @@ function saveState() {
         usedProblems: STATE.usedProblems,
         currentCurriculum: STATE.currentCurriculum,
         mapSelection: STATE.mapSelection,
-        collectionTab: STATE.collectionTab
+        collectionTab: STATE.collectionTab,
+        relationCoach: STATE.relationCoach
     };
     localStorage.setItem(LS_KEY, JSON.stringify(s));
 }
@@ -224,6 +286,7 @@ function loadState() {
         STATE.currentCurriculum = s.currentCurriculum || 'division';
         STATE.mapSelection = s.mapSelection || { grade: null, subGrade: null, domain: null };
         STATE.collectionTab = s.collectionTab || '전체';
+        STATE.relationCoach = s.relationCoach || null;
 
         // 홈 모드인 경우 맵 모드로 강제 전환 (메인 페이지 변경)
         if (STATE.mode === 'home') {
@@ -2262,6 +2325,31 @@ function drawMap() {
             startY += btnH + gap;
         });
 
+        const coachBtnW = Math.min(360, W - 60);
+        const coachBtnH = 72;
+        const coachBtnX = (W - coachBtnW) / 2;
+        const coachBtnY = startY + 10;
+
+        CTX.save();
+        roundRect(CTX, coachBtnX, coachBtnY, coachBtnW, coachBtnH, 20);
+        const coachGradient = CTX.createLinearGradient(coachBtnX, coachBtnY, coachBtnX + coachBtnW, coachBtnY + coachBtnH);
+        coachGradient.addColorStop(0, '#2563eb');
+        coachGradient.addColorStop(1, '#14b8a6');
+        CTX.fillStyle = coachGradient;
+        CTX.shadowColor = 'rgba(37, 99, 235, 0.25)';
+        CTX.shadowBlur = 12;
+        CTX.fill();
+        CTX.restore();
+
+        CTX.fillStyle = '#ffffff';
+        CTX.font = 'bold 25px Jua, sans-serif';
+        CTX.textAlign = 'center';
+        CTX.textBaseline = 'middle';
+        CTX.fillText('관계수학 코치', coachBtnX + coachBtnW / 2, coachBtnY + coachBtnH / 2 - 10);
+        CTX.font = '16px Jua, sans-serif';
+        CTX.fillText('문장 → 관계 → 표 → 연산', coachBtnX + coachBtnW / 2, coachBtnY + coachBtnH / 2 + 17);
+        STATE.hitboxes.push({ id: 'btn_relation_coach', x: coachBtnX, y: coachBtnY, w: coachBtnW, h: coachBtnH });
+
     } else if (!STATE.mapSelection.subGrade) {
         // 2단계: 학년군/학년 선택
         if (!CURRICULUM_DATA) {
@@ -2317,22 +2405,26 @@ function drawMap() {
             return;
         }
 
-        const domains = Object.keys(domainData);
+        const sections = typeof getCurriculumTopicSections === 'function'
+            ? getCurriculumTopicSections(domainData)
+            : Object.keys(domainData).map(title => ({ title, topics: domainData[title] }));
         let startY = contentY + 20;
 
-        domains.forEach(dom => {
+        sections.forEach(section => {
+            const topics = Array.isArray(section.topics) ? section.topics : [];
+            if (!topics.length) return;
+
             // 영역 제목
             CTX.fillStyle = '#374151';
             CTX.font = 'bold 26px Jua, sans-serif';
             CTX.textAlign = 'left';
-            CTX.fillText(dom, 30, startY);
+            CTX.fillText(section.title, 30, startY);
             startY += 40;
 
             // 주제 버튼들
-            const topics = domainData[dom];
             const btnH = 50;
             const gap = 12;
-            const colCount = Math.floor((W - 60) / 180); // 버튼 최소 너비 고려
+            const colCount = Math.max(1, Math.floor((W - 60) / 180)); // 버튼 최소 너비 고려
             const btnW = (W - 60 - (colCount - 1) * gap) / colCount;
 
             topics.forEach((topic, idx) => {
@@ -2340,18 +2432,19 @@ function drawMap() {
                 const col = idx % colCount;
                 const bx = 30 + col * (btnW + gap);
                 const by = startY + row * (btnH + gap);
+                const supported = isProblemTopicSupported(topic);
 
                 CTX.save();
                 roundRect(CTX, bx, by, btnW, btnH, 12);
-                CTX.fillStyle = '#f0f9ff';
+                CTX.fillStyle = supported ? '#f0f9ff' : '#f3f4f6';
                 CTX.fill();
-                CTX.strokeStyle = '#bae6fd';
+                CTX.strokeStyle = supported ? '#bae6fd' : '#d1d5db';
                 CTX.lineWidth = 1.5;
                 CTX.stroke();
                 CTX.restore();
 
-                CTX.fillStyle = '#0369a1';
-                CTX.font = 'bold 20px Jua, sans-serif';
+                CTX.fillStyle = supported ? '#0369a1' : '#9ca3af';
+                CTX.font = `bold ${supported ? 20 : 18}px Jua, sans-serif`;
                 CTX.textAlign = 'center';
                 CTX.textBaseline = 'middle';
 
@@ -2359,9 +2452,13 @@ function drawMap() {
                 let displayTopic = topic;
                 if (topic.length > 8) displayTopic = topic.substring(0, 8) + '..';
 
-                CTX.fillText(displayTopic, bx + btnW / 2, by + btnH / 2);
+                CTX.fillText(displayTopic, bx + btnW / 2, by + (supported ? btnH / 2 : btnH / 2 - 7));
+                if (!supported) {
+                    CTX.font = '13px Jua, sans-serif';
+                    CTX.fillText('준비중', bx + btnW / 2, by + btnH / 2 + 15);
+                }
 
-                STATE.hitboxes.push({ id: `topic_${topic}`, x: bx, y: by, w: btnW, h: btnH });
+                STATE.hitboxes.push({ id: `topic_${topic}`, x: bx, y: by, w: btnW, h: btnH, disabled: !supported });
             });
 
             const rows = Math.ceil(topics.length / colCount);
@@ -2698,6 +2795,272 @@ function drawKeypad(x, y, w, h) {
     });
 }
 
+function startRelationCoachMode() {
+    STATE.currentCurriculum = '관계수학 코치';
+    STATE.mode = 'quiz';
+    STATE.questionIndex = 0;
+    STATE.totalQuestions = 0;
+    STATE.score = 0;
+    STATE.problem = null;
+    STATE.selected = null;
+    STATE.isCorrect = null;
+    STATE.confirmed = null;
+    STATE.symbolAnswers = { square: null, circle: null, triangle: null };
+    STATE.relationCoach = null;
+    ensureProblem();
+    saveState();
+}
+
+function ensureRelationCoachState() {
+    if (!STATE.problem || STATE.problem.type !== 'relationshipCoach') return;
+    if (!STATE.relationCoach || STATE.relationCoach.problemId !== STATE.problem.problem_id) {
+        STATE.relationCoach = window.RelationCoach?.createState(STATE.problem) || null;
+    }
+}
+
+function coachOptionValue(option) {
+    if (option && typeof option === 'object' && typeof option.value !== 'undefined') return String(option.value);
+    return String(option);
+}
+
+function coachOptionLabel(option) {
+    if (option && typeof option === 'object' && typeof option.label !== 'undefined') return String(option.label);
+    return String(option);
+}
+
+function drawRelationVisualization(problem, x, y, w, h) {
+    if (!problem?.entities?.length) return y;
+
+    CTX.save();
+    roundRect(CTX, x, y, w, h, 14);
+    CTX.fillStyle = '#f8fafc';
+    CTX.fill();
+    CTX.strokeStyle = '#bfdbfe';
+    CTX.lineWidth = 2;
+    CTX.stroke();
+
+    CTX.fillStyle = '#1e3a8a';
+    CTX.font = `bold ${Math.round(17 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'left';
+    CTX.fillText(`기준: ${problem.base_unit}`, x + 14, y + 28);
+
+    const values = problem.entities.map(entity => Math.max(0.1, Number(entity.relative_value || entity.count || 1)));
+    const maxValue = Math.max(...values, 1);
+    const rowH = Math.max(28, Math.floor((h - 44) / problem.entities.length));
+
+    problem.entities.forEach((entity, idx) => {
+        const rowY = y + 44 + idx * rowH;
+        const barW = Math.max(28, (w - 150) * (Math.max(0.1, Number(entity.relative_value || entity.count || 1)) / maxValue));
+
+        CTX.fillStyle = '#334155';
+        CTX.font = `bold ${Math.round(15 * SCALE)}px Jua, sans-serif`;
+        CTX.textAlign = 'left';
+        CTX.fillText(entity.label, x + 14, rowY + 18);
+
+        roundRect(CTX, x + 105, rowY + 3, barW, rowH - 8, 8);
+        CTX.fillStyle = entity.relative_value >= 1 ? '#60a5fa' : '#93c5fd';
+        CTX.fill();
+
+        CTX.fillStyle = '#0f172a';
+        CTX.font = `${Math.round(13 * SCALE)}px Jua, sans-serif`;
+        const label = entity.relative_value ? `${Math.round(entity.relative_value * 100) / 100}배` : `${entity.count}`;
+        CTX.fillText(label, x + 112 + barW, rowY + 18);
+    });
+
+    CTX.restore();
+    return y + h + 12;
+}
+
+function drawCoachOptionButtons(options, selectedValue, x, y, w, buttonH, prefix) {
+    const gap = Math.round(10 * SCALE);
+    const cols = options.length > 3 ? 2 : 1;
+    const buttonW = (w - (cols - 1) * gap) / cols;
+    let lastBottom = y;
+
+    options.forEach((option, idx) => {
+        const col = idx % cols;
+        const row = Math.floor(idx / cols);
+        const bx = x + col * (buttonW + gap);
+        const by = y + row * (buttonH + gap);
+        const value = coachOptionValue(option);
+        const selected = selectedValue === value;
+
+        CTX.save();
+        roundRect(CTX, bx, by, buttonW, buttonH, 12);
+        CTX.fillStyle = selected ? '#2563eb' : '#eff6ff';
+        CTX.fill();
+        CTX.strokeStyle = selected ? '#1d4ed8' : '#bfdbfe';
+        CTX.lineWidth = 2;
+        CTX.stroke();
+        CTX.restore();
+
+        CTX.fillStyle = selected ? '#ffffff' : '#1e3a8a';
+        CTX.font = `bold ${Math.round(17 * SCALE)}px Jua, sans-serif`;
+        CTX.textAlign = 'center';
+        CTX.textBaseline = 'middle';
+        const label = coachOptionLabel(option);
+        const display = label.length > 22 ? label.slice(0, 21) + '..' : label;
+        CTX.fillText(display, bx + buttonW / 2, by + buttonH / 2);
+        CTX.textBaseline = 'alphabetic';
+
+        STATE.hitboxes.push({ id: `${prefix}_${idx}`, x: bx, y: by, w: buttonW, h: buttonH, value });
+        lastBottom = Math.max(lastBottom, by + buttonH);
+    });
+
+    return lastBottom;
+}
+
+function drawRelationshipCoachQuiz(W, H, cardX, cardY, cardW, cardH) {
+    ensureRelationCoachState();
+    const problem = STATE.problem;
+    const coachState = STATE.relationCoach;
+    const steps = window.RelationCoach?.getSteps(problem) || [];
+    const step = window.RelationCoach?.getCurrentStep(problem, coachState);
+
+    CTX.fillStyle = '#0f766e';
+    CTX.font = `bold ${Math.round(27 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'center';
+    CTX.fillText('관계수학 코치', cardX + cardW / 2, cardY + Math.round(38 * SCALE));
+
+    CTX.fillStyle = '#111827';
+    CTX.font = `bold ${Math.round(20 * SCALE)}px Jua, sans-serif`;
+    const questionLines = getLines(CTX, problem.question, cardW - 42);
+    let currentY = cardY + Math.round(72 * SCALE);
+    questionLines.slice(0, 5).forEach(line => {
+        CTX.fillText(line, cardX + cardW / 2, currentY);
+        currentY += Math.round(27 * SCALE);
+    });
+
+    currentY += Math.round(10 * SCALE);
+
+    if (step) {
+        const panelX = cardX + 18;
+        const panelW = cardW - 36;
+        const stepNumber = (coachState?.stepIndex || 0) + 1;
+
+        CTX.save();
+        roundRect(CTX, panelX, currentY, panelW, Math.round(54 * SCALE), 14);
+        CTX.fillStyle = '#ecfeff';
+        CTX.fill();
+        CTX.strokeStyle = '#99f6e4';
+        CTX.stroke();
+        CTX.restore();
+
+        CTX.fillStyle = '#0f766e';
+        CTX.font = `bold ${Math.round(20 * SCALE)}px Jua, sans-serif`;
+        CTX.textAlign = 'left';
+        CTX.textBaseline = 'middle';
+        CTX.fillText(`${stepNumber}/${steps.length} ${step.label}`, panelX + 16, currentY + Math.round(27 * SCALE));
+
+        const hintW = Math.round(78 * SCALE);
+        const hintH = Math.round(34 * SCALE);
+        const hintX = panelX + panelW - hintW - 12;
+        const hintY = currentY + Math.round(10 * SCALE);
+        roundRect(CTX, hintX, hintY, hintW, hintH, 10);
+        CTX.fillStyle = '#fef3c7';
+        CTX.fill();
+        CTX.fillStyle = '#92400e';
+        CTX.textAlign = 'center';
+        CTX.fillText('힌트', hintX + hintW / 2, hintY + hintH / 2);
+        CTX.textBaseline = 'alphabetic';
+        STATE.hitboxes.push({ id: 'btn_coach_hint', x: hintX, y: hintY, w: hintW, h: hintH });
+
+        currentY += Math.round(76 * SCALE);
+
+        CTX.fillStyle = '#111827';
+        CTX.font = `bold ${Math.round(22 * SCALE)}px Jua, sans-serif`;
+        CTX.textAlign = 'center';
+        getLines(CTX, step.prompt, panelW).forEach(line => {
+            CTX.fillText(line, cardX + cardW / 2, currentY);
+            currentY += Math.round(30 * SCALE);
+        });
+
+        if ((coachState?.hintLevel || 0) > 0) {
+            CTX.fillStyle = '#92400e';
+            CTX.font = `${Math.round(17 * SCALE)}px Jua, sans-serif`;
+            getLines(CTX, step.hint, panelW).forEach(line => {
+                CTX.fillText(line, cardX + cardW / 2, currentY);
+                currentY += Math.round(24 * SCALE);
+            });
+        }
+
+        if (step.id === 'visualization') {
+            currentY = drawRelationVisualization(problem, panelX, currentY + 6, panelW, Math.round(150 * SCALE));
+        }
+
+        const selectedValue = coachState?.selections?.[step.id] || '';
+        const optionsBottom = drawCoachOptionButtons(
+            step.options,
+            selectedValue,
+            panelX,
+            currentY + Math.round(10 * SCALE),
+            panelW,
+            Math.round(58 * SCALE),
+            'coach_opt'
+        );
+
+        currentY = optionsBottom + Math.round(18 * SCALE);
+
+        if (coachState?.feedback) {
+            CTX.fillStyle = coachState.feedback.includes('좋아요') ? '#047857' : '#dc2626';
+            CTX.font = `${Math.round(18 * SCALE)}px Jua, sans-serif`;
+            CTX.textAlign = 'center';
+            CTX.fillText(coachState.feedback, cardX + cardW / 2, currentY);
+            currentY += Math.round(26 * SCALE);
+        }
+
+        const nextW = Math.max(220, Math.min(panelW * 0.75, Math.round(300 * SCALE)));
+        const nextH = Math.round(58 * SCALE);
+        const nextX = cardX + (cardW - nextW) / 2;
+        const nextY = currentY;
+        const disabled = !selectedValue;
+
+        roundRect(CTX, nextX, nextY, nextW, nextH, 16);
+        CTX.fillStyle = disabled ? '#d1d5db' : '#14b8a6';
+        CTX.fill();
+        CTX.fillStyle = '#ffffff';
+        CTX.font = `bold ${Math.round(23 * SCALE)}px Jua, sans-serif`;
+        CTX.textAlign = 'center';
+        CTX.textBaseline = 'middle';
+        CTX.fillText('다음 사고 단계', nextX + nextW / 2, nextY + nextH / 2);
+        CTX.textBaseline = 'alphabetic';
+        STATE.hitboxes.push({ id: 'btn_coach_next', x: nextX, y: nextY, w: nextW, h: nextH, disabled });
+        return;
+    }
+
+    CTX.fillStyle = '#0f766e';
+    CTX.font = `bold ${Math.round(21 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'center';
+    CTX.fillText('관계 정리가 끝났어요. 이제 답을 골라볼까요?', cardX + cardW / 2, currentY);
+    currentY += Math.round(32 * SCALE);
+
+    const optionsBottom = drawCoachOptionButtons(
+        problem.options,
+        STATE.selected || '',
+        cardX + 25,
+        currentY,
+        cardW - 50,
+        Math.round(62 * SCALE),
+        'opt'
+    );
+
+    const btnW = Math.max(240, Math.min(Math.round(280 * SCALE), (cardW - 40) * 0.8));
+    const btnH = Math.max(58, Math.round(64 * SCALE));
+    const btnX = cardX + (cardW - btnW) / 2;
+    const btnY = optionsBottom + Math.round(24 * SCALE);
+
+    roundRect(CTX, btnX, btnY, btnW, btnH, 18);
+    CTX.fillStyle = STATE.selected == null ? '#d1d5db' : '#14b8a6';
+    CTX.fill();
+    CTX.fillStyle = '#ffffff';
+    CTX.font = `bold ${Math.round(25 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'center';
+    CTX.textBaseline = 'middle';
+    CTX.fillText('정답 확인', btnX + btnW / 2, btnY + btnH / 2);
+    CTX.textBaseline = 'alphabetic';
+    STATE.hitboxes.push({ id: 'btn_check', x: btnX, y: btnY, w: btnW, h: btnH, disabled: STATE.selected == null });
+}
+
 function drawQuiz() {
     const { W, H } = clear();
     drawBackgroundTiles(W, H, 0.15);
@@ -2720,6 +3083,12 @@ function drawQuiz() {
         drawSymbolEquationQuiz(W, H, cardX, cardY, cardW, cardH);
         return;
     }
+
+    if (STATE.problem.type === 'relationshipCoach') {
+        drawRelationshipCoachQuiz(W, H, cardX, cardY, cardW, cardH);
+        return;
+    }
+
     const problem = STATE.problem;
     const { question, options } = problem;
 
@@ -3647,7 +4016,11 @@ function drawComplete() {
    상태 천이 & 로직
    ========================================================================= */
 function ensureProblem() {
-    if (!STATE.problem) STATE.problem = genProblem(STATE.difficulty);
+    if (!STATE.problem) {
+        STATE.problem = genProblem(STATE.difficulty);
+        STATE.relationCoach = null;
+    }
+    ensureRelationCoachState();
 }
 
 function checkAnswer() {
@@ -3656,6 +4029,10 @@ function checkAnswer() {
     // 정답 비교 로직 개선 (공백 제거 및 숫자/단위 처리)
     const normalize = (val) => String(val).replace(/\s+/g, '').trim();
     const correct = normalize(STATE.selected) === normalize(STATE.problem.answer);
+
+    if (STATE.problem?.type === 'relationshipCoach' && window.RelationCoach) {
+        window.RelationCoach.appendAttempt(STATE.problem, STATE.relationCoach, STATE.selected, correct);
+    }
     
     STATE.isCorrect = correct;
     STATE.mode = 'explain';
@@ -3803,6 +4180,8 @@ function gotoNextQuestion() {
     STATE.confirmed = null;
     // 미지수 상태 초기화
     STATE.symbolAnswers = { square: null, circle: null, triangle: null };
+    STATE.relationCoach = null;
+    ensureRelationCoachState();
     STATE.mode = 'quiz';
     saveState();
 }
@@ -3933,7 +4312,8 @@ function resetAll() {
         currentCurriculum: 'division',
         mapSelection: { grade: null, subGrade: null, domain: null },
         collectionTab: '전체',
-        symbolAnswers: { square: null, circle: null, triangle: null }
+        symbolAnswers: { square: null, circle: null, triangle: null },
+        relationCoach: null
     };
     saveState();
 }
@@ -3966,6 +4346,9 @@ function onPointer(evt) {
                 case 'btn_start_game':
                     STATE.mode = 'map';
                     break;
+                case 'btn_relation_coach':
+                    startRelationCoachMode();
+                    break;
                 case 'btn_collection':
                     STATE.mode = 'collection';
                     break;
@@ -3992,6 +4375,29 @@ function onPointer(evt) {
                     break;
                 case 'btn_hint':
                     STATE.showHint = !STATE.showHint;
+                    break;
+                case 'btn_coach_hint':
+                    ensureRelationCoachState();
+                    if (STATE.relationCoach) {
+                        STATE.relationCoach.hintLevel = Math.min(7, (STATE.relationCoach.hintLevel || 0) + 1);
+                    }
+                    saveState();
+                    break;
+                case 'btn_coach_next':
+                    ensureRelationCoachState();
+                    if (STATE.problem?.type === 'relationshipCoach' && STATE.relationCoach && window.RelationCoach) {
+                        const step = window.RelationCoach.getCurrentStep(STATE.problem, STATE.relationCoach);
+                        const selected = STATE.relationCoach.selections?.[step?.id];
+                        const result = window.RelationCoach.evaluateStep(STATE.problem, step, selected);
+                        STATE.relationCoach.feedback = result.feedback;
+                        if (result.correct) {
+                            STATE.relationCoach.stepIndex += 1;
+                        } else if (result.errorType) {
+                            STATE.relationCoach.errors.push(result.errorType);
+                            STATE.relationCoach.hintLevel = Math.min(7, Math.max(STATE.relationCoach.hintLevel || 0, 2));
+                        }
+                    }
+                    saveState();
                     break;
                 default:
                     if (b.id.startsWith('key_')) {
@@ -4021,7 +4427,18 @@ function onPointer(evt) {
                         STATE.caughtIds = [];
                         // 미지수 상태 초기화
                         STATE.symbolAnswers = { square: null, circle: null, triangle: null };
+                        STATE.problem = null;
+                        STATE.selected = null;
+                        STATE.relationCoach = null;
                         ensureProblem();
+                    } else if (b.id.startsWith('coach_opt_')) {
+                        ensureRelationCoachState();
+                        const step = window.RelationCoach?.getCurrentStep(STATE.problem, STATE.relationCoach);
+                        if (STATE.relationCoach && step) {
+                            STATE.relationCoach.selections[step.id] = b.value;
+                            STATE.relationCoach.feedback = '';
+                            saveState();
+                        }
                     } else if (b.id.startsWith('opt_')) {
                         STATE.selected = b.value;
                     } else if (b.id.startsWith('symbol_')) {

@@ -80,25 +80,27 @@ function generateDistractors(answer, count = 3, options = {}) {
     const wrongs = new Set();
     const numAnswer = typeof answer === 'number' ? answer : parseInt(answer);
 
-    if (!isNaN(numAnswer)) {
-        // 일반적인 오답 패턴
-        const patterns = [
-            numAnswer + 1,      // ±1 오류
-            numAnswer - 1,
-            numAnswer + 10,     // 자릿수 오류
-            numAnswer - 10,
-            numAnswer * 2,      // 연산 혼동
-            Math.floor(numAnswer / 2),
-            numAnswer + options.operand || 0,  // 연산 결과 혼동
-            numAnswer - (options.operand || 0)
-        ].filter(v => v > 0 && v !== numAnswer);
+    if (isNaN(numAnswer)) {
+        return buildFallbackDistractors(String(answer), [], count);
+    }
 
-        // 랜덤하게 섞어서 선택
-        const shuffled = shuffleArray(patterns);
-        for (const p of shuffled) {
-            if (wrongs.size >= count) break;
-            wrongs.add(p);
-        }
+    // 일반적인 오답 패턴
+    const patterns = [
+        numAnswer + 1,      // ±1 오류
+        numAnswer - 1,
+        numAnswer + 10,     // 자릿수 오류
+        numAnswer - 10,
+        numAnswer * 2,      // 연산 혼동
+        Math.floor(numAnswer / 2),
+        numAnswer + (options.operand || 0),  // 연산 결과 혼동
+        numAnswer - (options.operand || 0)
+    ].filter(v => v > 0 && v !== numAnswer);
+
+    // 랜덤하게 섞어서 선택
+    const shuffled = shuffleArray(patterns);
+    for (const p of shuffled) {
+        if (wrongs.size >= count) break;
+        wrongs.add(p);
     }
 
     // 부족하면 랜덤 추가
@@ -113,15 +115,70 @@ function generateDistractors(answer, count = 3, options = {}) {
     return Array.from(wrongs).slice(0, count);
 }
 
+function addUniqueOption(options, candidate, answerString) {
+    const value = String(candidate);
+    if (!value || value === answerString || options.includes(value)) return false;
+    options.push(value);
+    return true;
+}
+
+function buildFallbackDistractors(answerString, existingOptions, requiredCount) {
+    const options = [...existingOptions];
+    const fractionMatch = answerString.match(/^(\d+)\/(\d+)$/);
+    if (fractionMatch) {
+        const numerator = parseInt(fractionMatch[1], 10);
+        const denominator = parseInt(fractionMatch[2], 10);
+        const candidates = [
+            `${numerator}/${denominator + 1}`,
+            `${numerator}/${Math.max(2, denominator - 1)}`,
+            `${numerator + 1}/${denominator}`,
+            `${Math.max(1, numerator - 1)}/${denominator}`,
+            `${denominator}/${Math.max(1, numerator)}`
+        ];
+        candidates.forEach(candidate => addUniqueOption(options, candidate, answerString));
+    }
+
+    const numericMatch = answerString.match(/^(-?\d+)(.*)$/);
+    if (numericMatch) {
+        const value = parseInt(numericMatch[1], 10);
+        const suffix = numericMatch[2] || '';
+        const offsets = [1, -1, 2, -2, 5, -5, 10, -10, 20, -20];
+        offsets.forEach(offset => {
+            const candidate = value + offset;
+            if (candidate > 0) addUniqueOption(options, `${candidate}${suffix}`, answerString);
+        });
+    }
+
+    const genericCandidates = ['같다', '모른다', '첫 번째', '두 번째', '세 번째', '네 번째'];
+    genericCandidates.forEach(candidate => addUniqueOption(options, candidate, answerString));
+
+    let guard = 1;
+    while (options.length < requiredCount && guard < 50) {
+        addUniqueOption(options, `${answerString}보다 ${guard}만큼 다름`, answerString);
+        guard += 1;
+    }
+
+    return options.slice(0, requiredCount);
+}
+
+function buildAnswerOptions(answer, wrongs, optionCount = 4) {
+    const answerString = String(answer);
+    const wrongValues = Array.isArray(wrongs) ? wrongs : Array.from(wrongs || []);
+    const uniqueWrongs = [];
+
+    wrongValues.forEach(wrong => {
+        addUniqueOption(uniqueWrongs, wrong, answerString);
+    });
+
+    const completedWrongs = buildFallbackDistractors(answerString, uniqueWrongs, optionCount - 1);
+    return shuffleArray([answerString, ...completedWrongs].slice(0, optionCount));
+}
+
 // 문제 결과 객체 생성
 function createProblemResult(question, answer, explanation, wrongs, problemType, difficulty) {
-    const wrongsFiltered = Array.isArray(wrongs)
-        ? wrongs.filter(w => String(w) !== String(answer)).slice(0, 3)
-        : Array.from(wrongs).filter(w => String(w) !== String(answer)).slice(0, 3);
-
     return {
         question,
-        options: shuffleArray([answer, ...wrongsFiltered].map(String)),
+        options: buildAnswerOptions(answer, wrongs, 4),
         answer: String(answer),
         explanation,
         problemKey: `${problemType}-${difficulty}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`
@@ -155,6 +212,7 @@ window.ProblemBase = {
     getThreeCharacters,
     getRandomSymbol,
     generateDistractors,
+    buildAnswerOptions,
     createProblemResult,
     formatWithUnit,
     validateTemplate

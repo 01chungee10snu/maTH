@@ -16,6 +16,7 @@
 | Feature | Status | Link | Author | Date |
 |---------|--------|------|--------|------|
 | Math Game Upgrade | 🔄 In Progress | [math-game-upgrade.design.md](02-design/features/math-game-upgrade.design.md) | Gemini CLI | 2026-02-03 |
+| Relationship Math Coach | 🔄 MVP Implemented | [relationship-math-coach.design.md](02-design/features/relationship-math-coach.design.md) | Codex | 2026-05-19 |
 
 ## 03. Analysis (분석)
 
