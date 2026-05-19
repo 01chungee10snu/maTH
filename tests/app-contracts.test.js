@@ -235,10 +235,11 @@ function testRelationshipCoachBankHasIrtMetadata() {
   runScript(context, 'js/problems/relationshipCoachProblems.js');
 
   const bank = context.window.RelationshipCoachProblems.bank;
-  assert.ok(bank.length >= 10);
+  assert.ok(bank.length >= 30);
   const difficulties = bank.map(item => item.irt?.b).filter(value => typeof value === 'number');
   assert.ok(Math.min(...difficulties) <= -1.3);
   assert.ok(Math.max(...difficulties) >= 1.7);
+  const skillCounts = new Map();
   for (const item of bank) {
     assert.ok(item.problem_id);
     assert.ok(item.irt);
@@ -246,7 +247,21 @@ function testRelationshipCoachBankHasIrtMetadata() {
     assert.strictEqual(typeof item.irt.b, 'number');
     assert.ok(Array.isArray(item.skill_tags));
     assert.ok(item.skill_tags.length > 0);
+    item.skill_tags.forEach(skill => skillCounts.set(skill, (skillCounts.get(skill) || 0) + 1));
   }
+  [
+    'DIRECT_COMPARE',
+    'EQUAL_SHARING',
+    'QUOTATIVE_DIVISION',
+    'UNIT_COMPARE',
+    'MULTIPLICATIVE_COMPARE',
+    'FRACTION_RELATION',
+    'INVERSE_RELATION',
+    'PROPORTION',
+    'RANKING',
+    'COMPOSITE_RELATION',
+    'DIRECTION_CONFUSION'
+  ].forEach(skill => assert.ok((skillCounts.get(skill) || 0) >= 2, `${skill} needs at least 2 seed items`));
 
   const problem = context.window.RelationshipCoachProblems.generateForItem(bank[0]);
   assert.strictEqual(problem.problem_id, bank[0].problem_id);
