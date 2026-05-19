@@ -54,6 +54,7 @@ test('map and relationship coach smoke test', async ({ page }) => {
   const relationCoach = await page.evaluate(() => {
     startRelationCoachMode();
     ensureProblem();
+    const thetaBefore = STATE.irt?.theta ?? 0;
 
     while (RelationCoach.getCurrentStep(STATE.problem, STATE.relationCoach)) {
       const step = RelationCoach.getCurrentStep(STATE.problem, STATE.relationCoach);
@@ -64,11 +65,17 @@ test('map and relationship coach smoke test', async ({ page }) => {
     }
 
     drawQuiz();
+    STATE.selected = STATE.problem.answer;
+    checkAnswer();
+
     return {
       ok: true,
       type: STATE.problem.type,
       answerOptions: STATE.problem.options.length,
-      optionHitboxes: STATE.hitboxes.filter(box => box.id.startsWith('opt_')).length
+      optionHitboxes: STATE.hitboxes.filter(box => box.id.startsWith('opt_')).length,
+      thetaBefore,
+      thetaAfter: STATE.irt.theta,
+      irtAttempts: STATE.irt.attemptCount
     };
   });
 
@@ -76,6 +83,8 @@ test('map and relationship coach smoke test', async ({ page }) => {
   expect(relationCoach.type).toBe('relationshipCoach');
   expect(relationCoach.answerOptions).toBe(4);
   expect(relationCoach.optionHitboxes).toBe(4);
+  expect(relationCoach.irtAttempts).toBeGreaterThan(0);
+  expect(relationCoach.thetaAfter).toBeGreaterThan(relationCoach.thetaBefore);
 
   const visibleError = await page.locator('#err').evaluate(el => ({
     text: el.textContent,

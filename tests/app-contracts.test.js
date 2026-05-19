@@ -157,10 +157,89 @@ function testRelationshipCoachProblemContract() {
   assert.strictEqual(result.correct, true);
 }
 
+function testIrtEngineUpdatesLearnerStateAndSelectsItems() {
+  const context = createContext();
+  runScript(context, 'js/irtEngine.js');
+
+  assert.strictEqual(typeof context.window.IrtEngine.createInitialState, 'function');
+
+  const initial = context.window.IrtEngine.createInitialState('relationship_math');
+  const easy = {
+    problem_id: 'easy',
+    irt: { b: -1.1 },
+    skill_tags: ['UNIT_COMPARE'],
+    problem_types: ['UNIT_COMPARE']
+  };
+  const target = {
+    problem_id: 'target',
+    irt: { b: 0.05 },
+    skill_tags: ['INVERSE_RELATION'],
+    problem_types: ['INVERSE_RELATION']
+  };
+  const hard = {
+    problem_id: 'hard',
+    irt: { b: 1.8 },
+    skill_tags: ['PROPORTION'],
+    problem_types: ['PROPORTION']
+  };
+
+  const selected = context.window.IrtEngine.selectNextItem([easy, target, hard], initial);
+  assert.strictEqual(selected.problem_id, 'target');
+
+  const updatedCorrect = context.window.IrtEngine.updateState(initial, target, {
+    correct: true,
+    hintLevel: 0,
+    stepSuccessRate: 1
+  });
+  assert.ok(updatedCorrect.theta > initial.theta);
+  assert.strictEqual(updatedCorrect.attemptCount, 1);
+  assert.strictEqual(updatedCorrect.skillStates.INVERSE_RELATION.attempts, 1);
+  assert.ok(updatedCorrect.standardError < initial.standardError);
+
+  const updatedWithHints = context.window.IrtEngine.updateState(initial, target, {
+    correct: true,
+    hintLevel: 6,
+    stepSuccessRate: 1
+  });
+  assert.ok(updatedWithHints.theta > initial.theta);
+  assert.ok(updatedWithHints.theta < updatedCorrect.theta);
+
+  const updatedWrong = context.window.IrtEngine.updateState(initial, hard, {
+    correct: false,
+    hintLevel: 2,
+    stepSuccessRate: 0.25
+  });
+  assert.ok(updatedWrong.theta < initial.theta);
+}
+
+function testRelationshipCoachBankHasIrtMetadata() {
+  const context = createContext();
+  runScript(context, 'js/problems/problemBase.js');
+  runScript(context, 'js/problems/relationshipCoachProblems.js');
+
+  const bank = context.window.RelationshipCoachProblems.bank;
+  assert.ok(bank.length >= 5);
+  for (const item of bank) {
+    assert.ok(item.problem_id);
+    assert.ok(item.irt);
+    assert.strictEqual(item.irt.model, 'rasch');
+    assert.strictEqual(typeof item.irt.b, 'number');
+    assert.ok(Array.isArray(item.skill_tags));
+    assert.ok(item.skill_tags.length > 0);
+  }
+
+  const problem = context.window.RelationshipCoachProblems.generateForItem(bank[0]);
+  assert.strictEqual(problem.problem_id, bank[0].problem_id);
+  assert.strictEqual(problem.irt.b, bank[0].irt.b);
+  assert.deepStrictEqual(problem.skill_tags, bank[0].skill_tags);
+}
+
 testCurriculumTopicSections();
 testProblemOptionsStayUniqueAndComplete();
 testRelationshipCoachProblemContract();
 testSupabasePublicConfigContract();
 testSupabaseClientUsesPublicConfig();
+testIrtEngineUpdatesLearnerStateAndSelectsItems();
+testRelationshipCoachBankHasIrtMetadata();
 
 console.log('app contract tests passed');

@@ -266,7 +266,8 @@ function saveState() {
         currentCurriculum: STATE.currentCurriculum,
         mapSelection: STATE.mapSelection,
         collectionTab: STATE.collectionTab,
-        relationCoach: STATE.relationCoach
+        relationCoach: STATE.relationCoach,
+        irt: STATE.irt
     };
     localStorage.setItem(LS_KEY, JSON.stringify(s));
 }
@@ -287,6 +288,7 @@ function loadState() {
         STATE.mapSelection = s.mapSelection || { grade: null, subGrade: null, domain: null };
         STATE.collectionTab = s.collectionTab || '전체';
         STATE.relationCoach = s.relationCoach || null;
+        STATE.irt = s.irt || null;
 
         // 홈 모드인 경우 맵 모드로 강제 전환 (메인 페이지 변경)
         if (STATE.mode === 'home') {
@@ -297,6 +299,14 @@ function loadState() {
 
 function genProblem(diff) {
     const topic = STATE.currentCurriculum || 'division';
+
+    if (isRelationshipCoachTopic(topic) && window.IrtEngine && window.RelationshipCoachProblems?.bank) {
+        ensureIrtState();
+        const selectedItem = window.IrtEngine.selectNextItem(window.RelationshipCoachProblems.bank, STATE.irt);
+        if (selectedItem && window.RelationshipCoachProblems.generateForItem) {
+            return window.RelationshipCoachProblems.generateForItem(selectedItem, diff);
+        }
+    }
 
     // 모듈 시스템 우선 사용 (로드된 경우)
     if (window.ProblemLoader && window.ProblemBase) {
@@ -333,6 +343,41 @@ function genProblem(diff) {
 
     // 기본값: 덧셈
     return genAdditionProblem(diff);
+}
+
+function isRelationshipCoachTopic(topic) {
+    return String(topic || '').includes('관계수학')
+        || String(topic || '').includes('관계형')
+        || String(topic || '').includes('문장제 코치')
+        || topic === 'relationshipCoach';
+}
+
+function ensureIrtState() {
+    if (!window.IrtEngine) return null;
+    if (!STATE.irt || STATE.irt.version !== 1 || STATE.irt.topic !== 'relationship_math') {
+        STATE.irt = window.IrtEngine.createInitialState('relationship_math');
+    }
+    return STATE.irt;
+}
+
+function getRelationCoachStepSuccessRate() {
+    if (!STATE.problem?.coachSteps?.length || !STATE.relationCoach) return undefined;
+    const steps = window.RelationCoach?.getSteps?.(STATE.problem) || STATE.problem.coachSteps;
+    const attempted = steps.filter(step => STATE.relationCoach.selections && Object.prototype.hasOwnProperty.call(STATE.relationCoach.selections, step.id));
+    if (!attempted.length) return 0;
+    const errors = new Set(STATE.relationCoach.errors || []);
+    const correctSteps = attempted.filter(step => !errors.has(step.errorType)).length;
+    return correctSteps / attempted.length;
+}
+
+function updateIrtAfterAnswer(correct) {
+    if (!window.IrtEngine || !STATE.problem?.irt) return;
+    ensureIrtState();
+    STATE.irt = window.IrtEngine.updateState(STATE.irt, STATE.problem, {
+        correct: !!correct,
+        hintLevel: STATE.relationCoach?.hintLevel || 0,
+        stepSuccessRate: getRelationCoachStepSuccessRate()
+    });
 }
 
 function genNumberProblem(diff) {
@@ -2807,6 +2852,7 @@ function startRelationCoachMode() {
     STATE.confirmed = null;
     STATE.symbolAnswers = { square: null, circle: null, triangle: null };
     STATE.relationCoach = null;
+    ensureIrtState();
     ensureProblem();
     saveState();
 }
@@ -4033,6 +4079,7 @@ function checkAnswer() {
     if (STATE.problem?.type === 'relationshipCoach' && window.RelationCoach) {
         window.RelationCoach.appendAttempt(STATE.problem, STATE.relationCoach, STATE.selected, correct);
     }
+    updateIrtAfterAnswer(correct);
     
     STATE.isCorrect = correct;
     STATE.mode = 'explain';
@@ -4313,7 +4360,8 @@ function resetAll() {
         mapSelection: { grade: null, subGrade: null, domain: null },
         collectionTab: '전체',
         symbolAnswers: { square: null, circle: null, triangle: null },
-        relationCoach: null
+        relationCoach: null,
+        irt: window.IrtEngine ? window.IrtEngine.createInitialState('relationship_math') : null
     };
     saveState();
 }
@@ -4430,6 +4478,7 @@ function onPointer(evt) {
                         STATE.problem = null;
                         STATE.selected = null;
                         STATE.relationCoach = null;
+                        if (isRelationshipCoachTopic(topic)) ensureIrtState();
                         ensureProblem();
                     } else if (b.id.startsWith('coach_opt_')) {
                         ensureRelationCoachState();

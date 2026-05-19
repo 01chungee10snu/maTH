@@ -57,7 +57,9 @@ let STATE = {
     triangle: null  // △ 선택값
   },
   // 관계수학 코치 진행 상태
-  relationCoach: null
+  relationCoach: null,
+  // IRT 기반 적응형 학습 상태
+  irt: null
 };
 
 let TINIPINGS = [];

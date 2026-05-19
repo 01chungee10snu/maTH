@@ -31,6 +31,8 @@ const RELATION_COACH_PROBLEM_BANK = [
         problem_id: 'REL_MATH_001',
         grade_band: 'G1_G2',
         level: 4,
+        skill_tags: ['UNIT_COMPARE', 'INVERSE_RELATION', 'RANKING'],
+        irt: { model: 'rasch', b: -0.2 },
         problem_types: ['UNIT_COMPARE', 'INVERSE_RELATION', 'RANKING'],
         question: '빨간 그릇을 가득 채우려면 ㉮ 그릇으로는 5번, ㉯ 그릇으로는 3번 부어야 해요. 또 빨간 그릇 물을 ㉰ 그릇에는 3번, ㉱ 그릇에는 5번 나누어 담을 수 있어요. 두 번째로 큰 그릇은 무엇일까요?',
         base_unit: '빨간 그릇',
@@ -49,6 +51,8 @@ const RELATION_COACH_PROBLEM_BANK = [
         problem_id: 'REL_MATH_002',
         grade_band: 'G1_G2',
         level: 2,
+        skill_tags: ['QUOTATIVE_DIVISION'],
+        irt: { model: 'rasch', b: -1.1 },
         problem_types: ['QUOTATIVE_DIVISION'],
         question: '쿠키 12개를 한 봉지에 3개씩 넣으려고 해요. 봉지는 모두 몇 개 필요할까요?',
         base_unit: '한 봉지',
@@ -65,6 +69,8 @@ const RELATION_COACH_PROBLEM_BANK = [
         problem_id: 'REL_MATH_003',
         grade_band: 'G1_G2',
         level: 3,
+        skill_tags: ['EQUAL_SHARING'],
+        irt: { model: 'rasch', b: -0.8 },
         problem_types: ['EQUAL_SHARING'],
         question: '사탕 15개를 친구 5명에게 똑같이 나누어 주려고 해요. 한 명은 사탕을 몇 개씩 받을까요?',
         base_unit: '한 명',
@@ -81,6 +87,8 @@ const RELATION_COACH_PROBLEM_BANK = [
         problem_id: 'REL_MATH_004',
         grade_band: 'G3_G4',
         level: 7,
+        skill_tags: ['FRACTION_RELATION', 'MULTIPLICATIVE_COMPARE'],
+        irt: { model: 'rasch', b: 0.8 },
         problem_types: ['FRACTION_RELATION', 'MULTIPLICATIVE_COMPARE'],
         question: '파란 끈의 길이는 빨간 끈의 1/3이고, 초록 끈의 길이는 빨간 끈의 2배예요. 가장 긴 끈은 무엇일까요?',
         base_unit: '빨간 끈',
@@ -98,6 +106,8 @@ const RELATION_COACH_PROBLEM_BANK = [
         problem_id: 'REL_MATH_005',
         grade_band: 'G3_G4',
         level: 10,
+        skill_tags: ['PROPORTION', 'TRANSFER_FAILURE'],
+        irt: { model: 'rasch', b: 1.4 },
         problem_types: ['PROPORTION', 'TRANSFER_FAILURE'],
         question: '연필 2자루의 값이 300원이에요. 같은 연필 6자루의 값은 얼마일까요?',
         base_unit: '연필 2자루',
@@ -239,8 +249,14 @@ function generateRelationshipCoachProblem(difficulty) {
     return cloneRelationProblem(selected, difficulty);
 }
 
+function generateRelationshipCoachProblemForItem(item, difficulty = item?.level || 4) {
+    const selected = RELATION_COACH_PROBLEM_BANK.find(problem => problem.problem_id === item?.problem_id) || item;
+    return cloneRelationProblem(selected, difficulty);
+}
+
 window.RelationshipCoachProblems = {
     generate: generateRelationshipCoachProblem,
+    generateForItem: generateRelationshipCoachProblemForItem,
     taxonomy: RELATION_COACH_TAXONOMY,
     errorCodes: RELATION_COACH_ERROR_CODES,
     bank: RELATION_COACH_PROBLEM_BANK
