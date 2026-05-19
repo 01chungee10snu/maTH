@@ -212,13 +212,33 @@ function testIrtEngineUpdatesLearnerStateAndSelectsItems() {
   assert.ok(updatedWrong.theta < initial.theta);
 }
 
+function testIrtSelectionAvoidsImmediateItemRepeatWhenAlternativesExist() {
+  const context = createContext();
+  runScript(context, 'js/problems/problemBase.js');
+  runScript(context, 'js/problems/relationshipCoachProblems.js');
+  runScript(context, 'js/irtEngine.js');
+
+  const items = context.window.RelationshipCoachProblems.bank;
+  const state = {
+    ...context.window.IrtEngine.createInitialState('relationship_math'),
+    theta: 0.63,
+    lastItemIds: ['REL_MATH_004', 'REL_MATH_004', 'REL_MATH_001']
+  };
+
+  const selected = context.window.IrtEngine.selectNextItem(items, state);
+  assert.notStrictEqual(selected.problem_id, 'REL_MATH_004');
+}
+
 function testRelationshipCoachBankHasIrtMetadata() {
   const context = createContext();
   runScript(context, 'js/problems/problemBase.js');
   runScript(context, 'js/problems/relationshipCoachProblems.js');
 
   const bank = context.window.RelationshipCoachProblems.bank;
-  assert.ok(bank.length >= 5);
+  assert.ok(bank.length >= 10);
+  const difficulties = bank.map(item => item.irt?.b).filter(value => typeof value === 'number');
+  assert.ok(Math.min(...difficulties) <= -1.3);
+  assert.ok(Math.max(...difficulties) >= 1.7);
   for (const item of bank) {
     assert.ok(item.problem_id);
     assert.ok(item.irt);
@@ -240,6 +260,7 @@ testRelationshipCoachProblemContract();
 testSupabasePublicConfigContract();
 testSupabaseClientUsesPublicConfig();
 testIrtEngineUpdatesLearnerStateAndSelectsItems();
+testIrtSelectionAvoidsImmediateItemRepeatWhenAlternativesExist();
 testRelationshipCoachBankHasIrtMetadata();
 
 console.log('app contract tests passed');

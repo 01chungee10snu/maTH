@@ -121,9 +121,13 @@ function selectNextIrtItem(items, state = createInitialIrtState()) {
     if (!pool.length) return null;
 
     const recent = new Set(state.lastItemIds || []);
+    const immediateLastId = state.lastItemIds?.[0];
+    const candidatePool = pool.length > 1 && immediateLastId
+        ? pool.filter(item => item.problem_id !== immediateLastId)
+        : pool;
     const theta = Number.isFinite(state.theta) ? state.theta : 0;
 
-    return [...pool].sort((a, b) => {
+    return [...candidatePool].sort((a, b) => {
         const aRecent = recent.has(a.problem_id) ? 0.35 : 0;
         const bRecent = recent.has(b.problem_id) ? 0.35 : 0;
         const aScore = Math.abs(getIrtDifficulty(a) - theta) - getItemInformation(theta, a) + aRecent + getSkillWeaknessPenalty(a, state);

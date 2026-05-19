@@ -119,6 +119,97 @@ const RELATION_COACH_PROBLEM_BANK = [
         operation: '곱셈',
         answer: '900원',
         explanation: '6자루는 2자루 묶음이 3번 있는 것입니다. 300원짜리 묶음이 3개이므로 300 × 3 = 900원입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_006',
+        grade_band: 'G1_G2',
+        level: 1,
+        skill_tags: ['DIRECT_COMPARE'],
+        irt: { model: 'rasch', b: -1.5 },
+        problem_types: ['DIRECT_COMPARE'],
+        question: '민지는 구슬 8개, 도윤이는 구슬 5개를 가지고 있어요. 더 많은 구슬을 가진 사람은 누구일까요?',
+        base_unit: '구슬 수',
+        entities: [
+            { id: 'minji', label: '민지', count: 8, relative_value: 8 },
+            { id: 'doyun', label: '도윤', count: 5, relative_value: 5 }
+        ],
+        question_type: 'LARGEST',
+        operation: '관계 비교',
+        answer: '민지',
+        explanation: '8은 5보다 큽니다. 구슬을 더 많이 가진 사람은 민지입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_007',
+        grade_band: 'G1_G2',
+        level: 4,
+        skill_tags: ['UNIT_COMPARE', 'BASE_UNIT_CONFUSION'],
+        irt: { model: 'rasch', b: -0.4 },
+        problem_types: ['UNIT_COMPARE'],
+        question: '작은 컵 4컵을 부으면 큰 병 1개가 가득 차요. 작은 컵 8컵은 큰 병 몇 개와 같을까요?',
+        base_unit: '큰 병 1개',
+        entities: [
+            { id: 'base', label: '큰 병 1개', count: 4, relative_value: 1 },
+            { id: 'target', label: '작은 컵 8컵', count: 8, relative_value: 2 }
+        ],
+        question_type: 'UNIT_AMOUNT',
+        operation: '나눗셈',
+        answer: '2개',
+        explanation: '작은 컵 4컵이 큰 병 1개와 같으므로, 작은 컵 8컵은 4컵 묶음이 2개입니다. 따라서 큰 병 2개와 같습니다.'
+    },
+    {
+        problem_id: 'REL_MATH_008',
+        grade_band: 'G1_G2',
+        level: 5,
+        skill_tags: ['INVERSE_RELATION', 'DIRECTION_CONFUSION'],
+        irt: { model: 'rasch', b: 0.2 },
+        problem_types: ['UNIT_COMPARE', 'INVERSE_RELATION'],
+        question: '노란 병을 가득 채우려면 작은 컵으로는 6번, 큰 컵으로는 3번 부어야 해요. 더 큰 컵은 무엇일까요?',
+        base_unit: '노란 병',
+        entities: [
+            { id: 'small', label: '작은 컵', relation_direction: 'A_to_base', count: 6, relative_value: 0.167 },
+            { id: 'large', label: '큰 컵', relation_direction: 'A_to_base', count: 3, relative_value: 0.333 }
+        ],
+        question_type: 'LARGEST',
+        operation: '관계 비교',
+        answer: '큰 컵',
+        explanation: '같은 노란 병을 채우는 데 적게 부어도 되는 컵이 더 큽니다. 3번이면 되는 큰 컵이 6번 필요한 작은 컵보다 큽니다.'
+    },
+    {
+        problem_id: 'REL_MATH_009',
+        grade_band: 'G3_G4',
+        level: 8,
+        skill_tags: ['RANKING', 'COMPOSITE_RELATION'],
+        irt: { model: 'rasch', b: 1.0 },
+        problem_types: ['RANKING', 'COMPOSITE_RELATION'],
+        question: 'A 막대는 B 막대의 2배이고, C 막대는 A 막대의 절반이에요. 가장 긴 막대는 무엇일까요?',
+        base_unit: 'B 막대',
+        entities: [
+            { id: 'B', label: 'B 막대', relative_value: 1 },
+            { id: 'A', label: 'A 막대', relative_value: 2 },
+            { id: 'C', label: 'C 막대', relative_value: 1 }
+        ],
+        question_type: 'LARGEST',
+        operation: '관계 비교',
+        answer: 'A 막대',
+        explanation: 'B를 기준 1로 보면 A는 2입니다. C는 A의 절반이므로 다시 1입니다. 따라서 가장 긴 것은 A 막대입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_010',
+        grade_band: 'G3_G4',
+        level: 11,
+        skill_tags: ['FRACTION_RELATION', 'PROPORTION', 'TRANSFER_FAILURE'],
+        irt: { model: 'rasch', b: 1.8 },
+        problem_types: ['FRACTION_RELATION', 'PROPORTION', 'TRANSFER_FAILURE'],
+        question: '물 3컵으로 주스 2병을 만들 수 있어요. 같은 비율로 주스 6병을 만들려면 물은 몇 컵 필요할까요?',
+        base_unit: '주스 2병',
+        entities: [
+            { id: 'base', label: '주스 2병', count: 2, relative_value: 3 },
+            { id: 'target', label: '주스 6병', count: 6, relative_value: 9 }
+        ],
+        question_type: 'TOTAL_AMOUNT',
+        operation: '곱셈',
+        answer: '9컵',
+        explanation: '주스 6병은 주스 2병 묶음이 3번입니다. 물도 3컵씩 3번 필요하므로 3 × 3 = 9컵입니다.'
     }
 ];
 
