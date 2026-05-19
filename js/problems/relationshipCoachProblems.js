@@ -397,7 +397,7 @@ const RELATION_COACH_PROBLEM_BANK = [
         grade_band: 'G1_G2',
         level: 3,
         skill_tags: ['QUOTATIVE_DIVISION'],
-        irt: { model: 'rasch', b: -0.7 },
+        irt: { model: 'rasch', b: -0.8 },
         problem_types: ['QUOTATIVE_DIVISION'],
         question: '블록 24개를 6개씩 묶어 탑을 만들려고 해요. 탑은 몇 개 만들 수 있을까요?',
         base_unit: '탑 1개',
@@ -575,6 +575,374 @@ const RELATION_COACH_PROBLEM_BANK = [
         operation: '관계 비교',
         answer: '7.5컵',
         explanation: '빵 1개에는 밀가루 3/4컵이 필요합니다. 빵 10개에는 3/4 × 10 = 7.5컵이 필요합니다.'
+    },
+    {
+        problem_id: 'REL_MATH_031',
+        grade_band: 'G1_G2',
+        level: 1,
+        skill_tags: ['DIRECT_COMPARE'],
+        irt: { model: 'rasch', b: -1.6 },
+        problem_types: ['DIRECT_COMPARE'],
+        question: '빨간 바구니에는 사과 4개, 파란 바구니에는 사과 7개가 있어요. 더 많은 바구니는 무엇일까요?',
+        base_unit: '사과 개수',
+        entities: [
+            { id: 'red', label: '빨간 바구니', count: 4, relative_value: 4 },
+            { id: 'blue', label: '파란 바구니', count: 7, relative_value: 7 }
+        ],
+        question_type: 'LARGEST',
+        operation: '관계 비교',
+        answer: '파란 바구니',
+        explanation: '7은 4보다 큽니다. 사과가 더 많은 바구니는 파란 바구니입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_032',
+        grade_band: 'G1_G2',
+        level: 2,
+        skill_tags: ['EQUAL_SHARING'],
+        irt: { model: 'rasch', b: -1.2 },
+        problem_types: ['EQUAL_SHARING'],
+        question: '과자 10개를 2명이 똑같이 나누어 먹으려고 해요. 한 명은 몇 개씩 먹을까요?',
+        base_unit: '한 명',
+        entities: [
+            { id: 'total', label: '과자 전체', count: 10, relative_value: 10 },
+            { id: 'people', label: '2명', count: 2, relative_value: 2 }
+        ],
+        question_type: 'UNIT_AMOUNT',
+        operation: '나눗셈',
+        answer: '5개',
+        explanation: '10개를 2명에게 똑같이 나누면 10 ÷ 2 = 5입니다. 한 명은 5개씩 먹습니다.'
+    },
+    {
+        problem_id: 'REL_MATH_033',
+        grade_band: 'G1_G2',
+        level: 2,
+        skill_tags: ['QUOTATIVE_DIVISION'],
+        irt: { model: 'rasch', b: -1.0 },
+        problem_types: ['QUOTATIVE_DIVISION'],
+        question: '공책 18권을 3권씩 묶으려고 해요. 몇 묶음이 될까요?',
+        base_unit: '한 묶음',
+        entities: [
+            { id: 'total', label: '공책 전체', count: 18, relative_value: 18 },
+            { id: 'bundle', label: '한 묶음', count: 3, relative_value: 3 }
+        ],
+        question_type: 'GROUP_COUNT',
+        operation: '나눗셈',
+        answer: '6묶음',
+        explanation: '18권을 3권씩 묶으면 18 ÷ 3 = 6입니다. 6묶음이 됩니다.'
+    },
+    {
+        problem_id: 'REL_MATH_034',
+        grade_band: 'G2_G3',
+        level: 4,
+        skill_tags: ['UNIT_COMPARE'],
+        irt: { model: 'rasch', b: -0.7 },
+        problem_types: ['UNIT_COMPARE'],
+        question: '색연필 6자루가 한 세트예요. 색연필 24자루는 몇 세트일까요?',
+        base_unit: '한 세트',
+        entities: [
+            { id: 'base', label: '한 세트', count: 6, relative_value: 1 },
+            { id: 'target', label: '색연필 24자루', count: 24, relative_value: 4 }
+        ],
+        question_type: 'GROUP_COUNT',
+        operation: '나눗셈',
+        answer: '4세트',
+        explanation: '한 세트가 6자루이므로 24자루는 6자루 묶음이 4개입니다. 4세트입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_035',
+        grade_band: 'G2_G3',
+        level: 5,
+        skill_tags: ['INVERSE_RELATION', 'DIRECTION_CONFUSION'],
+        irt: { model: 'rasch', b: -0.2 },
+        problem_types: ['UNIT_COMPARE', 'INVERSE_RELATION'],
+        question: '한 병을 채우려면 작은 컵은 10번, 큰 컵은 5번 부어야 해요. 더 작은 컵은 무엇일까요?',
+        base_unit: '한 병',
+        entities: [
+            { id: 'small', label: '작은 컵', relation_direction: 'A_to_base', count: 10, relative_value: 0.1 },
+            { id: 'large', label: '큰 컵', relation_direction: 'A_to_base', count: 5, relative_value: 0.2 }
+        ],
+        question_type: 'SMALLEST',
+        operation: '관계 비교',
+        answer: '작은 컵',
+        explanation: '같은 병을 채우는 데 더 많이 필요한 컵이 더 작습니다. 10번 필요한 작은 컵이 더 작습니다.'
+    },
+    {
+        problem_id: 'REL_MATH_036',
+        grade_band: 'G2_G3',
+        level: 5,
+        skill_tags: ['MULTIPLICATIVE_COMPARE'],
+        irt: { model: 'rasch', b: 0.0 },
+        problem_types: ['MULTIPLICATIVE_COMPARE'],
+        question: '아빠의 나이는 36살이고, 아이의 나이는 아빠 나이의 1/4이에요. 아이는 몇 살일까요?',
+        base_unit: '아빠 나이',
+        entities: [
+            { id: 'father', label: '아빠', count: 36, relative_value: 1 },
+            { id: 'child', label: '아이', count: 9, relative_value: 0.25 }
+        ],
+        question_type: 'UNIT_AMOUNT',
+        operation: '나눗셈',
+        answer: '9살',
+        explanation: '36의 1/4은 36 ÷ 4 = 9입니다. 아이는 9살입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_037',
+        grade_band: 'G3_G4',
+        level: 6,
+        skill_tags: ['FRACTION_RELATION'],
+        irt: { model: 'rasch', b: 0.3 },
+        problem_types: ['FRACTION_RELATION'],
+        question: '전체 케이크가 20조각이에요. 민아는 전체의 1/5을 먹었어요. 민아가 먹은 케이크는 몇 조각일까요?',
+        base_unit: '전체 케이크',
+        entities: [
+            { id: 'whole', label: '전체', count: 20, relative_value: 1 },
+            { id: 'mina', label: '민아가 먹은 양', count: 4, relative_value: 0.2 }
+        ],
+        question_type: 'UNIT_AMOUNT',
+        operation: '나눗셈',
+        answer: '4조각',
+        explanation: '20조각의 1/5은 20 ÷ 5 = 4입니다. 민아는 4조각을 먹었습니다.'
+    },
+    {
+        problem_id: 'REL_MATH_038',
+        grade_band: 'G2_G3',
+        level: 5,
+        skill_tags: ['RANKING'],
+        irt: { model: 'rasch', b: 0.2 },
+        problem_types: ['RANKING'],
+        question: 'A팀은 12점, B팀은 16점, C팀은 14점을 얻었어요. 두 번째로 높은 점수의 팀은 어디일까요?',
+        base_unit: '점수',
+        entities: [
+            { id: 'A', label: 'A팀', count: 12, relative_value: 12 },
+            { id: 'B', label: 'B팀', count: 16, relative_value: 16 },
+            { id: 'C', label: 'C팀', count: 14, relative_value: 14 }
+        ],
+        question_type: 'SECOND_LARGEST',
+        operation: '관계 비교',
+        answer: 'C팀',
+        explanation: 'B팀이 16점으로 가장 높고, C팀이 14점으로 두 번째입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_039',
+        grade_band: 'G3_G4',
+        level: 7,
+        skill_tags: ['COMPOSITE_RELATION'],
+        irt: { model: 'rasch', b: 0.6 },
+        problem_types: ['COMPOSITE_RELATION'],
+        question: '상자 A에는 공 8개가 있고, 상자 B에는 A보다 5개 더 많아요. 상자 C에는 B보다 3개 적어요. C에는 공이 몇 개 있을까요?',
+        base_unit: '상자 A',
+        entities: [
+            { id: 'A', label: '상자 A', count: 8, relative_value: 1 },
+            { id: 'B', label: '상자 B', count: 13, relative_value: 1.625 },
+            { id: 'C', label: '상자 C', count: 10, relative_value: 1.25 }
+        ],
+        question_type: 'TOTAL_AMOUNT',
+        operation: '덧셈',
+        answer: '10개',
+        explanation: 'B는 8 + 5 = 13개입니다. C는 B보다 3개 적으므로 13 - 3 = 10개입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_040',
+        grade_band: 'G3_G4',
+        level: 8,
+        skill_tags: ['PROPORTION'],
+        irt: { model: 'rasch', b: 0.8 },
+        problem_types: ['PROPORTION'],
+        question: '리본 3m의 값이 900원이에요. 같은 리본 7m의 값은 얼마일까요?',
+        base_unit: '리본 3m',
+        entities: [
+            { id: 'base', label: '리본 3m', count: 3, relative_value: 900 },
+            { id: 'target', label: '리본 7m', count: 7, relative_value: 2100 }
+        ],
+        question_type: 'TOTAL_AMOUNT',
+        operation: '곱셈',
+        answer: '2100원',
+        explanation: '1m의 값은 900 ÷ 3 = 300원입니다. 7m는 300 × 7 = 2100원입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_041',
+        grade_band: 'G2_G3',
+        level: 6,
+        skill_tags: ['DIRECT_COMPARE', 'RANKING'],
+        irt: { model: 'rasch', b: -0.1 },
+        problem_types: ['DIRECT_COMPARE', 'RANKING'],
+        question: '기차 A는 30분, 기차 B는 25분, 기차 C는 40분 걸렸어요. 가장 빨리 도착한 기차는 무엇일까요?',
+        base_unit: '걸린 시간',
+        entities: [
+            { id: 'A', label: '기차 A', count: 30, relative_value: 30 },
+            { id: 'B', label: '기차 B', count: 25, relative_value: 25 },
+            { id: 'C', label: '기차 C', count: 40, relative_value: 40 }
+        ],
+        question_type: 'SMALLEST',
+        operation: '관계 비교',
+        answer: '기차 B',
+        explanation: '가장 빨리 도착한 것은 시간이 가장 적게 걸린 것입니다. 25분 걸린 기차 B가 가장 빠릅니다.'
+    },
+    {
+        problem_id: 'REL_MATH_042',
+        grade_band: 'G2_G3',
+        level: 6,
+        skill_tags: ['INVERSE_RELATION', 'DIRECTION_CONFUSION'],
+        irt: { model: 'rasch', b: 0.4 },
+        problem_types: ['INVERSE_RELATION'],
+        question: '같은 양의 모래를 옮길 때 빨간 삽은 4번, 파란 삽은 7번 퍼야 해요. 더 큰 삽은 무엇일까요?',
+        base_unit: '같은 양의 모래',
+        entities: [
+            { id: 'red', label: '빨간 삽', relation_direction: 'A_to_base', count: 4, relative_value: 0.25 },
+            { id: 'blue', label: '파란 삽', relation_direction: 'A_to_base', count: 7, relative_value: 0.143 }
+        ],
+        question_type: 'LARGEST',
+        operation: '관계 비교',
+        answer: '빨간 삽',
+        explanation: '같은 양을 옮길 때 적게 퍼도 되는 삽이 더 큽니다. 4번 필요한 빨간 삽이 더 큽니다.'
+    },
+    {
+        problem_id: 'REL_MATH_043',
+        grade_band: 'G3_G4',
+        level: 9,
+        skill_tags: ['FRACTION_RELATION', 'MULTIPLICATIVE_COMPARE'],
+        irt: { model: 'rasch', b: 1.0 },
+        problem_types: ['FRACTION_RELATION', 'MULTIPLICATIVE_COMPARE'],
+        question: 'A 끈은 18cm이고, B 끈은 A의 1/3, C 끈은 B의 4배예요. C 끈은 몇 cm일까요?',
+        base_unit: 'A 끈',
+        entities: [
+            { id: 'A', label: 'A 끈', count: 18, relative_value: 1 },
+            { id: 'B', label: 'B 끈', count: 6, relative_value: 0.333 },
+            { id: 'C', label: 'C 끈', count: 24, relative_value: 1.333 }
+        ],
+        question_type: 'UNIT_AMOUNT',
+        operation: '나눗셈',
+        answer: '24cm',
+        explanation: 'B는 18 ÷ 3 = 6cm입니다. C는 B의 4배이므로 6 × 4 = 24cm입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_044',
+        grade_band: 'G3_G4',
+        level: 10,
+        skill_tags: ['PROPORTION', 'TRANSFER_FAILURE'],
+        irt: { model: 'rasch', b: 1.3 },
+        problem_types: ['PROPORTION', 'TRANSFER_FAILURE'],
+        question: '물감 2통으로 포스터 5장을 칠할 수 있어요. 같은 비율로 포스터 15장을 칠하려면 물감은 몇 통 필요할까요?',
+        base_unit: '포스터 5장',
+        entities: [
+            { id: 'base', label: '포스터 5장', count: 5, relative_value: 2 },
+            { id: 'target', label: '포스터 15장', count: 15, relative_value: 6 }
+        ],
+        question_type: 'TOTAL_AMOUNT',
+        operation: '곱셈',
+        answer: '6통',
+        explanation: '15장은 5장 묶음이 3번입니다. 물감도 2통씩 3번 필요하므로 2 × 3 = 6통입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_045',
+        grade_band: 'G3_G4',
+        level: 10,
+        skill_tags: ['COMPOSITE_RELATION', 'RANKING'],
+        irt: { model: 'rasch', b: 1.4 },
+        problem_types: ['COMPOSITE_RELATION', 'RANKING'],
+        question: 'A는 B보다 4개 많고, C는 A의 2배예요. B가 6개라면 가장 많은 것은 무엇일까요?',
+        base_unit: 'B',
+        entities: [
+            { id: 'B', label: 'B', count: 6, relative_value: 1 },
+            { id: 'A', label: 'A', count: 10, relative_value: 1.667 },
+            { id: 'C', label: 'C', count: 20, relative_value: 3.333 }
+        ],
+        question_type: 'LARGEST',
+        operation: '관계 비교',
+        answer: 'C',
+        explanation: 'A는 6 + 4 = 10개입니다. C는 A의 2배이므로 20개입니다. 가장 많은 것은 C입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_046',
+        grade_band: 'G3_G4',
+        level: 11,
+        skill_tags: ['UNIT_COMPARE', 'PROPORTION'],
+        irt: { model: 'rasch', b: 1.5 },
+        problem_types: ['UNIT_COMPARE', 'PROPORTION'],
+        question: '한 상자에는 귤 12개가 들어 있어요. 귤 54개는 몇 상자와 몇 개일까요?',
+        base_unit: '한 상자',
+        entities: [
+            { id: 'base', label: '한 상자', count: 12, relative_value: 1 },
+            { id: 'target', label: '귤 54개', count: 54, relative_value: 4.5 }
+        ],
+        question_type: 'GROUP_COUNT',
+        operation: '나눗셈',
+        answer: '4상자와 6개',
+        explanation: '54 ÷ 12 = 4 나머지 6입니다. 따라서 4상자와 6개입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_047',
+        grade_band: 'G3_G4',
+        level: 11,
+        skill_tags: ['INVERSE_RELATION', 'COMPOSITE_RELATION'],
+        irt: { model: 'rasch', b: 1.6 },
+        problem_types: ['INVERSE_RELATION', 'COMPOSITE_RELATION'],
+        question: '큰 통을 채우려면 A컵은 5번, B컵은 10번 필요해요. 큰 통의 물은 C컵에 2번 나누어 담을 수 있어요. 크기가 큰 순서로 맞는 것은 무엇일까요?',
+        base_unit: '큰 통',
+        entities: [
+            { id: 'A', label: 'A컵', relation_direction: 'A_to_base', count: 5, relative_value: 0.2 },
+            { id: 'B', label: 'B컵', relation_direction: 'B_to_base', count: 10, relative_value: 0.1 },
+            { id: 'C', label: 'C컵', relation_direction: 'base_to_C', count: 2, relative_value: 2 }
+        ],
+        question_type: 'RANK_ORDER',
+        operation: '관계 비교',
+        answer: 'C컵, A컵, B컵',
+        explanation: 'C컵은 큰 통 물을 2번에 나누어 담을 만큼 큽니다. A컵은 통을 5번에 채우고, B컵은 10번에 채우므로 A가 B보다 큽니다. 순서는 C컵, A컵, B컵입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_048',
+        grade_band: 'G3_G4',
+        level: 12,
+        skill_tags: ['FRACTION_RELATION', 'RANKING', 'COMPOSITE_RELATION'],
+        irt: { model: 'rasch', b: 1.8 },
+        problem_types: ['FRACTION_RELATION', 'RANKING', 'COMPOSITE_RELATION'],
+        question: 'A는 전체의 2/3, B는 전체의 1/2, C는 B의 2배예요. 가장 큰 것은 무엇일까요?',
+        base_unit: '전체',
+        entities: [
+            { id: 'A', label: 'A', relative_value: 0.667 },
+            { id: 'B', label: 'B', relative_value: 0.5 },
+            { id: 'C', label: 'C', relative_value: 1 }
+        ],
+        question_type: 'LARGEST',
+        operation: '관계 비교',
+        answer: 'C',
+        explanation: 'B는 전체의 1/2이고 C는 B의 2배이므로 전체와 같습니다. A는 2/3이므로 가장 큰 것은 C입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_049',
+        grade_band: 'G3_G4',
+        level: 12,
+        skill_tags: ['PROPORTION', 'MULTIPLICATIVE_COMPARE', 'TRANSFER_FAILURE'],
+        irt: { model: 'rasch', b: 1.9 },
+        problem_types: ['PROPORTION', 'MULTIPLICATIVE_COMPARE', 'TRANSFER_FAILURE'],
+        question: '기계 3대가 2시간에 부품 24개를 만들어요. 같은 속도로 기계 6대가 2시간 일하면 부품은 몇 개 만들까요?',
+        base_unit: '기계 3대',
+        entities: [
+            { id: 'base', label: '기계 3대', count: 3, relative_value: 24 },
+            { id: 'target', label: '기계 6대', count: 6, relative_value: 48 }
+        ],
+        question_type: 'TOTAL_AMOUNT',
+        operation: '곱셈',
+        answer: '48개',
+        explanation: '기계 수가 3대에서 6대로 2배가 되었고 시간은 같습니다. 따라서 부품 수도 24개의 2배인 48개입니다.'
+    },
+    {
+        problem_id: 'REL_MATH_050',
+        grade_band: 'G3_G4',
+        level: 12,
+        skill_tags: ['FRACTION_RELATION', 'PROPORTION', 'COMPOSITE_RELATION'],
+        irt: { model: 'rasch', b: 2.1 },
+        problem_types: ['FRACTION_RELATION', 'PROPORTION', 'COMPOSITE_RELATION'],
+        question: '전체 40쪽짜리 책에서 첫째 날 1/4을 읽고, 둘째 날 남은 쪽의 1/2을 읽었어요. 둘째 날 읽은 쪽수는 몇 쪽일까요?',
+        base_unit: '전체 책',
+        entities: [
+            { id: 'whole', label: '전체', count: 40, relative_value: 1 },
+            { id: 'day1', label: '첫째 날', count: 10, relative_value: 0.25 },
+            { id: 'day2', label: '둘째 날', count: 15, relative_value: 0.375 }
+        ],
+        question_type: 'UNIT_AMOUNT',
+        operation: '나눗셈',
+        answer: '15쪽',
+        explanation: '첫째 날은 40 ÷ 4 = 10쪽을 읽었습니다. 남은 쪽은 30쪽이고, 그 절반은 15쪽입니다. 둘째 날은 15쪽을 읽었습니다.'
     }
 ];
 
