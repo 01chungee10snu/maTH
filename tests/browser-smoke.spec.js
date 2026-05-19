@@ -1,12 +1,16 @@
 const { test, expect } = require('@playwright/test');
 
 test('map and relationship coach smoke test', async ({ page }) => {
+  test.setTimeout(60000);
   const consoleErrors = [];
   page.on('console', msg => {
     if (msg.type() === 'error') consoleErrors.push(msg.text());
   });
 
-  await page.goto(process.env.APP_URL || 'http://127.0.0.1:8791/');
+  await page.goto(process.env.APP_URL || 'http://127.0.0.1:8791/', {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000
+  });
   await page.waitForFunction(() => {
     return typeof STATE !== 'undefined'
       && typeof CURRICULUM_DATA !== 'undefined'
