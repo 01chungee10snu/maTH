@@ -364,6 +364,40 @@ function testIrtSelectionAvoidsImmediateItemRepeatWhenAlternativesExist() {
   assert.notStrictEqual(selected.problem_id, 'REL_MATH_004');
 }
 
+function testIrtSelectionMaintainsItemDiversityAcrossAdaptiveRun() {
+  const context = createContext();
+  runScript(context, 'js/relationCurriculum.js');
+  runScript(context, 'js/problems/problemBase.js');
+  runScript(context, 'js/problems/relationshipCoachProblems.js');
+  runScript(context, 'js/irtEngine.js');
+
+  const items = context.window.RelationCurriculum.filterItemsForTopic(
+    context.window.RelationshipCoachProblems.bank,
+    '자연수의 곱셈과 나눗셈'
+  );
+  let state = context.window.IrtEngine.createInitialState('relationship_math');
+  const selectedIds = [];
+
+  for (let index = 0; index < 12; index += 1) {
+    const item = context.window.IrtEngine.selectNextItem(items, state);
+    selectedIds.push(item.problem_id);
+    state = context.window.IrtEngine.updateState(state, item, {
+      correct: true,
+      hintLevel: index % 3,
+      stepSuccessRate: 1
+    });
+  }
+
+  const counts = selectedIds.reduce((acc, id) => {
+    acc[id] = (acc[id] || 0) + 1;
+    return acc;
+  }, {});
+  const maxRepeat = Math.max(...Object.values(counts));
+
+  assert.ok(new Set(selectedIds).size >= 9, `selected too few unique items: ${selectedIds.join(',')}`);
+  assert.ok(maxRepeat <= 2, `item repeated too often: ${JSON.stringify(counts)}`);
+}
+
 function testRelationshipCoachBankHasIrtMetadata() {
   const context = createContext();
   runScript(context, 'js/problems/problemBase.js');
@@ -659,6 +693,7 @@ async function runTests() {
   testSupabaseClientUsesPublicConfig();
   testIrtEngineUpdatesLearnerStateAndSelectsItems();
   testIrtSelectionAvoidsImmediateItemRepeatWhenAlternativesExist();
+  testIrtSelectionMaintainsItemDiversityAcrossAdaptiveRun();
   testRelationshipCoachBankHasIrtMetadata();
   testIrtAttemptLogCreatesSupabaseReadyPendingRecords();
   await testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners();

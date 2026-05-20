@@ -304,9 +304,11 @@ function genProblem(diff) {
 
     if (shouldUseRelationThinkingProblem(topic) && window.IrtEngine && window.RelationshipCoachProblems?.bank) {
         ensureIrtState();
-        const pool = window.RelationCurriculum?.filterItemsForTopic
-            ? window.RelationCurriculum.filterItemsForTopic(window.RelationshipCoachProblems.bank, topic)
-            : window.RelationshipCoachProblems.bank;
+        const pool = window.AdaptiveLearningFlow?.getCandidateItems
+            ? window.AdaptiveLearningFlow.getCandidateItems(window.RelationshipCoachProblems.bank, STATE)
+            : window.RelationCurriculum?.filterItemsForTopic
+                ? window.RelationCurriculum.filterItemsForTopic(window.RelationshipCoachProblems.bank, topic)
+                : window.RelationshipCoachProblems.bank;
         const selectedItem = window.IrtEngine.selectNextItem(pool, STATE.irt);
         if (selectedItem && window.RelationshipCoachProblems.generateForItem) {
             return window.RelationshipCoachProblems.generateForItem(selectedItem, diff);

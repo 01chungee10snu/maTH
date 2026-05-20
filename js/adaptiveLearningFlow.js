@@ -62,10 +62,20 @@ function createStartPatch(state = {}) {
     };
 }
 
+function getCandidateItems(items, state = {}) {
+    const allItems = Array.isArray(items) ? items.filter(item => item && item.problem_id) : [];
+    if (state.learningEntry === 'adaptive') return allItems;
+    if (window.RelationCurriculum?.filterItemsForTopic) {
+        return window.RelationCurriculum.filterItemsForTopic(allItems, state.currentCurriculum);
+    }
+    return allItems;
+}
+
 window.AdaptiveLearningFlow = {
     defaultTopic: ADAPTIVE_DEFAULT_TOPIC,
     chooseStartTopic,
-    createStartPatch
+    createStartPatch,
+    getCandidateItems
 };
 
 globalThis.AdaptiveLearningFlow = window.AdaptiveLearningFlow;
