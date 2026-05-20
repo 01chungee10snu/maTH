@@ -38,12 +38,16 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
   const runtimeBank = await page.evaluate(() => ({
     itemCount: RelationshipCoachProblems.bank.length,
     expandedCount: RelationshipCoachProblems.bank.filter(item => item.source === 'elementary_seed_bank').length,
-    hasExpandedLoader: typeof ExpandedWordProblemBank?.load === 'function'
+    hasExpandedLoader: typeof ExpandedWordProblemBank?.load === 'function',
+    loadedTinipingImages: TINIPINGS.filter(item => item.imageStatus === 'loaded' && item.imageObj).length,
+    placeholderTinipingImages: TINIPINGS.filter(item => item.imageStatus === 'placeholder').length
   }));
 
   expect(runtimeBank.itemCount).toBeGreaterThanOrEqual(1050);
   expect(runtimeBank.expandedCount).toBeGreaterThanOrEqual(1000);
   expect(runtimeBank.hasExpandedLoader).toBe(true);
+  expect(runtimeBank.loadedTinipingImages).toBeGreaterThanOrEqual(140);
+  expect(runtimeBank.placeholderTinipingImages).toBeLessThanOrEqual(8);
 
   const topLevelMap = await page.evaluate(() => {
     STATE.mode = 'map';
@@ -188,6 +192,31 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
   expect(parentReport.reliabilityLevel).toBe('관찰 단계');
   expect(parentReport.validityGaps).toBeGreaterThan(0);
   expect(parentReport.recommendations).toBeGreaterThan(0);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileCollection = await page.evaluate(() => {
+    STATE.mode = 'collection';
+    STATE.collectionTab = '전체';
+    STATE.caughtIds = TINIPINGS.slice(0, 18).map(item => item.id);
+    lastCssW = null;
+    lastCssH = null;
+    setHiDPI();
+    drawCollection();
+    const tabs = STATE.hitboxes.filter(box => box.id.startsWith('tab_'));
+    return {
+      canvasWidth: CANVAS.width / DPR,
+      canvasHeight: CANVAS.height / DPR,
+      tabRows: new Set(tabs.map(box => Math.round(box.y))).size,
+      minTabWidth: Math.min(...tabs.map(box => box.w)),
+      loadedImages: TINIPINGS.filter(item => item.imageStatus === 'loaded' && item.imageObj).length
+    };
+  });
+
+  expect(mobileCollection.canvasWidth).toBeLessThanOrEqual(390);
+  expect(mobileCollection.canvasHeight).toBeGreaterThan(844);
+  expect(mobileCollection.tabRows).toBeGreaterThanOrEqual(2);
+  expect(mobileCollection.minTabWidth).toBeGreaterThanOrEqual(80);
+  expect(mobileCollection.loadedImages).toBeGreaterThanOrEqual(140);
 
   const visibleError = await page.locator('#err').evaluate(el => ({
     text: el.textContent,

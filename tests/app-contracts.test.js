@@ -320,6 +320,94 @@ function testExpandedSeedBankConvertsIntoIrtRuntimeItems() {
   assert.ok(seedProblem.coachSteps.some(step => step.id === 'operation'));
 }
 
+function testTinipingAssetPolicyDoesNotUseWrongCharacterFallbacks() {
+  const context = createContext();
+  runScript(context, 'js/data.js');
+
+  assert.strictEqual(typeof context.window.TinipingAssetPolicy.createAssetRecord, 'function');
+  assert.strictEqual(typeof context.window.TinipingAssetPolicy.getLocalImageCandidates, 'function');
+
+  const placeholder = context.window.TinipingAssetPolicy.createAssetRecord(
+    { name: '키키핑', type: '일반', season: 1, domain: '도형과 측정' },
+    null,
+    null
+  );
+
+  assert.strictEqual(placeholder.imageObj, null);
+  assert.strictEqual(placeholder.image, null);
+  assert.strictEqual(placeholder.imageStatus, 'placeholder');
+  assert.strictEqual(placeholder.placeholder.label, '키키핑');
+  assert.ok(Array.isArray(placeholder.placeholder.colors));
+  assert.ok(placeholder.placeholder.colors.length >= 2);
+
+  const characterCandidates = context.window.TinipingAssetPolicy.getLocalImageCandidates('사뿐핑');
+  assert.ok(
+    characterCandidates.some(candidate => candidate.path === './images/characters/사뿐핑.png'),
+    'character directory images should be preferred when available'
+  );
+}
+
+function testTinipingImageManifestCoversMostCharactersWithLocalFiles() {
+  const manifestPath = path.join(root, 'data/tiniping_image_manifest.json');
+  assert.ok(fs.existsSync(manifestPath), 'tiniping image manifest must exist');
+
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  assert.ok(Array.isArray(manifest.items));
+  assert.strictEqual(manifest.itemCount, 148);
+  assert.strictEqual(manifest.missingCount, 0);
+  assert.strictEqual(manifest.items.length, 148);
+
+  const names = new Set();
+  for (const item of manifest.items) {
+    assert.ok(item.name);
+    assert.ok(!names.has(item.name), `duplicate manifest item: ${item.name}`);
+    names.add(item.name);
+    assert.ok(item.path && item.path.startsWith('./images/tinipings/'));
+    assert.ok(/\.(png|jpe?g|webp)$/i.test(item.path), `manifest must reference image files only: ${item.path}`);
+    assert.ok(/Render/i.test(item.sourceFile || ''), `manifest source must be a character render: ${item.name}`);
+    assert.ok(item.sourceUrl && /^https:\/\//.test(item.sourceUrl));
+    assert.ok(fs.existsSync(path.join(root, item.path.replace(/^\.\//, ''))), `missing image file: ${item.path}`);
+  }
+}
+
+function testCanvasTextHelpersFitKoreanLabelsAndWrapTabs() {
+  const context = createContext();
+  runScript(context, 'js/canvasText.js');
+
+  assert.strictEqual(typeof context.window.CanvasText.wrapText, 'function');
+  assert.strictEqual(typeof context.window.CanvasText.getWrappedTabLayout, 'function');
+
+  const measureContext = {
+    font: '',
+    measureText(text) {
+      return { width: String(text).length * 10 };
+    }
+  };
+  const lines = context.window.CanvasText.wrapText(
+    measureContext,
+    '관계사고가필요한긴문장제문제',
+    70,
+    { maxLines: 3 }
+  );
+
+  assert.ok(lines.length > 1);
+  assert.ok(lines.every(line => measureContext.measureText(line).width <= 70));
+
+  const tabs = ['전체', '수와 연산', '도형과 측정', '규칙성', '자료와 가능성', '부모 리포트'];
+  const tabLayout = context.window.CanvasText.getWrappedTabLayout(tabs, {
+    x: 16,
+    y: 90,
+    width: 280,
+    minTabWidth: 86,
+    tabHeight: 42,
+    gap: 8
+  });
+
+  assert.ok(tabLayout.rows >= 2);
+  assert.ok(tabLayout.tabs.every(tab => tab.w >= 86));
+  assert.ok(tabLayout.height > 42);
+}
+
 function testIrtEngineUpdatesLearnerStateAndSelectsItems() {
   const context = createContext();
   runScript(context, 'js/irtEngine.js');
@@ -926,6 +1014,9 @@ async function runTests() {
   testAdaptiveLearningFlowStartsWithoutManualSchoolSelection();
   testElementaryWordProblemSeedBankContract();
   testExpandedSeedBankConvertsIntoIrtRuntimeItems();
+  testTinipingAssetPolicyDoesNotUseWrongCharacterFallbacks();
+  testTinipingImageManifestCoversMostCharactersWithLocalFiles();
+  testCanvasTextHelpersFitKoreanLabelsAndWrapTabs();
   testSupabasePublicConfigContract();
   testSupabaseClientUsesPublicConfig();
   testIrtEngineUpdatesLearnerStateAndSelectsItems();

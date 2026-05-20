@@ -508,6 +508,23 @@ const localImageMap = {
     "온리핑": "온리핑.png"
 };
 
+const availableTinipingImageFiles = new Set([
+    "꾸래핑.png", "나나핑.png", "다이아나핑.png", "라라핑.png", "럭키핑.png", "말랑핑.png",
+    "믿어핑.png", "바로핑.png", "반짝하츄핑.png", "방글핑.png", "베리하츄핑.png", "빛나핑.png",
+    "빤짝핑.png", "뽀니핑.png", "사뿐핑.png", "샤샤핑.png", "솔찌핑.png", "스위핑.png",
+    "스타하츄핑.png", "시즌1하츄핑.png", "아름핑.png", "아자핑.png", "오로라핑.png",
+    "온리핑.png", "이클핑.png", "잘난핑.png", "젤리핑.png", "조아핑.png", "차차핑.png",
+    "초롱핑.png", "키킹.png", "탕이핑.png", "포실핑.png", "푸핑.png", "프린스핑.png",
+    "플로라하츄핑.png", "하츄핑.png", "해피핑.png"
+]);
+
+const availableCharacterImageFiles = new Set([
+    "깡총핑.png", "깨굴핑.png", "나비핑.png", "다이아나핑.png", "롱롱핑.png", "뽀니핑.png",
+    "뽀득핑.png", "사뿐핑.png", "샤를핑.png", "슈슈핑.png", "스노우핑.png", "실크핑.png",
+    "아름핑.png", "야옹핑.png", "이슬핑.png", "이클립스핑.png", "젠틀핑.png", "차밍핑.png",
+    "쿨쿨핑.png", "큐핑.png", "트롯핑.png", "포실핑.png", "하츄핑.png", "해핑.png"
+]);
+
 // 시즌별 하츄핑 변신 버전
 const seasonHatchupingMap = {
     1: "시즌1하츄핑.png",
@@ -517,6 +534,74 @@ const seasonHatchupingMap = {
     5: "스타하츄핑.png",
     6: "하츄핑.png"
 };
+
+const tinipingDomainPalettes = {
+    "수와 연산": ['#fce7f3', '#f9a8d4', '#9f1239'],
+    "도형과 측정": ['#e0f2fe', '#7dd3fc', '#075985'],
+    "규칙성": ['#fef3c7', '#facc15', '#92400e'],
+    "자료와 가능성": ['#ede9fe', '#c4b5fd', '#5b21b6']
+};
+
+const tinipingTypeAccents = {
+    "로열": '#ec4899',
+    "전설": '#f59e0b',
+    "서포팅": '#8b5cf6',
+    "일반": '#0ea5e9',
+    "빌런": '#64748b'
+};
+
+function uniqueCandidates(candidates) {
+    const seen = new Set();
+    return candidates.filter(candidate => {
+        if (!candidate?.path || seen.has(candidate.path)) return false;
+        seen.add(candidate.path);
+        return true;
+    });
+}
+
+function getLocalImageCandidates(name) {
+    const candidates = [];
+    const exactFilename = `${name}.png`;
+
+    if (name === '하츄핑' && localImageMap[name]) {
+        candidates.push({ path: `./images/tinipings/${localImageMap[name]}`, source: 'local-season' });
+    }
+    if (availableCharacterImageFiles.has(exactFilename)) {
+        candidates.push({ path: `./images/characters/${exactFilename}`, source: 'local-character' });
+    }
+    if (availableTinipingImageFiles.has(exactFilename)) {
+        candidates.push({ path: `./images/tinipings/${exactFilename}`, source: 'local-tiniping' });
+    }
+    if (localImageMap[name] && name !== '하츄핑') {
+        candidates.push({ path: `./images/tinipings/${localImageMap[name]}`, source: 'local-season' });
+    }
+
+    return uniqueCandidates(candidates);
+}
+
+function getTinipingPlaceholderMeta(tiniping = {}) {
+    const palette = tinipingDomainPalettes[tiniping.domain] || ['#f8fafc', '#cbd5e1', '#334155'];
+    return {
+        label: tiniping.name || '???',
+        glyph: String(tiniping.name || '?').replace(/\s+/g, '').slice(0, 2) || '?',
+        season: tiniping.season || null,
+        domain: tiniping.domain || '',
+        type: tiniping.type || '일반',
+        colors: palette,
+        accent: tinipingTypeAccents[tiniping.type] || palette[2]
+    };
+}
+
+function createTinipingAssetRecord(tiniping, imgObj, imgSrc) {
+    const hasImage = Boolean(imgObj && imgSrc);
+    return {
+        ...tiniping,
+        image: hasImage ? imgSrc : null,
+        imageObj: hasImage ? imgObj : null,
+        imageStatus: hasImage ? 'loaded' : 'placeholder',
+        placeholder: getTinipingPlaceholderMeta(tiniping)
+    };
+}
 
 function detectMimeTypeFromBase64(data) {
     if (!data) return null;
@@ -577,30 +662,33 @@ function preloadImage(src) {
     });
 }
 
-async function loadTinipingImages() {
-    const FALLBACK_IMAGE_SRC = './images/tinipings/하츄핑.png';
-    let fallbackImageObj = null;
-
-    // 0단계: 폴백 이미지 로드
-    try {
-        fallbackImageObj = await preloadImage(FALLBACK_IMAGE_SRC);
-        if (!fallbackImageObj) {
-            console.error('치명적 오류: 폴백 이미지 로드 실패');
-        }
-    } catch (e) {
-        console.error('폴백 이미지 로드 중 예외 발생:', e);
+async function preloadFirstAvailableImage(candidates) {
+    for (const candidate of candidates) {
+        const img = await preloadImage(candidate.path);
+        if (img) return { img, src: candidate.path, source: candidate.source };
     }
+    return null;
+}
 
+async function loadTinipingImages() {
     // 1단계: 로컬 이미지 먼저 로드
     const localImagePromises = [];
     const localLoadedNames = new Set();
+    const manifestLoadedNames = new Set();
 
-    for (const [name, filename] of Object.entries(localImageMap)) {
-        const imagePath = `./images/tinipings/${filename}`;
-        const promise = preloadImage(imagePath).then(img => {
-            if (img) {
-                IMAGE_CACHE.set(name, img);
-                NAME2IMG.set(name, imagePath);
+    const localCandidateNames = Array.from(new Set([
+        ...baseTinipings.map(t => t.name),
+        ...Object.keys(localImageMap)
+    ]));
+
+    for (const name of localCandidateNames) {
+        const candidates = getLocalImageCandidates(name);
+        if (!candidates.length) continue;
+
+        const promise = preloadFirstAvailableImage(candidates).then(result => {
+            if (result?.img) {
+                IMAGE_CACHE.set(name, result.img);
+                NAME2IMG.set(name, result.src);
                 localLoadedNames.add(name);
             }
         });
@@ -623,7 +711,25 @@ async function loadTinipingImages() {
     await Promise.all(localImagePromises);
     console.log('로컬 이미지 로드 완료:', localLoadedNames.size, '개');
 
-    // 2단계: base64 JSON에서 추가 이미지 로드 (로컬에 없는 것만)
+    // 2단계: 실제 티니핑 이미지 manifest 반영
+    try {
+        const response = await fetch('./data/tiniping_image_manifest.json');
+        if (response.ok) {
+            const manifest = await response.json();
+            (manifest.items || []).forEach(item => {
+                if (item.name && item.path) {
+                    NAME2IMG.set(item.name, item.path);
+                    IMAGE_CACHE.delete(item.name);
+                    manifestLoadedNames.add(item.name);
+                }
+            });
+            console.log('티니핑 이미지 manifest 로드 성공:', manifest.itemCount || manifest.items?.length || 0, '개');
+        }
+    } catch (error) {
+        console.warn('티니핑 이미지 manifest 로드 오류 (선택적):', error.message);
+    }
+
+    // 3단계: base64 JSON에서 추가 이미지 로드 (로컬에 없는 것만)
     let loadedData = null;
     try {
         const response = await fetch('./teenieping_images_base64.json');
@@ -647,7 +753,7 @@ async function loadTinipingImages() {
     // base64 이미지 프리로드
     const base64Promises = [];
     NAME2IMG.forEach((src, name) => {
-        if (!IMAGE_CACHE.has(name)) {
+        if (!IMAGE_CACHE.has(name) || manifestLoadedNames.has(name)) {
             const promise = preloadImage(src).then(img => {
                 if (img) {
                     IMAGE_CACHE.set(name, img);
@@ -659,31 +765,25 @@ async function loadTinipingImages() {
 
     await Promise.all(base64Promises);
 
-    // 이미지가 없는 티니핑은 폴백 이미지 할당
+    // 이미지가 없는 티니핑은 각 캐릭터별 플레이스홀더로 표시
     const missingNames = [];
     
     TINIPINGS = baseTinipings.map(t => {
-        let imgObj = IMAGE_CACHE.get(t.name);
-        let imgSrc = NAME2IMG.get(t.name);
+        const imgObj = IMAGE_CACHE.get(t.name);
+        const imgSrc = NAME2IMG.get(t.name);
 
         if (!imgObj) {
             missingNames.push(t.name);
-            imgObj = fallbackImageObj; // 폴백 이미지 사용
-            imgSrc = FALLBACK_IMAGE_SRC;
         }
 
-        return {
-            ...t,
-            image: imgSrc,
-            imageObj: imgObj
-        };
+        return createTinipingAssetRecord(t, imgObj, imgSrc);
     });
 
     if (missingNames.length) {
-        console.warn(`이미지 로드 실패 (${missingNames.length}개), 기본 이미지로 대체됨:`, missingNames.slice(0, 5).join(', ') + (missingNames.length > 5 ? '...' : ''));
+        console.warn(`이미지 소스 없음 (${missingNames.length}개), 이름 배지로 표시됨:`, missingNames.slice(0, 5).join(', ') + (missingNames.length > 5 ? '...' : ''));
     }
 
-    console.log('티니핑 이미지 로드 완료:', IMAGE_CACHE.size, '/', baseTinipings.length, '개 (폴백 적용 포함)');
+    console.log('티니핑 이미지 로드 완료:', IMAGE_CACHE.size, '/', baseTinipings.length, '개 (이름 배지 포함)');
 }
 
 async function loadEncyclopedia() {
@@ -705,3 +805,11 @@ async function loadEncyclopedia() {
 
     console.warn('모든 도감 데이터 로드 실패');
 }
+
+window.TinipingAssetPolicy = {
+    getLocalImageCandidates,
+    getPlaceholderMeta: getTinipingPlaceholderMeta,
+    createAssetRecord: createTinipingAssetRecord
+};
+
+globalThis.TinipingAssetPolicy = window.TinipingAssetPolicy;

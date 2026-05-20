@@ -110,6 +110,74 @@ function getMapRequiredHeight(width) {
     return height + bottomPad;
 }
 
+function getCollectionTabs() {
+    return ['전체', '수와 연산', '도형과 측정', '규칙성', '자료와 가능성', '부모 리포트'];
+}
+
+function getCollectionTabLayout(width, startY = Math.round(100 * SCALE)) {
+    const x = Math.round(24 * SCALE);
+    const availableWidth = width - x * 2;
+    if (window.CanvasText?.getWrappedTabLayout) {
+        return window.CanvasText.getWrappedTabLayout(getCollectionTabs(), {
+            x,
+            y: startY,
+            width: availableWidth,
+            minTabWidth: Math.max(82, Math.round(96 * SCALE)),
+            tabHeight: Math.max(40, Math.round(46 * SCALE)),
+            gap: Math.max(7, Math.round(10 * SCALE))
+        });
+    }
+
+    const tabs = getCollectionTabs();
+    const tabGap = Math.round(10 * SCALE);
+    const tabW = (availableWidth - (tabs.length - 1) * tabGap) / tabs.length;
+    const tabH = Math.max(40, Math.round(46 * SCALE));
+    return {
+        x,
+        y: startY,
+        width: availableWidth,
+        rows: 1,
+        height: tabH,
+        tabs: tabs.map((label, i) => ({
+            label,
+            x: x + i * (tabW + tabGap),
+            y: startY,
+            w: tabW,
+            h: tabH
+        }))
+    };
+}
+
+function getCollectionGridMetrics(width, gridY) {
+    const gridX = Math.round(24 * SCALE);
+    const minCellW = Math.max(82, Math.round(96 * SCALE));
+    const cols = Math.max(2, Math.min(8, Math.floor((width - Math.round(48 * SCALE)) / minCellW)));
+    const cellW = Math.floor((width - Math.round(48 * SCALE)) / cols);
+    const cellH = Math.max(116, Math.round(132 * SCALE));
+    const pad = Math.max(8, Math.round(10 * SCALE));
+    return { gridX, gridY, cols, cellW, cellH, pad };
+}
+
+function getCollectionRequiredHeight(width) {
+    const tabLayout = getCollectionTabLayout(width);
+    if ((STATE.collectionTab || '전체') === '부모 리포트') {
+        return tabLayout.y + tabLayout.height + Math.round(430 * SCALE);
+    }
+
+    const targetTab = STATE.collectionTab || '전체';
+    const filteredCount = targetTab === '전체'
+        ? (TINIPINGS?.length || 0)
+        : (TINIPINGS || []).filter(t => t.domain === targetTab).length;
+    const gridY = tabLayout.y + tabLayout.height + Math.round(25 * SCALE);
+    const metrics = getCollectionGridMetrics(width, gridY);
+    const rows = Math.ceil(Math.max(1, filteredCount) / metrics.cols);
+    return gridY + rows * metrics.cellH + Math.round(36 * SCALE);
+}
+
+function getCatchRequiredHeight() {
+    return Math.max(640, Math.round(860 * SCALE));
+}
+
 function isProblemTopicSupported(topic) {
     const text = String(topic || '');
     if (!text) return false;
@@ -152,6 +220,10 @@ function setHiDPI() {
         cssH = Math.max(cssH, layout.totalHeight);
     } else if (currentMode === 'map') {
         cssH = Math.max(cssH, getMapRequiredHeight(cssW), viewportH - 48);
+    } else if (currentMode === 'collection') {
+        cssH = Math.max(cssH, getCollectionRequiredHeight(cssW), viewportH - 48);
+    } else if (currentMode === 'catch') {
+        cssH = Math.max(cssH, getCatchRequiredHeight(), viewportH - 48);
     } else if (viewportH > viewportW) {
         cssH = Math.max(cssH, viewportH - 48);
     }
@@ -2244,10 +2316,12 @@ function drawHeader(W, H) {
 
     // Title
     CTX.fillStyle = '#EC4899'; // Accent Pink
-    CTX.font = 'bold 32px Jua, sans-serif, Segoe UI, Roboto';
-    CTX.textAlign = 'center';
     const title = STATE.currentCurriculum === 'division' ? '태희의 도전! 수학꾸러기' : `태희의 ${STATE.currentCurriculum} 도전!`;
-    CTX.fillText(title, W / 2, 48);
+    drawFittedCanvasText(title, W / 2, 48, W - 180, {
+        initialSize: 32,
+        minSize: 20,
+        weight: 'bold'
+    });
     CTX.textAlign = 'left';
 
     // Subtitle / Info
@@ -2294,6 +2368,93 @@ function drawCollectionButton(W, H) {
     STATE.hitboxes.push({ id: 'btn_collection', x: bx, y: by, w: bw, h: bh });
 }
 
+function getTinipingVisualMeta(tp = {}) {
+    if (tp.placeholder) return tp.placeholder;
+    if (window.TinipingAssetPolicy?.getPlaceholderMeta) {
+        return window.TinipingAssetPolicy.getPlaceholderMeta(tp);
+    }
+    return {
+        label: tp.name || '???',
+        glyph: String(tp.name || '?').slice(0, 2),
+        colors: ['#fce7f3', '#f9a8d4', '#9f1239'],
+        accent: '#ec4899',
+        season: tp.season || null,
+        domain: tp.domain || '',
+        type: tp.type || '일반'
+    };
+}
+
+function drawTinipingPlaceholder(tp, cx, cy, imageSize, options = {}) {
+    const meta = getTinipingVisualMeta(tp);
+    const radius = imageSize / 2;
+    const colors = meta.colors || ['#f8fafc', '#cbd5e1', '#334155'];
+
+    CTX.save();
+    CTX.beginPath();
+    CTX.arc(cx, cy, radius, 0, Math.PI * 2);
+    const g = CTX.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
+    g.addColorStop(0, colors[0]);
+    g.addColorStop(1, colors[1] || colors[0]);
+    CTX.fillStyle = g;
+    CTX.shadowColor = options.shadow === false ? 'transparent' : 'rgba(15, 23, 42, 0.12)';
+    CTX.shadowBlur = options.compact ? Math.round(4 * SCALE) : Math.round(10 * SCALE);
+    CTX.fill();
+    CTX.lineWidth = Math.max(2, Math.round((options.compact ? 2 : 4) * SCALE));
+    CTX.strokeStyle = meta.accent || colors[2] || '#64748b';
+    CTX.stroke();
+    CTX.restore();
+
+    CTX.save();
+    CTX.fillStyle = colors[2] || '#334155';
+    CTX.textAlign = 'center';
+    CTX.textBaseline = 'middle';
+    const glyphSize = Math.max(12, imageSize * (options.compact ? 0.28 : 0.22));
+    if (window.CanvasText?.drawFittedText) {
+        window.CanvasText.drawFittedText(CTX, meta.glyph || '?', cx, cy - imageSize * 0.04, imageSize * 0.72, {
+            initialSize: glyphSize,
+            minSize: Math.max(10, glyphSize * 0.68),
+            weight: 'bold'
+        });
+    } else {
+        CTX.font = `bold ${Math.round(glyphSize)}px Jua, sans-serif`;
+        CTX.fillText(meta.glyph || '?', cx, cy - imageSize * 0.04);
+    }
+
+    if (!options.compact && meta.season) {
+        CTX.fillStyle = meta.accent || colors[2] || '#64748b';
+        CTX.font = `bold ${Math.max(10, Math.round(13 * SCALE))}px Jua, sans-serif`;
+        CTX.fillText(`S${meta.season}`, cx, cy + imageSize * 0.24);
+    }
+    CTX.textBaseline = 'alphabetic';
+    CTX.restore();
+}
+
+function drawTinipingPortrait(tp, cx, cy, imageSize, options = {}) {
+    if (tp?.imageObj && tp.imageStatus !== 'placeholder') {
+        try {
+            CTX.drawImage(tp.imageObj, cx - imageSize / 2, cy - imageSize / 2, imageSize, imageSize);
+            return true;
+        } catch (e) {
+            console.warn('이미지 그리기 실패:', tp.name, e);
+        }
+    }
+
+    drawTinipingPlaceholder(tp, cx, cy, imageSize, options);
+    return false;
+}
+
+function drawFittedCanvasText(text, x, y, maxWidth, options = {}) {
+    if (window.CanvasText?.drawFittedText) {
+        return window.CanvasText.drawFittedText(CTX, text, x, y, maxWidth, options);
+    }
+    CTX.textAlign = options.align || 'center';
+    CTX.textBaseline = options.baseline || 'middle';
+    CTX.font = `${options.weight || 'bold'} ${Math.round(options.initialSize || 16)}px Jua, sans-serif`;
+    CTX.fillText(String(text || ''), x, y);
+    CTX.textBaseline = 'alphabetic';
+    return options.initialSize || 16;
+}
+
 function drawBackgroundTiles(W, H, opacity = 0.15) {
     if (!TINIPINGS || TINIPINGS.length === 0) return;
     const tileSize = 60;
@@ -2321,10 +2482,8 @@ function drawBackgroundTiles(W, H, opacity = 0.15) {
             CTX.fill();
             CTX.restore();
 
-            if (tp.imageObj) {
-                const imgSize = tileSize * 0.7;
-                CTX.drawImage(tp.imageObj, x + (tileSize - imgSize) / 2, y + (tileSize - imgSize) / 2, imgSize, imgSize);
-            }
+            const imgSize = tileSize * 0.68;
+            drawTinipingPortrait(tp, x + tileSize / 2, y + tileSize / 2, imgSize, { compact: true, shadow: false });
         }
     }
     CTX.globalAlpha = 1.0;
@@ -2560,15 +2719,19 @@ function drawHome() {
     const layout = getHomeLayout(W);
 
     CTX.fillStyle = '#ec4899';
-    CTX.font = `bold ${Math.round(42 * SCALE)}px Jua, sans-serif, Segoe UI, Roboto`;
-    CTX.textAlign = 'center';
-    CTX.fillText('태희의 도전! 수학꾸러기', W / 2, layout.titleY);
+    drawFittedCanvasText('태희의 도전! 수학꾸러기', W / 2, layout.titleY, W - Math.round(44 * SCALE), {
+        initialSize: Math.round(42 * SCALE),
+        minSize: Math.round(26 * SCALE),
+        weight: 'bold'
+    });
     CTX.textAlign = 'left';
 
     CTX.fillStyle = '#6b7280';
-    CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif, Segoe UI, Roboto`;
-    CTX.textAlign = 'center';
-    CTX.fillText('문제를 풀고 귀여운 티니핑들을 모아보세요!', W / 2, layout.subtitleY);
+    drawFittedCanvasText('문제를 풀고 귀여운 티니핑들을 모아보세요!', W / 2, layout.subtitleY, W - Math.round(44 * SCALE), {
+        initialSize: Math.round(24 * SCALE),
+        minSize: Math.round(16 * SCALE),
+        weight: 'bold'
+    });
     CTX.textAlign = 'left';
 
     const cardRadius = Math.round(24 * SCALE);
@@ -2605,15 +2768,21 @@ function drawHome() {
         CTX.stroke();
         CTX.restore();
 
-        if (tp.imageObj) {
-            const imgSize = layout.tileSize * 0.7;
-            CTX.drawImage(tp.imageObj, x + (layout.tileSize - imgSize) / 2, y + Math.round(8 * SCALE), imgSize, imgSize);
-        }
+        const imgSize = layout.tileSize * 0.66;
+        drawTinipingPortrait(
+            tp,
+            x + layout.tileSize / 2,
+            y + Math.round(8 * SCALE) + imgSize / 2,
+            imgSize,
+            { compact: true }
+        );
 
         CTX.fillStyle = '#111827';
-        CTX.font = `bold ${Math.max(12, Math.round(14 * SCALE))}px Jua, sans-serif`;
-        CTX.textAlign = 'center';
-        CTX.fillText(tp.name, x + layout.tileSize / 2, y + layout.tileSize - Math.round(10 * SCALE));
+        drawFittedCanvasText(tp.name, x + layout.tileSize / 2, y + layout.tileSize - Math.round(10 * SCALE), layout.tileSize - Math.round(8 * SCALE), {
+            initialSize: Math.max(12, Math.round(14 * SCALE)),
+            minSize: 10,
+            weight: 'bold'
+        });
         CTX.textAlign = 'left';
     }
 
@@ -3424,8 +3593,11 @@ function drawEncyclopediaCard(cx, startY, tiniping, canvasHeight) {
 
     // canvasHeight 파라미터를 사용하여 H 참조 오류 해결
     const H = canvasHeight || (CANVAS.height / DPR);
-    const cardW = Math.min(400, Math.round(440 * SCALE));
-    const cardH = Math.min(Math.round(320 * SCALE), H - (startY + Math.round(100 * SCALE)));
+    const cardW = Math.min(400, Math.round(440 * SCALE), Math.max(240, cx * 2 - Math.round(36 * SCALE)));
+    const cardH = Math.max(
+        Math.round(190 * SCALE),
+        Math.min(Math.round(320 * SCALE), H - (startY + Math.round(100 * SCALE)))
+    );
     const cardX = cx - cardW / 2;
     const cardY = startY;
     const padding = Math.round(20 * SCALE);
@@ -3445,8 +3617,14 @@ function drawEncyclopediaCard(cx, startY, tiniping, canvasHeight) {
 
     // 이름 표시
     const displayName = encyclopedia?.name || tiniping.name || '???';
-    CTX.font = `bold ${Math.round(28 * SCALE)}px Jua, sans-serif`;
-    CTX.fillText(`${displayName}`, cardX + padding, textY);
+    CTX.fillStyle = colors.text;
+    drawFittedCanvasText(`${displayName}`, cardX + padding, textY, cardW - padding * 2 - Math.round(92 * SCALE), {
+        initialSize: Math.round(28 * SCALE),
+        minSize: Math.round(18 * SCALE),
+        align: 'left',
+        baseline: 'alphabetic',
+        weight: 'bold'
+    });
 
     // 유형 배지
     const typeBadgeX = cardX + cardW - padding - Math.round(80 * SCALE);
@@ -3456,9 +3634,11 @@ function drawEncyclopediaCard(cx, startY, tiniping, canvasHeight) {
     CTX.fill();
     CTX.restore();
     CTX.fillStyle = '#ffffff';
-    CTX.font = `bold ${Math.round(18 * SCALE)}px Jua, sans-serif`;
-    CTX.textAlign = 'center';
-    CTX.fillText(displayType, typeBadgeX + Math.round(40 * SCALE), textY - Math.round(4 * SCALE));
+    drawFittedCanvasText(displayType, typeBadgeX + Math.round(40 * SCALE), textY - Math.round(4 * SCALE), Math.round(68 * SCALE), {
+        initialSize: Math.round(18 * SCALE),
+        minSize: Math.round(12 * SCALE),
+        weight: 'bold'
+    });
 
     textY += Math.round(45 * SCALE);
     CTX.textAlign = 'left';
@@ -3467,8 +3647,14 @@ function drawEncyclopediaCard(cx, startY, tiniping, canvasHeight) {
     CTX.font = `bold ${Math.round(22 * SCALE)}px Jua, sans-serif`;
     const subtitle = encyclopedia?.subtitle || tiniping.desc || '';
     if (subtitle) {
-        CTX.fillText(`✨ ${subtitle}`, cardX + padding, textY);
-        textY += Math.round(35 * SCALE);
+        const lines = window.CanvasText?.wrapText
+            ? window.CanvasText.wrapText(CTX, `✨ ${subtitle}`, cardW - padding * 2, { maxLines: 2 })
+            : [`✨ ${subtitle}`];
+        lines.forEach(line => {
+            CTX.fillText(line, cardX + padding, textY);
+            textY += Math.round(28 * SCALE);
+        });
+        textY += Math.round(7 * SCALE);
     }
 
     CTX.strokeStyle = colors.border;
@@ -3512,6 +3698,9 @@ function drawEncyclopediaCard(cx, startY, tiniping, canvasHeight) {
         CTX.textAlign = 'right';
         CTX.fillText(`No. ${String(displayId).padStart(3, '0')}`, cardX + cardW - padding, cardY + cardH - Math.round(15 * SCALE));
     }
+
+    CTX.textAlign = 'left';
+    return { x: cardX, y: cardY, w: cardW, h: cardH };
 }
 
 function drawGeometryShape(ctx, shapeType, cx, cy, size) {
@@ -3750,32 +3939,7 @@ function drawClock(ctx, cx, cy, radius, h, m) {
 }
 
 function drawTinipingImage(tgt, cx, cy, imageSize) {
-    if (tgt.imageObj) {
-        try {
-            CTX.drawImage(tgt.imageObj, cx - imageSize / 2, cy - imageSize / 2, imageSize, imageSize);
-            return true;
-        } catch (e) {
-            console.warn('이미지 그리기 실패:', tgt.name, e);
-        }
-    }
-    // Fallback: draw circle with name
-    CTX.save();
-    CTX.beginPath();
-    CTX.arc(cx, cy, imageSize / 2 - 10, 0, Math.PI * 2);
-    CTX.fillStyle = '#fce7f3';
-    CTX.fill();
-    CTX.strokeStyle = '#ec4899';
-    CTX.lineWidth = 3;
-    CTX.stroke();
-    CTX.restore();
-
-    CTX.fillStyle = '#9f1239';
-    CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif`;
-    CTX.textAlign = 'center';
-    CTX.textBaseline = 'middle';
-    CTX.fillText(tgt.name || '???', cx, cy);
-    CTX.textBaseline = 'alphabetic';
-    return false;
+    return drawTinipingPortrait(tgt, cx, cy, imageSize, { compact: false });
 }
 
 function drawCatch(ts) {
@@ -3808,13 +3972,13 @@ function drawCatch(ts) {
     }
 
     const cx = W / 2;
-    const baseR = 120;
+    const baseR = Math.min(Math.round(120 * SCALE), Math.max(64, Math.round(W * 0.22)));
     let cy, imageSize;
 
     if (stage === 1) {
         cy = H / 2 - 20;
         const scale = 0.6 + 0.4 * stageProgress;
-        imageSize = Math.round(200 * scale * SCALE);
+        imageSize = Math.min(Math.round(200 * scale * SCALE), Math.round(baseR * 1.7));
 
         CTX.save();
         CTX.translate(cx, cy);
@@ -3837,10 +4001,10 @@ function drawCatch(ts) {
 
     } else if (stage === 2) {
         const startY = H / 2 - 20;
-        const endY = Math.round(180 * SCALE);
+        const endY = Math.max(Math.round(120 * SCALE), Math.min(Math.round(180 * SCALE), Math.round(H * 0.22)));
         const easeProgress = 1 - Math.pow(1 - stageProgress, 3);
         cy = startY + (endY - startY) * easeProgress;
-        imageSize = Math.round(220 * SCALE);
+        imageSize = Math.min(Math.round(220 * SCALE), Math.round(baseR * 1.75));
 
         CTX.save();
         CTX.translate(cx, cy);
@@ -3855,8 +4019,8 @@ function drawCatch(ts) {
         drawTinipingImage(tgt, cx, cy, imageSize);
 
     } else {
-        cy = Math.round(180 * SCALE);
-        imageSize = Math.round(220 * SCALE);
+        cy = Math.max(Math.round(120 * SCALE), Math.min(Math.round(180 * SCALE), Math.round(H * 0.22)));
+        imageSize = Math.min(Math.round(220 * SCALE), Math.round(baseR * 1.75));
 
         CTX.save();
         CTX.translate(cx, cy);
@@ -3870,12 +4034,13 @@ function drawCatch(ts) {
 
         drawTinipingImage(tgt, cx, cy, imageSize);
 
-        drawEncyclopediaCard(cx, cy + baseR + 20, tgt, H);
+        const card = drawEncyclopediaCard(cx, cy + baseR + Math.round(18 * SCALE), tgt, H);
 
         const bw = Math.max(240, Math.round(280 * SCALE));
         const bh = Math.max(56, Math.round(64 * SCALE));
         const bx = cx - bw / 2;
-        const by = Math.max(H - Math.round(100 * SCALE), cy + baseR + 350);
+        const preferredButtonY = (card?.y || cy + baseR) + (card?.h || Math.round(300 * SCALE)) + Math.round(18 * SCALE);
+        const by = Math.min(H - bh - Math.round(24 * SCALE), Math.max(preferredButtonY, cy + baseR + Math.round(220 * SCALE)));
 
         CTX.save();
         roundRect(CTX, bx, by, bw, bh, Math.round(16 * SCALE));
@@ -3945,19 +4110,14 @@ function drawCollection() {
     STATE.hitboxes.push({ id: 'btn_close_collection', x: bx, y: by, w: bw, h: bh });
 
     // 탭 버튼 영역
-    const tabs = ['전체', '수와 연산', '도형과 측정', '규칙성', '자료와 가능성', '부모 리포트'];
-    const tabY = Math.round(100 * SCALE);
-    const tabH = Math.round(46 * SCALE);
-    const tabGap = Math.round(10 * SCALE);
-    const totalTabW = W - Math.round(48 * SCALE);
-    const tabW = (totalTabW - (tabs.length - 1) * tabGap) / tabs.length;
+    const tabLayout = getCollectionTabLayout(W);
 
-    tabs.forEach((tab, i) => {
-        const tx = Math.round(24 * SCALE) + i * (tabW + tabGap);
+    tabLayout.tabs.forEach(tabBox => {
+        const tab = tabBox.label;
         const isSelected = (STATE.collectionTab || '전체') === tab;
 
         CTX.save();
-        roundRect(CTX, tx, tabY, tabW, tabH, 12);
+        roundRect(CTX, tabBox.x, tabBox.y, tabBox.w, tabBox.h, Math.round(12 * SCALE));
         CTX.fillStyle = isSelected ? '#ec4899' : '#f3f4f6';
         CTX.fill();
         if (!isSelected) {
@@ -3968,28 +4128,24 @@ function drawCollection() {
         CTX.restore();
 
         CTX.fillStyle = isSelected ? '#ffffff' : '#4b5563';
-        CTX.font = `bold ${Math.round(18 * SCALE)}px Jua, sans-serif`;
-        CTX.textAlign = 'center';
-        CTX.textBaseline = 'middle';
-        CTX.fillText(tab, tx + tabW / 2, tabY + tabH / 2);
+        drawFittedCanvasText(tab, tabBox.x + tabBox.w / 2, tabBox.y + tabBox.h / 2, tabBox.w - Math.round(10 * SCALE), {
+            initialSize: Math.round(18 * SCALE),
+            minSize: Math.round(12 * SCALE),
+            weight: 'bold'
+        });
         CTX.textBaseline = 'alphabetic';
 
-        STATE.hitboxes.push({ id: `tab_${tab}`, x: tx, y: tabY, w: tabW, h: tabH });
+        STATE.hitboxes.push({ id: `tab_${tab}`, x: tabBox.x, y: tabBox.y, w: tabBox.w, h: tabBox.h });
     });
 
     if (isParentReport) {
-        drawParentReportPanel(W, H, tabY + tabH + Math.round(25 * SCALE));
+        drawParentReportPanel(W, H, tabLayout.y + tabLayout.height + Math.round(25 * SCALE));
         return;
     }
 
     // 그리드 영역
-    const gridX = Math.round(24 * SCALE);
-    const gridY = tabY + tabH + Math.round(25 * SCALE);
-    const minCellW = Math.max(80, Math.round(90 * SCALE));
-    const cols = Math.max(3, Math.min(8, Math.floor((W - Math.round(48 * SCALE)) / minCellW)));
-    const cellW = Math.floor((W - Math.round(48 * SCALE)) / cols);
-    const cellH = Math.max(110, Math.round(130 * SCALE));
-    const pad = Math.round(10 * SCALE);
+    const gridY = tabLayout.y + tabLayout.height + Math.round(25 * SCALE);
+    const { gridX, cols, cellW, cellH, pad } = getCollectionGridMetrics(W, gridY);
 
     // 필터링된 티니핑 목록
     const targetTab = STATE.collectionTab || '전체';
@@ -4019,12 +4175,13 @@ function drawCollection() {
         CTX.fill();
         CTX.restore();
 
-        const imgSize = Math.min(cellW, cellH) * 0.55;
-        const imgX = cx + cellW / 2 - imgSize / 2;
+        const imgSize = Math.min(cellW, cellH) * 0.54;
         const imgY = cy + pad * 2;
 
         if (isCaught && tp.imageObj) {
-            CTX.drawImage(tp.imageObj, imgX, imgY, imgSize, imgSize);
+            drawTinipingPortrait(tp, cx + cellW / 2, imgY + imgSize / 2, imgSize, { compact: true });
+        } else if (isCaught) {
+            drawTinipingPortrait(tp, cx + cellW / 2, imgY + imgSize / 2, imgSize, { compact: true });
         } else {
             // 미획득 시 실루엣 또는 물음표
             CTX.fillStyle = '#d1d5db';
@@ -4037,8 +4194,11 @@ function drawCollection() {
         }
 
         CTX.fillStyle = isCaught ? '#1f2937' : '#9ca3af';
-        CTX.font = `bold ${Math.round(16 * SCALE)}px Jua, sans-serif`;
-        CTX.fillText(tp.name, cx + cellW / 2, cy + cellH - pad * 2.5);
+        drawFittedCanvasText(tp.name, cx + cellW / 2, cy + cellH - pad * 2.5, cellW - pad * 2, {
+            initialSize: Math.round(16 * SCALE),
+            minSize: Math.round(11 * SCALE),
+            weight: 'bold'
+        });
     });
 }
 
