@@ -1170,9 +1170,13 @@ function buildComplexCompare(difficulty, i) {
   const baseA = 8 + difficulty * 2 + i;
   const addA = 2 + (i % 5) + Math.floor(difficulty / 4);
   const baseB = baseA + 3 + (i % 4);
-  const useB = 1 + (i % 3);
+  let useB = 1 + (i % 3);
   const finalA = baseA + addA;
-  const finalB = baseB - useB;
+  let finalB = baseB - useB;
+  if (finalA === finalB) {
+    useB += 1;
+    finalB = baseB - useB;
+  }
   const diff = Math.abs(finalA - finalB);
   const winner = finalA >= finalB ? nameA : nameB;
   return [
@@ -1268,9 +1272,13 @@ function buildEarlyChangeCompare(difficulty, i) {
   const startA = 8 + difficulty + (i % 18);
   const gainA = 2 + (i % 5);
   const startB = startA + 3 + (i % 4);
-  const useB = 1 + (i % 3);
+  let useB = 1 + (i % 3);
   const finalA = startA + gainA;
-  const finalB = startB - useB;
+  let finalB = startB - useB;
+  if (finalA === finalB) {
+    useB += 1;
+    finalB = startB - useB;
+  }
   const diff = Math.abs(finalA - finalB);
   const winner = finalA >= finalB ? nameA : nameB;
   return [
@@ -1285,9 +1293,13 @@ function buildEarlyPartWholeCompare(difficulty, i) {
   const a1 = 3 + (i % 7);
   const a2 = 4 + ((i + difficulty) % 6);
   const b1 = 2 + ((i + 2) % 7);
-  const b2 = 5 + ((i + 3) % 6);
+  let b2 = 5 + ((i + 3) % 6);
   const totalA = a1 + a2;
-  const totalB = b1 + b2;
+  let totalB = b1 + b2;
+  if (totalA === totalB) {
+    b2 += 1;
+    totalB = b1 + b2;
+  }
   const diff = Math.abs(totalA - totalB);
   const winner = totalA >= totalB ? '첫 번째 상자' : '두 번째 상자';
   return [
@@ -1301,8 +1313,9 @@ function buildEarlyUnknownChangeCompare(difficulty, i) {
   const obj = pick(objects, i + 6);
   const start = 9 + difficulty + (i % 15);
   const total = start + 4 + (i % 6);
-  const friend = 7 + ((i + 2) % 12);
+  let friend = 7 + ((i + 2) % 12);
   const change = total - start;
+  if (change === friend) friend += 1;
   const diff = Math.abs(change - friend);
   const larger = change >= friend ? '더 받은 수' : '친구가 가진 수';
   return [
@@ -1316,9 +1329,13 @@ function buildEarlyDataTotalCompare(difficulty, i) {
   const a = 2 + (i % 6);
   const b = 3 + ((i + difficulty) % 6);
   const c = 2 + ((i + 1) % 5);
-  const d = 4 + ((i + 2) % 5);
+  let d = 4 + ((i + 2) % 5);
   const first = a + b;
-  const second = c + d;
+  let second = c + d;
+  if (first === second) {
+    d += 1;
+    second = c + d;
+  }
   const diff = Math.abs(first - second);
   const winner = first >= second ? '월요일과 화요일' : '수요일과 목요일';
   return [
@@ -1331,8 +1348,9 @@ function buildEarlyDataTotalCompare(difficulty, i) {
 function buildEarlyMeasurementCompare(difficulty, i) {
   const first = 12 + difficulty + (i % 15);
   const second = 5 + (i % 9);
-  const ribbon = 14 + ((i + 3) % 14);
+  let ribbon = 14 + ((i + 3) % 14);
   const total = first + second;
+  if (total === ribbon) ribbon += 1;
   const diff = Math.abs(total - ribbon);
   const larger = total >= ribbon ? '이어 붙인 길이' : '리본 길이';
   return [

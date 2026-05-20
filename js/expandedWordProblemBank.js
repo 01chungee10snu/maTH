@@ -5,7 +5,7 @@
    있는 relationshipCoach 호환 문항으로 변환합니다.
    ========================================================================= */
 
-const EXPANDED_WORD_BANK_URL = 'data/elementary_word_problem_seed_bank.json?v=20260521-complex-v3';
+const EXPANDED_WORD_BANK_URL = 'data/elementary_word_problem_seed_bank.json?v=20260521-options-v4';
 
 function clampExpandedBank(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -38,33 +38,126 @@ function inferSeedQuestionType(item) {
     return 'WORD_PROBLEM';
 }
 
-function parseAnswerNumber(answer) {
-    const match = String(answer || '').match(/-?\d+(?:\.\d+)?/);
+function parseExpandedNumberPart(text) {
+    const source = String(text || '').trim();
+    const match = source.match(/-?\d+(?:\.\d+)?/);
     if (!match) return null;
     return {
         value: Number(match[0]),
         raw: match[0],
-        unit: String(answer).slice(match.index + match[0].length)
+        prefix: source.slice(0, match.index),
+        unit: source.slice(match.index + match[0].length)
     };
 }
 
-function buildSeedDistractors(answer) {
-    const parsed = parseAnswerNumber(answer);
-    if (!parsed || !Number.isFinite(parsed.value)) {
-        return ['다시 계산이 필요해요', '문제 조건 부족', '알 수 없음'];
+function getExpandedOffsets(value) {
+    return value <= 3 ? [1, 2, 3, -1] : [-1, 1, 2, -2, 5, -5];
+}
+
+function formatExpandedNumberPart(part, value) {
+    return `${part.prefix || ''}${value}${part.unit || ''}`;
+}
+
+function extractExpandedLabelCandidates(item, answerLabel) {
+    const text = `${item.problem || ''} ${answerLabel || ''}`;
+    const candidates = [
+        '태희', '민지', '하준', '서아', '지우', '도윤', '수빈', '연우', '지민', '유나',
+        '월요일과 화요일', '수요일과 목요일', '월요일', '화요일', '수요일', '목요일',
+        '첫 번째 상자', '두 번째 상자', '이어 붙인 길이', '리본 길이', '더 받은 수', '친구가 가진 수',
+        '첫째 날', '둘째 날', '큰 컵', '작은 컵'
+    ];
+    return uniqueExpandedList(candidates.filter(label => text.includes(label)));
+}
+
+function buildLabeledNumberDistractors(item, answer, label, numberPart) {
+    const labels = extractExpandedLabelCandidates(item, label);
+    const otherLabels = labels.filter(candidate => candidate !== label);
+    const options = [];
+    const add = candidate => {
+        if (candidate && candidate !== answer && !options.includes(candidate)) options.push(candidate);
+    };
+
+    otherLabels.forEach(otherLabel => add(`${otherLabel}, ${formatExpandedNumberPart(numberPart, numberPart.value)}`));
+    getExpandedOffsets(numberPart.value).forEach(offset => {
+        const nextValue = numberPart.value + offset;
+        if (Number.isFinite(nextValue) && nextValue >= 0) add(`${label}, ${formatExpandedNumberPart(numberPart, nextValue)}`);
+    });
+    otherLabels.forEach(otherLabel => {
+        getExpandedOffsets(numberPart.value).forEach(offset => {
+            const nextValue = numberPart.value + offset;
+            if (Number.isFinite(nextValue) && nextValue >= 0) add(`${otherLabel}, ${formatExpandedNumberPart(numberPart, nextValue)}`);
+        });
+    });
+
+    return options.slice(0, 5);
+}
+
+function buildCommaNumberDistractors(answer, parts, parsedParts) {
+    const options = [];
+    const add = candidate => {
+        if (candidate && candidate !== answer && !options.includes(candidate)) options.push(candidate);
+    };
+
+    parsedParts.forEach((part, index) => {
+        getExpandedOffsets(part.value).forEach(offset => {
+            const nextValue = part.value + offset;
+            if (!Number.isFinite(nextValue) || nextValue < 0) return;
+            const candidateParts = [...parts];
+            candidateParts[index] = formatExpandedNumberPart(part, nextValue);
+            add(candidateParts.join(', '));
+        });
+    });
+
+    if (parsedParts.length >= 2) {
+        const candidateParts = [...parts];
+        parsedParts.slice(0, 2).forEach((part, index) => {
+            const nextValue = part.value + 1;
+            candidateParts[index] = formatExpandedNumberPart(part, nextValue);
+        });
+        add(candidateParts.join(', '));
     }
 
-    const offsets = parsed.value <= 3 ? [1, 2, 3] : [-1, 1, 2, -2, 5, -5];
-    return offsets
+    return options.slice(0, 5);
+}
+
+function buildSeedDistractors(item) {
+    const answer = String(item.answer || '');
+    const commaParts = answer.split(',').map(part => part.trim());
+
+    if (commaParts.length >= 2) {
+        const firstNumber = parseExpandedNumberPart(commaParts[0]);
+        const secondNumber = parseExpandedNumberPart(commaParts[1]);
+        if (!firstNumber && secondNumber && Number.isFinite(secondNumber.value)) {
+            const labeled = buildLabeledNumberDistractors(item, answer, commaParts[0], secondNumber);
+            if (labeled.length >= 3) return labeled;
+        }
+
+        const parsedParts = commaParts.map(parseExpandedNumberPart);
+        if (parsedParts.every(part => part && Number.isFinite(part.value))) {
+            const commaDistractors = buildCommaNumberDistractors(answer, commaParts, parsedParts);
+            if (commaDistractors.length >= 3) return commaDistractors;
+        }
+    }
+
+    const parsed = parseExpandedNumberPart(answer);
+    if (!parsed || !Number.isFinite(parsed.value)) {
+        const labelDistractors = extractExpandedLabelCandidates(item, answer)
+            .filter(candidate => candidate !== answer);
+        return labelDistractors.length >= 3
+            ? labelDistractors.slice(0, 5)
+            : ['다시 계산이 필요해요', '문제 조건 부족', '알 수 없음'];
+    }
+
+    return getExpandedOffsets(parsed.value)
         .map(offset => parsed.value + offset)
         .filter(value => Number.isFinite(value) && value >= 0 && value !== parsed.value)
-        .map(value => `${value}${parsed.unit}`)
+        .map(value => formatExpandedNumberPart(parsed, value))
         .filter(value => value !== answer)
         .slice(0, 5);
 }
 
 function buildSeedEntities(item) {
-    const options = uniqueExpandedList([item.answer, ...buildSeedDistractors(item.answer)]).slice(0, 5);
+    const options = uniqueExpandedList([item.answer, ...buildSeedDistractors(item)]).slice(0, 5);
     while (options.length < 4) {
         options.push(`${item.answer}이 아님 ${options.length}`);
     }

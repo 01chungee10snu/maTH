@@ -103,6 +103,19 @@ function assertComplexRatio(label, items, minimumRatio) {
   );
 }
 
+function getAnswerOptionShape(value) {
+  const text = String(value || '').trim();
+  const commaParts = text.split(',').map(part => part.trim());
+  if (commaParts.length >= 2) {
+    const numericParts = commaParts.map(part => /-?\d/.test(part));
+    if (!numericParts[0] && numericParts.slice(1).some(Boolean)) return 'label_comma_number';
+    if (numericParts.every(Boolean)) return 'comma_numeric';
+    return 'comma_mixed';
+  }
+  if (/^\d+\/\d+$/.test(text) || /^-?\d/.test(text)) return 'numeric';
+  return 'text';
+}
+
 function testSupabasePublicConfigContract() {
   const context = createConfigContext();
 
@@ -453,6 +466,19 @@ function testExpandedSeedBankConvertsIntoIrtRuntimeItems() {
   const seedBaseStep = seedProblem.coachSteps.find(step => step.id === 'base');
   assert.strictEqual(seedBaseStep.answer, '문제에서 묻는 값');
   assert.ok(!seedBaseStep.options.some(option => option.value === seedProblem.topic));
+
+  converted.forEach(item => {
+    const problem = context.window.RelationshipCoachProblems.generateForItem(item);
+    const optionShapes = new Set(problem.options.map(getAnswerOptionShape));
+    assert.strictEqual(
+      optionShapes.size,
+      1,
+      `${problem.problem_id} has answer-option shape bias: ${problem.options.join(' | ')}`
+    );
+    if (/누가 몇 .*더 많/.test(problem.question)) {
+      assert.ok(!/,\s*0/.test(String(problem.answer)), `${problem.problem_id} should not ask who is greater for a tie`);
+    }
+  });
 }
 
 function testTinipingAssetPolicyDoesNotUseWrongCharacterFallbacks() {

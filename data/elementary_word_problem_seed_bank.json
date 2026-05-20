@@ -26445,9 +26445,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 색종이 9개에서 2개를 더 모았고, 민지는 12개에서 1개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 9+2=11개, 민지는 12-1=11개입니다. 차이는 0개입니다."
+      "problem": "태희는 색종이 9개에서 2개를 더 모았고, 민지는 12개에서 2개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 9+2=11개, 민지는 12-2=10개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_002",
@@ -26526,9 +26526,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "서아는 쿠키 12개에서 5개를 더 모았고, 지우는 18개에서 1개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "서아, 0개",
-      "solution": "서아는 12+5=17개, 지우는 18-1=17개입니다. 차이는 0개입니다."
+      "problem": "서아는 쿠키 12개에서 5개를 더 모았고, 지우는 18개에서 2개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "서아, 1개",
+      "solution": "서아는 12+5=17개, 지우는 18-2=16개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_005",
@@ -26634,9 +26634,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "연우는 카드 16개에서 4개를 더 모았고, 지민는 22개에서 2개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "연우, 0개",
-      "solution": "연우는 16+4=20개, 지민는 22-2=20개입니다. 차이는 0개입니다."
+      "problem": "연우는 카드 16개에서 4개를 더 모았고, 지민는 22개에서 3개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "연우, 1개",
+      "solution": "연우는 16+4=20개, 지민는 22-3=19개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_009",
@@ -26742,9 +26742,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 연필 20개에서 3개를 더 모았고, 하준는 26개에서 3개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 20+3=23개, 하준는 26-3=23개입니다. 차이는 0개입니다."
+      "problem": "민지는 연필 20개에서 3개를 더 모았고, 하준는 26개에서 4개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 20+3=23개, 하준는 26-4=22개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_013",
@@ -27012,9 +27012,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 연필 12개에서 3개를 더 모았고, 하준는 16개에서 1개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 12+3=15개, 하준는 16-1=15개입니다. 차이는 0개입니다."
+      "problem": "민지는 연필 12개에서 3개를 더 모았고, 하준는 16개에서 2개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 12+3=15개, 하준는 16-2=14개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_023",
@@ -27120,9 +27120,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 공책 16개에서 2개를 더 모았고, 수빈는 20개에서 2개를 사용했어요. 두 사람이 가진 공책을 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 16+2=18개, 수빈는 20-2=18개입니다. 차이는 0개입니다."
+      "problem": "도윤는 공책 16개에서 2개를 더 모았고, 수빈는 20개에서 3개를 사용했어요. 두 사람이 가진 공책을 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 16+2=18개, 수빈는 20-3=17개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_027",
@@ -27579,9 +27579,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "하준는 딱지 15개에서 4개를 더 모았고, 서아는 20개에서 1개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "하준, 0개",
-      "solution": "하준는 15+4=19개, 서아는 20-1=19개입니다. 차이는 0개입니다."
+      "problem": "하준는 딱지 15개에서 4개를 더 모았고, 서아는 20개에서 2개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "하준, 1개",
+      "solution": "하준는 15+4=19개, 서아는 20-2=18개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_044",
@@ -27687,9 +27687,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "수빈는 책 19개에서 3개를 더 모았고, 연우는 24개에서 2개를 사용했어요. 두 사람이 가진 책을 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "수빈, 0개",
-      "solution": "수빈는 19+3=22개, 연우는 24-2=22개입니다. 차이는 0개입니다."
+      "problem": "수빈는 책 19개에서 3개를 더 모았고, 연우는 24개에서 3개를 사용했어요. 두 사람이 가진 책을 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "수빈, 1개",
+      "solution": "수빈는 19+3=22개, 연우는 24-3=21개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_048",
@@ -27795,9 +27795,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 색종이 23개에서 2개를 더 모았고, 민지는 28개에서 3개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 23+2=25개, 민지는 28-3=25개입니다. 차이는 0개입니다."
+      "problem": "태희는 색종이 23개에서 2개를 더 모았고, 민지는 28개에서 4개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 23+2=25개, 민지는 28-4=24개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_052",
@@ -28065,9 +28065,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 색종이 15개에서 2개를 더 모았고, 민지는 18개에서 1개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 15+2=17개, 민지는 18-1=17개입니다. 차이는 0개입니다."
+      "problem": "태희는 색종이 15개에서 2개를 더 모았고, 민지는 18개에서 2개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 15+2=17개, 민지는 18-2=16개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_062",
@@ -28146,9 +28146,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "서아는 쿠키 18개에서 5개를 더 모았고, 지우는 24개에서 1개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "서아, 0개",
-      "solution": "서아는 18+5=23개, 지우는 24-1=23개입니다. 차이는 0개입니다."
+      "problem": "서아는 쿠키 18개에서 5개를 더 모았고, 지우는 24개에서 2개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "서아, 1개",
+      "solution": "서아는 18+5=23개, 지우는 24-2=22개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_065",
@@ -28254,9 +28254,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "연우는 카드 22개에서 4개를 더 모았고, 지민는 28개에서 2개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "연우, 0개",
-      "solution": "연우는 22+4=26개, 지민는 28-2=26개입니다. 차이는 0개입니다."
+      "problem": "연우는 카드 22개에서 4개를 더 모았고, 지민는 28개에서 3개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "연우, 1개",
+      "solution": "연우는 22+4=26개, 지민는 28-3=25개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_069",
@@ -28362,9 +28362,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 연필 26개에서 3개를 더 모았고, 하준는 32개에서 3개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 26+3=29개, 하준는 32-3=29개입니다. 차이는 0개입니다."
+      "problem": "민지는 연필 26개에서 3개를 더 모았고, 하준는 32개에서 4개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 26+3=29개, 하준는 32-4=28개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_073",
@@ -28632,9 +28632,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 연필 18개에서 3개를 더 모았고, 하준는 22개에서 1개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 18+3=21개, 하준는 22-1=21개입니다. 차이는 0개입니다."
+      "problem": "민지는 연필 18개에서 3개를 더 모았고, 하준는 22개에서 2개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 18+3=21개, 하준는 22-2=20개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_083",
@@ -28740,9 +28740,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 공책 22개에서 2개를 더 모았고, 수빈는 26개에서 2개를 사용했어요. 두 사람이 가진 공책을 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 22+2=24개, 수빈는 26-2=24개입니다. 차이는 0개입니다."
+      "problem": "도윤는 공책 22개에서 2개를 더 모았고, 수빈는 26개에서 3개를 사용했어요. 두 사람이 가진 공책을 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 22+2=24개, 수빈는 26-3=23개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_CHANGE_COMPARE_087",
@@ -33951,9 +33951,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 4권, 화요일은 6권, 수요일은 6권, 목요일은 4권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 4+6=10권, 수요일과 목요일은 6+4=10권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 4권, 화요일은 6권, 수요일은 6권, 목요일은 5권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 4+6=10권, 수요일과 목요일은 6+5=11권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_DATA_TOTAL_COMPARE_010",
@@ -34356,9 +34356,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 7권, 화요일은 3권, 수요일은 6권, 목요일은 4권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 7+3=10권, 수요일과 목요일은 6+4=10권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 7권, 화요일은 3권, 수요일은 6권, 목요일은 5권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 7+3=10권, 수요일과 목요일은 6+5=11권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_DATA_TOTAL_COMPARE_025",
@@ -34761,9 +34761,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 4권, 화요일은 6권, 수요일은 6권, 목요일은 4권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 4+6=10권, 수요일과 목요일은 6+4=10권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 4권, 화요일은 6권, 수요일은 6권, 목요일은 5권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 4+6=10권, 수요일과 목요일은 6+5=11권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_DATA_TOTAL_COMPARE_040",
@@ -35166,9 +35166,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 7권, 화요일은 3권, 수요일은 6권, 목요일은 4권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 7+3=10권, 수요일과 목요일은 6+4=10권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 7권, 화요일은 3권, 수요일은 6권, 목요일은 5권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 7+3=10권, 수요일과 목요일은 6+5=11권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_DATA_TOTAL_COMPARE_055",
@@ -35571,9 +35571,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 4권, 화요일은 6권, 수요일은 6권, 목요일은 4권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 4+6=10권, 수요일과 목요일은 6+4=10권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 4권, 화요일은 6권, 수요일은 6권, 목요일은 5권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 4+6=10권, 수요일과 목요일은 6+5=11권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_DATA_TOTAL_COMPARE_070",
@@ -35976,9 +35976,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 7권, 화요일은 3권, 수요일은 6권, 목요일은 4권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 7+3=10권, 수요일과 목요일은 6+4=10권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 7권, 화요일은 3권, 수요일은 6권, 목요일은 5권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 7+3=10권, 수요일과 목요일은 6+5=11권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_DATA_TOTAL_COMPARE_085",
@@ -36651,9 +36651,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "number_line",
-      "problem": "막대 16cm와 5cm를 이어 붙였어요. 리본은 21cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
-      "answer": "이어 붙인 길이, 0cm",
-      "solution": "이어 붙인 막대는 16+5=21cm입니다. 21cm와 21cm의 차이는 0cm입니다."
+      "problem": "막대 16cm와 5cm를 이어 붙였어요. 리본은 22cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
+      "answer": "리본 길이, 1cm",
+      "solution": "이어 붙인 막대는 16+5=21cm입니다. 21cm와 22cm의 차이는 1cm입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_MEASUREMENT_COMPARE_020",
@@ -37164,9 +37164,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "number_line",
-      "problem": "막대 20cm와 6cm를 이어 붙였어요. 리본은 26cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
-      "answer": "이어 붙인 길이, 0cm",
-      "solution": "이어 붙인 막대는 20+6=26cm입니다. 26cm와 26cm의 차이는 0cm입니다."
+      "problem": "막대 20cm와 6cm를 이어 붙였어요. 리본은 27cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
+      "answer": "리본 길이, 1cm",
+      "solution": "이어 붙인 막대는 20+6=26cm입니다. 26cm와 27cm의 차이는 1cm입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_MEASUREMENT_COMPARE_039",
@@ -37434,9 +37434,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "number_line",
-      "problem": "막대 15cm와 7cm를 이어 붙였어요. 리본은 22cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
-      "answer": "이어 붙인 길이, 0cm",
-      "solution": "이어 붙인 막대는 15+7=22cm입니다. 22cm와 22cm의 차이는 0cm입니다."
+      "problem": "막대 15cm와 7cm를 이어 붙였어요. 리본은 23cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
+      "answer": "리본 길이, 1cm",
+      "solution": "이어 붙인 막대는 15+7=22cm입니다. 22cm와 23cm의 차이는 1cm입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_MEASUREMENT_COMPARE_049",
@@ -37947,9 +37947,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "number_line",
-      "problem": "막대 19cm와 8cm를 이어 붙였어요. 리본은 27cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
-      "answer": "이어 붙인 길이, 0cm",
-      "solution": "이어 붙인 막대는 19+8=27cm입니다. 27cm와 27cm의 차이는 0cm입니다."
+      "problem": "막대 19cm와 8cm를 이어 붙였어요. 리본은 28cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
+      "answer": "리본 길이, 1cm",
+      "solution": "이어 붙인 막대는 19+8=27cm입니다. 27cm와 28cm의 차이는 1cm입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_MEASUREMENT_COMPARE_068",
@@ -38217,9 +38217,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "number_line",
-      "problem": "막대 14cm와 9cm를 이어 붙였어요. 리본은 23cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
-      "answer": "이어 붙인 길이, 0cm",
-      "solution": "이어 붙인 막대는 14+9=23cm입니다. 23cm와 23cm의 차이는 0cm입니다."
+      "problem": "막대 14cm와 9cm를 이어 붙였어요. 리본은 24cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
+      "answer": "리본 길이, 1cm",
+      "solution": "이어 붙인 막대는 14+9=23cm입니다. 23cm와 24cm의 차이는 1cm입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D01_EARLY_MEASUREMENT_COMPARE_078",
@@ -40935,9 +40935,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 색종이 10개에서 2개를 더 모았고, 민지는 13개에서 1개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 10+2=12개, 민지는 13-1=12개입니다. 차이는 0개입니다."
+      "problem": "태희는 색종이 10개에서 2개를 더 모았고, 민지는 13개에서 2개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 10+2=12개, 민지는 13-2=11개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_002",
@@ -41016,9 +41016,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "서아는 쿠키 13개에서 5개를 더 모았고, 지우는 19개에서 1개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "서아, 0개",
-      "solution": "서아는 13+5=18개, 지우는 19-1=18개입니다. 차이는 0개입니다."
+      "problem": "서아는 쿠키 13개에서 5개를 더 모았고, 지우는 19개에서 2개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "서아, 1개",
+      "solution": "서아는 13+5=18개, 지우는 19-2=17개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_005",
@@ -41124,9 +41124,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "연우는 카드 17개에서 4개를 더 모았고, 지민는 23개에서 2개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "연우, 0개",
-      "solution": "연우는 17+4=21개, 지민는 23-2=21개입니다. 차이는 0개입니다."
+      "problem": "연우는 카드 17개에서 4개를 더 모았고, 지민는 23개에서 3개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "연우, 1개",
+      "solution": "연우는 17+4=21개, 지민는 23-3=20개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_009",
@@ -41232,9 +41232,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 연필 21개에서 3개를 더 모았고, 하준는 27개에서 3개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 21+3=24개, 하준는 27-3=24개입니다. 차이는 0개입니다."
+      "problem": "민지는 연필 21개에서 3개를 더 모았고, 하준는 27개에서 4개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 21+3=24개, 하준는 27-4=23개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_013",
@@ -41502,9 +41502,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 연필 13개에서 3개를 더 모았고, 하준는 17개에서 1개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 13+3=16개, 하준는 17-1=16개입니다. 차이는 0개입니다."
+      "problem": "민지는 연필 13개에서 3개를 더 모았고, 하준는 17개에서 2개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 13+3=16개, 하준는 17-2=15개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_023",
@@ -41610,9 +41610,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 공책 17개에서 2개를 더 모았고, 수빈는 21개에서 2개를 사용했어요. 두 사람이 가진 공책을 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 17+2=19개, 수빈는 21-2=19개입니다. 차이는 0개입니다."
+      "problem": "도윤는 공책 17개에서 2개를 더 모았고, 수빈는 21개에서 3개를 사용했어요. 두 사람이 가진 공책을 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 17+2=19개, 수빈는 21-3=18개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_027",
@@ -42069,9 +42069,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "하준는 딱지 16개에서 4개를 더 모았고, 서아는 21개에서 1개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "하준, 0개",
-      "solution": "하준는 16+4=20개, 서아는 21-1=20개입니다. 차이는 0개입니다."
+      "problem": "하준는 딱지 16개에서 4개를 더 모았고, 서아는 21개에서 2개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "하준, 1개",
+      "solution": "하준는 16+4=20개, 서아는 21-2=19개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_044",
@@ -42177,9 +42177,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "수빈는 책 20개에서 3개를 더 모았고, 연우는 25개에서 2개를 사용했어요. 두 사람이 가진 책을 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "수빈, 0개",
-      "solution": "수빈는 20+3=23개, 연우는 25-2=23개입니다. 차이는 0개입니다."
+      "problem": "수빈는 책 20개에서 3개를 더 모았고, 연우는 25개에서 3개를 사용했어요. 두 사람이 가진 책을 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "수빈, 1개",
+      "solution": "수빈는 20+3=23개, 연우는 25-3=22개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_048",
@@ -42285,9 +42285,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 색종이 24개에서 2개를 더 모았고, 민지는 29개에서 3개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 24+2=26개, 민지는 29-3=26개입니다. 차이는 0개입니다."
+      "problem": "태희는 색종이 24개에서 2개를 더 모았고, 민지는 29개에서 4개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 24+2=26개, 민지는 29-4=25개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_052",
@@ -42555,9 +42555,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 색종이 16개에서 2개를 더 모았고, 민지는 19개에서 1개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 16+2=18개, 민지는 19-1=18개입니다. 차이는 0개입니다."
+      "problem": "태희는 색종이 16개에서 2개를 더 모았고, 민지는 19개에서 2개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 16+2=18개, 민지는 19-2=17개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_062",
@@ -42636,9 +42636,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "서아는 쿠키 19개에서 5개를 더 모았고, 지우는 25개에서 1개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "서아, 0개",
-      "solution": "서아는 19+5=24개, 지우는 25-1=24개입니다. 차이는 0개입니다."
+      "problem": "서아는 쿠키 19개에서 5개를 더 모았고, 지우는 25개에서 2개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "서아, 1개",
+      "solution": "서아는 19+5=24개, 지우는 25-2=23개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_065",
@@ -42744,9 +42744,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "연우는 카드 23개에서 4개를 더 모았고, 지민는 29개에서 2개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "연우, 0개",
-      "solution": "연우는 23+4=27개, 지민는 29-2=27개입니다. 차이는 0개입니다."
+      "problem": "연우는 카드 23개에서 4개를 더 모았고, 지민는 29개에서 3개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "연우, 1개",
+      "solution": "연우는 23+4=27개, 지민는 29-3=26개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_069",
@@ -42852,9 +42852,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 연필 27개에서 3개를 더 모았고, 하준는 33개에서 3개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 27+3=30개, 하준는 33-3=30개입니다. 차이는 0개입니다."
+      "problem": "민지는 연필 27개에서 3개를 더 모았고, 하준는 33개에서 4개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 27+3=30개, 하준는 33-4=29개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_073",
@@ -43122,9 +43122,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 연필 19개에서 3개를 더 모았고, 하준는 23개에서 1개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 19+3=22개, 하준는 23-1=22개입니다. 차이는 0개입니다."
+      "problem": "민지는 연필 19개에서 3개를 더 모았고, 하준는 23개에서 2개를 사용했어요. 두 사람이 가진 연필을 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 19+3=22개, 하준는 23-2=21개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_083",
@@ -43230,9 +43230,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 공책 23개에서 2개를 더 모았고, 수빈는 27개에서 2개를 사용했어요. 두 사람이 가진 공책을 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 23+2=25개, 수빈는 27-2=25개입니다. 차이는 0개입니다."
+      "problem": "도윤는 공책 23개에서 2개를 더 모았고, 수빈는 27개에서 3개를 사용했어요. 두 사람이 가진 공책을 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 23+2=25개, 수빈는 27-3=24개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_CHANGE_COMPARE_087",
@@ -48495,9 +48495,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 6권, 화요일은 3권, 수요일은 3권, 목요일은 6권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 6+3=9권, 수요일과 목요일은 3+6=9권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 6권, 화요일은 3권, 수요일은 3권, 목요일은 7권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 6+3=9권, 수요일과 목요일은 3+7=10권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_012",
@@ -48522,9 +48522,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 7권, 화요일은 4권, 수요일은 4권, 목요일은 7권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 7+4=11권, 수요일과 목요일은 4+7=11권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 7권, 화요일은 4권, 수요일은 4권, 목요일은 8권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 7+4=11권, 수요일과 목요일은 4+8=12권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_013",
@@ -48873,9 +48873,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 2권, 화요일은 5권, 수요일은 2권, 목요일은 5권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 2+5=7권, 수요일과 목요일은 2+5=7권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 2권, 화요일은 5권, 수요일은 2권, 목요일은 6권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 2+5=7권, 수요일과 목요일은 2+6=8권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_026",
@@ -48900,9 +48900,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 3권, 화요일은 6권, 수요일은 3권, 목요일은 6권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 3+6=9권, 수요일과 목요일은 3+6=9권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 3권, 화요일은 6권, 수요일은 3권, 목요일은 7권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 3+6=9권, 수요일과 목요일은 3+7=10권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_027",
@@ -48927,9 +48927,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 4권, 화요일은 7권, 수요일은 4권, 목요일은 7권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 4+7=11권, 수요일과 목요일은 4+7=11권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 4권, 화요일은 7권, 수요일은 4권, 목요일은 8권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 4+7=11권, 수요일과 목요일은 4+8=12권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_028",
@@ -48954,9 +48954,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 5권, 화요일은 8권, 수요일은 5권, 목요일은 8권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 5+8=13권, 수요일과 목요일은 5+8=13권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 5권, 화요일은 8권, 수요일은 5권, 목요일은 9권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 5+8=13권, 수요일과 목요일은 5+9=14권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_029",
@@ -49305,9 +49305,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 6권, 화요일은 3권, 수요일은 3권, 목요일은 6권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 6+3=9권, 수요일과 목요일은 3+6=9권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 6권, 화요일은 3권, 수요일은 3권, 목요일은 7권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 6+3=9권, 수요일과 목요일은 3+7=10권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_042",
@@ -49332,9 +49332,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 7권, 화요일은 4권, 수요일은 4권, 목요일은 7권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 7+4=11권, 수요일과 목요일은 4+7=11권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 7권, 화요일은 4권, 수요일은 4권, 목요일은 8권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 7+4=11권, 수요일과 목요일은 4+8=12권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_043",
@@ -49683,9 +49683,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 2권, 화요일은 5권, 수요일은 2권, 목요일은 5권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 2+5=7권, 수요일과 목요일은 2+5=7권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 2권, 화요일은 5권, 수요일은 2권, 목요일은 6권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 2+5=7권, 수요일과 목요일은 2+6=8권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_056",
@@ -49710,9 +49710,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 3권, 화요일은 6권, 수요일은 3권, 목요일은 6권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 3+6=9권, 수요일과 목요일은 3+6=9권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 3권, 화요일은 6권, 수요일은 3권, 목요일은 7권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 3+6=9권, 수요일과 목요일은 3+7=10권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_057",
@@ -49737,9 +49737,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 4권, 화요일은 7권, 수요일은 4권, 목요일은 7권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 4+7=11권, 수요일과 목요일은 4+7=11권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 4권, 화요일은 7권, 수요일은 4권, 목요일은 8권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 4+7=11권, 수요일과 목요일은 4+8=12권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_058",
@@ -49764,9 +49764,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 5권, 화요일은 8권, 수요일은 5권, 목요일은 8권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 5+8=13권, 수요일과 목요일은 5+8=13권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 5권, 화요일은 8권, 수요일은 5권, 목요일은 9권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 5+8=13권, 수요일과 목요일은 5+9=14권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_059",
@@ -50115,9 +50115,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 6권, 화요일은 3권, 수요일은 3권, 목요일은 6권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 6+3=9권, 수요일과 목요일은 3+6=9권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 6권, 화요일은 3권, 수요일은 3권, 목요일은 7권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 6+3=9권, 수요일과 목요일은 3+7=10권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_072",
@@ -50142,9 +50142,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 7권, 화요일은 4권, 수요일은 4권, 목요일은 7권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 7+4=11권, 수요일과 목요일은 4+7=11권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 7권, 화요일은 4권, 수요일은 4권, 목요일은 8권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 7+4=11권, 수요일과 목요일은 4+8=12권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_073",
@@ -50493,9 +50493,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 2권, 화요일은 5권, 수요일은 2권, 목요일은 5권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 2+5=7권, 수요일과 목요일은 2+5=7권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 2권, 화요일은 5권, 수요일은 2권, 목요일은 6권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 2+5=7권, 수요일과 목요일은 2+6=8권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_086",
@@ -50520,9 +50520,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 3권, 화요일은 6권, 수요일은 3권, 목요일은 6권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 3+6=9권, 수요일과 목요일은 3+6=9권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 3권, 화요일은 6권, 수요일은 3권, 목요일은 7권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 3+6=9권, 수요일과 목요일은 3+7=10권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_087",
@@ -50547,9 +50547,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 4권, 화요일은 7권, 수요일은 4권, 목요일은 7권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 4+7=11권, 수요일과 목요일은 4+7=11권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 4권, 화요일은 7권, 수요일은 4권, 목요일은 8권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 4+7=11권, 수요일과 목요일은 4+8=12권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_088",
@@ -50574,9 +50574,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "table",
-      "problem": "독서 기록에서 월요일은 5권, 화요일은 8권, 수요일은 5권, 목요일은 8권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
-      "answer": "월요일과 화요일, 0권",
-      "solution": "월요일과 화요일은 5+8=13권, 수요일과 목요일은 5+8=13권입니다. 차이는 0권입니다."
+      "problem": "독서 기록에서 월요일은 5권, 화요일은 8권, 수요일은 5권, 목요일은 9권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?",
+      "answer": "수요일과 목요일, 1권",
+      "solution": "월요일과 화요일은 5+8=13권, 수요일과 목요일은 5+9=14권입니다. 차이는 1권입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_DATA_TOTAL_COMPARE_089",
@@ -51627,9 +51627,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "number_line",
-      "problem": "막대 20cm와 5cm를 이어 붙였어요. 리본은 25cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
-      "answer": "이어 붙인 길이, 0cm",
-      "solution": "이어 붙인 막대는 20+5=25cm입니다. 25cm와 25cm의 차이는 0cm입니다."
+      "problem": "막대 20cm와 5cm를 이어 붙였어요. 리본은 26cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
+      "answer": "리본 길이, 1cm",
+      "solution": "이어 붙인 막대는 20+5=25cm입니다. 25cm와 26cm의 차이는 1cm입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_MEASUREMENT_COMPARE_038",
@@ -51897,9 +51897,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "number_line",
-      "problem": "막대 15cm와 6cm를 이어 붙였어요. 리본은 21cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
-      "answer": "이어 붙인 길이, 0cm",
-      "solution": "이어 붙인 막대는 15+6=21cm입니다. 21cm와 21cm의 차이는 0cm입니다."
+      "problem": "막대 15cm와 6cm를 이어 붙였어요. 리본은 22cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
+      "answer": "리본 길이, 1cm",
+      "solution": "이어 붙인 막대는 15+6=21cm입니다. 21cm와 22cm의 차이는 1cm입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_MEASUREMENT_COMPARE_048",
@@ -52410,9 +52410,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "number_line",
-      "problem": "막대 19cm와 7cm를 이어 붙였어요. 리본은 26cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
-      "answer": "이어 붙인 길이, 0cm",
-      "solution": "이어 붙인 막대는 19+7=26cm입니다. 26cm와 26cm의 차이는 0cm입니다."
+      "problem": "막대 19cm와 7cm를 이어 붙였어요. 리본은 27cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
+      "answer": "리본 길이, 1cm",
+      "solution": "이어 붙인 막대는 19+7=26cm입니다. 26cm와 27cm의 차이는 1cm입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_MEASUREMENT_COMPARE_067",
@@ -52680,9 +52680,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "number_line",
-      "problem": "막대 14cm와 8cm를 이어 붙였어요. 리본은 22cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
-      "answer": "이어 붙인 길이, 0cm",
-      "solution": "이어 붙인 막대는 14+8=22cm입니다. 22cm와 22cm의 차이는 0cm입니다."
+      "problem": "막대 14cm와 8cm를 이어 붙였어요. 리본은 23cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?",
+      "answer": "리본 길이, 1cm",
+      "solution": "이어 붙인 막대는 14+8=22cm입니다. 22cm와 23cm의 차이는 1cm입니다."
     },
     {
       "id": "EWP_G1G2_COMPLEX_D02_EARLY_MEASUREMENT_COMPARE_077",
@@ -55425,9 +55425,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 연필 14개에서 2개를 더 모았고, 민지는 17개에서 1개를 사용했어요. 두 사람이 가진 연필를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 14+2=16개, 민지는 17-1=16개입니다. 차이는 0개입니다."
+      "problem": "태희는 연필 14개에서 2개를 더 모았고, 민지는 17개에서 2개를 사용했어요. 두 사람이 가진 연필를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 14+2=16개, 민지는 17-2=15개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D03_COMPARE_ADJUST_002",
@@ -55506,9 +55506,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "서아는 사탕 17개에서 5개를 더 모았고, 지우는 23개에서 1개를 사용했어요. 두 사람이 가진 사탕를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "서아, 0개",
-      "solution": "서아는 17+5=22개, 지우는 23-1=22개입니다. 차이는 0개입니다."
+      "problem": "서아는 사탕 17개에서 5개를 더 모았고, 지우는 23개에서 2개를 사용했어요. 두 사람이 가진 사탕를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "서아, 1개",
+      "solution": "서아는 17+5=22개, 지우는 23-2=21개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D03_COMPARE_ADJUST_005",
@@ -55614,9 +55614,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "연우는 스티커 21개에서 4개를 더 모았고, 지민는 27개에서 2개를 사용했어요. 두 사람이 가진 스티커를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "연우, 0개",
-      "solution": "연우는 21+4=25개, 지민는 27-2=25개입니다. 차이는 0개입니다."
+      "problem": "연우는 스티커 21개에서 4개를 더 모았고, 지민는 27개에서 3개를 사용했어요. 두 사람이 가진 스티커를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "연우, 1개",
+      "solution": "연우는 21+4=25개, 지민는 27-3=24개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D03_COMPARE_ADJUST_009",
@@ -55722,9 +55722,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 딱지 25개에서 3개를 더 모았고, 하준는 31개에서 3개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 25+3=28개, 하준는 31-3=28개입니다. 차이는 0개입니다."
+      "problem": "민지는 딱지 25개에서 3개를 더 모았고, 하준는 31개에서 4개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 25+3=28개, 하준는 31-4=27개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D03_COMPARE_ADJUST_013",
@@ -55992,9 +55992,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 딱지 35개에서 3개를 더 모았고, 하준는 39개에서 1개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 35+3=38개, 하준는 39-1=38개입니다. 차이는 0개입니다."
+      "problem": "민지는 딱지 35개에서 3개를 더 모았고, 하준는 39개에서 2개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 35+3=38개, 하준는 39-2=37개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D03_COMPARE_ADJUST_023",
@@ -56100,9 +56100,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 책 39개에서 2개를 더 모았고, 수빈는 43개에서 2개를 사용했어요. 두 사람이 가진 책를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 39+2=41개, 수빈는 43-2=41개입니다. 차이는 0개입니다."
+      "problem": "도윤는 책 39개에서 2개를 더 모았고, 수빈는 43개에서 3개를 사용했어요. 두 사람이 가진 책를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 39+2=41개, 수빈는 43-3=40개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D03_COMPARE_ADJUST_027",
@@ -56559,9 +56559,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "하준는 쿠키 56개에서 4개를 더 모았고, 서아는 61개에서 1개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "하준, 0개",
-      "solution": "하준는 56+4=60개, 서아는 61-1=60개입니다. 차이는 0개입니다."
+      "problem": "하준는 쿠키 56개에서 4개를 더 모았고, 서아는 61개에서 2개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "하준, 1개",
+      "solution": "하준는 56+4=60개, 서아는 61-2=59개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D03_COMPARE_ADJUST_044",
@@ -56667,9 +56667,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "수빈는 카드 60개에서 3개를 더 모았고, 연우는 65개에서 2개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "수빈, 0개",
-      "solution": "수빈는 60+3=63개, 연우는 65-2=63개입니다. 차이는 0개입니다."
+      "problem": "수빈는 카드 60개에서 3개를 더 모았고, 연우는 65개에서 3개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "수빈, 1개",
+      "solution": "수빈는 60+3=63개, 연우는 65-3=62개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D03_COMPARE_ADJUST_048",
@@ -56775,9 +56775,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 연필 64개에서 2개를 더 모았고, 민지는 69개에서 3개를 사용했어요. 두 사람이 가진 연필를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 64+2=66개, 민지는 69-3=66개입니다. 차이는 0개입니다."
+      "problem": "태희는 연필 64개에서 2개를 더 모았고, 민지는 69개에서 4개를 사용했어요. 두 사람이 가진 연필를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 64+2=66개, 민지는 69-4=65개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D03_COMPARE_ADJUST_052",
@@ -57045,9 +57045,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 연필 74개에서 2개를 더 모았고, 민지는 77개에서 1개를 사용했어요. 두 사람이 가진 연필를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 74+2=76개, 민지는 77-1=76개입니다. 차이는 0개입니다."
+      "problem": "태희는 연필 74개에서 2개를 더 모았고, 민지는 77개에서 2개를 사용했어요. 두 사람이 가진 연필를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 74+2=76개, 민지는 77-2=75개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D03_COMPARE_ADJUST_062",
@@ -57126,9 +57126,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "서아는 사탕 77개에서 5개를 더 모았고, 지우는 83개에서 1개를 사용했어요. 두 사람이 가진 사탕를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "서아, 0개",
-      "solution": "서아는 77+5=82개, 지우는 83-1=82개입니다. 차이는 0개입니다."
+      "problem": "서아는 사탕 77개에서 5개를 더 모았고, 지우는 83개에서 2개를 사용했어요. 두 사람이 가진 사탕를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "서아, 1개",
+      "solution": "서아는 77+5=82개, 지우는 83-2=81개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D03_COMPARE_ADJUST_065",
@@ -57234,9 +57234,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "연우는 스티커 81개에서 4개를 더 모았고, 지민는 87개에서 2개를 사용했어요. 두 사람이 가진 스티커를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "연우, 0개",
-      "solution": "연우는 81+4=85개, 지민는 87-2=85개입니다. 차이는 0개입니다."
+      "problem": "연우는 스티커 81개에서 4개를 더 모았고, 지민는 87개에서 3개를 사용했어요. 두 사람이 가진 스티커를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "연우, 1개",
+      "solution": "연우는 81+4=85개, 지민는 87-3=84개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D03_COMPARE_ADJUST_069",
@@ -57342,9 +57342,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 딱지 85개에서 3개를 더 모았고, 하준는 91개에서 3개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 85+3=88개, 하준는 91-3=88개입니다. 차이는 0개입니다."
+      "problem": "민지는 딱지 85개에서 3개를 더 모았고, 하준는 91개에서 4개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 85+3=88개, 하준는 91-4=87개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D03_COMPARE_ADJUST_073",
@@ -68138,9 +68138,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "수빈는 스티커 22개에서 4개를 더 모았고, 연우는 27개에서 1개를 사용했어요. 두 사람이 가진 스티커를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "수빈, 0개",
-      "solution": "수빈는 22+4=26개, 연우는 27-1=26개입니다. 차이는 0개입니다."
+      "problem": "수빈는 스티커 22개에서 4개를 더 모았고, 연우는 27개에서 2개를 사용했어요. 두 사람이 가진 스티커를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "수빈, 1개",
+      "solution": "수빈는 22+4=26개, 연우는 27-2=25개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D04_COMPARE_ADJUST_008",
@@ -68246,9 +68246,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 딱지 26개에서 3개를 더 모았고, 민지는 31개에서 2개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 26+3=29개, 민지는 31-2=29개입니다. 차이는 0개입니다."
+      "problem": "태희는 딱지 26개에서 3개를 더 모았고, 민지는 31개에서 3개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 26+3=29개, 민지는 31-3=28개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D04_COMPARE_ADJUST_012",
@@ -68705,9 +68705,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "연우는 구슬 43개에서 5개를 더 모았고, 지민는 49개에서 1개를 사용했어요. 두 사람이 가진 구슬를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "연우, 0개",
-      "solution": "연우는 43+5=48개, 지민는 49-1=48개입니다. 차이는 0개입니다."
+      "problem": "연우는 구슬 43개에서 5개를 더 모았고, 지민는 49개에서 2개를 사용했어요. 두 사람이 가진 구슬를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "연우, 1개",
+      "solution": "연우는 43+5=48개, 지민는 49-2=47개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D04_COMPARE_ADJUST_029",
@@ -68813,9 +68813,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 쿠키 47개에서 4개를 더 모았고, 하준는 53개에서 2개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 47+4=51개, 하준는 53-2=51개입니다. 차이는 0개입니다."
+      "problem": "민지는 쿠키 47개에서 4개를 더 모았고, 하준는 53개에서 3개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 47+4=51개, 하준는 53-3=50개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D04_COMPARE_ADJUST_033",
@@ -68921,9 +68921,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 카드 51개에서 3개를 더 모았고, 수빈는 57개에서 3개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 51+3=54개, 수빈는 57-3=54개입니다. 차이는 0개입니다."
+      "problem": "도윤는 카드 51개에서 3개를 더 모았고, 수빈는 57개에서 4개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 51+3=54개, 수빈는 57-4=53개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D04_COMPARE_ADJUST_037",
@@ -69191,9 +69191,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 카드 61개에서 3개를 더 모았고, 수빈는 65개에서 1개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 61+3=64개, 수빈는 65-1=64개입니다. 차이는 0개입니다."
+      "problem": "도윤는 카드 61개에서 3개를 더 모았고, 수빈는 65개에서 2개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 61+3=64개, 수빈는 65-2=63개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D04_COMPARE_ADJUST_047",
@@ -78570,9 +78570,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "수빈는 구슬 24개에서 4개를 더 모았고, 연우는 29개에서 1개를 사용했어요. 두 사람이 가진 구슬를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "수빈, 0개",
-      "solution": "수빈는 24+4=28개, 연우는 29-1=28개입니다. 차이는 0개입니다."
+      "problem": "수빈는 구슬 24개에서 4개를 더 모았고, 연우는 29개에서 2개를 사용했어요. 두 사람이 가진 구슬를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "수빈, 1개",
+      "solution": "수빈는 24+4=28개, 연우는 29-2=27개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D05_COMPARE_ADJUST_008",
@@ -78678,9 +78678,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 쿠키 28개에서 3개를 더 모았고, 민지는 33개에서 2개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 28+3=31개, 민지는 33-2=31개입니다. 차이는 0개입니다."
+      "problem": "태희는 쿠키 28개에서 3개를 더 모았고, 민지는 33개에서 3개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 28+3=31개, 민지는 33-3=30개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D05_COMPARE_ADJUST_012",
@@ -79137,9 +79137,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "연우는 색종이 45개에서 5개를 더 모았고, 지민는 51개에서 1개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "연우, 0개",
-      "solution": "연우는 45+5=50개, 지민는 51-1=50개입니다. 차이는 0개입니다."
+      "problem": "연우는 색종이 45개에서 5개를 더 모았고, 지민는 51개에서 2개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "연우, 1개",
+      "solution": "연우는 45+5=50개, 지민는 51-2=49개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D05_COMPARE_ADJUST_029",
@@ -79245,9 +79245,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 사탕 49개에서 4개를 더 모았고, 하준는 55개에서 2개를 사용했어요. 두 사람이 가진 사탕를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 49+4=53개, 하준는 55-2=53개입니다. 차이는 0개입니다."
+      "problem": "민지는 사탕 49개에서 4개를 더 모았고, 하준는 55개에서 3개를 사용했어요. 두 사람이 가진 사탕를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 49+4=53개, 하준는 55-3=52개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D05_COMPARE_ADJUST_033",
@@ -79353,9 +79353,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 스티커 53개에서 3개를 더 모았고, 수빈는 59개에서 3개를 사용했어요. 두 사람이 가진 스티커를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 53+3=56개, 수빈는 59-3=56개입니다. 차이는 0개입니다."
+      "problem": "도윤는 스티커 53개에서 3개를 더 모았고, 수빈는 59개에서 4개를 사용했어요. 두 사람이 가진 스티커를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 53+3=56개, 수빈는 59-4=55개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D05_COMPARE_ADJUST_037",
@@ -79623,9 +79623,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 스티커 63개에서 3개를 더 모았고, 수빈는 67개에서 1개를 사용했어요. 두 사람이 가진 스티커를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 63+3=66개, 수빈는 67-1=66개입니다. 차이는 0개입니다."
+      "problem": "도윤는 스티커 63개에서 3개를 더 모았고, 수빈는 67개에서 2개를 사용했어요. 두 사람이 가진 스티커를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 63+3=66개, 수빈는 67-2=65개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G3G4_COMPLEX_D05_COMPARE_ADJUST_047",
@@ -89002,9 +89002,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "수빈는 색종이 26개에서 4개를 더 모았고, 연우는 31개에서 1개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "수빈, 0개",
-      "solution": "수빈는 26+4=30개, 연우는 31-1=30개입니다. 차이는 0개입니다."
+      "problem": "수빈는 색종이 26개에서 4개를 더 모았고, 연우는 31개에서 2개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "수빈, 1개",
+      "solution": "수빈는 26+4=30개, 연우는 31-2=29개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D06_COMPARE_ADJUST_008",
@@ -89110,9 +89110,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 사탕 30개에서 3개를 더 모았고, 민지는 35개에서 2개를 사용했어요. 두 사람이 가진 사탕를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 30+3=33개, 민지는 35-2=33개입니다. 차이는 0개입니다."
+      "problem": "태희는 사탕 30개에서 3개를 더 모았고, 민지는 35개에서 3개를 사용했어요. 두 사람이 가진 사탕를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 30+3=33개, 민지는 35-3=32개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D06_COMPARE_ADJUST_012",
@@ -89569,9 +89569,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "연우는 연필 47개에서 5개를 더 모았고, 지민는 53개에서 1개를 사용했어요. 두 사람이 가진 연필를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "연우, 0개",
-      "solution": "연우는 47+5=52개, 지민는 53-1=52개입니다. 차이는 0개입니다."
+      "problem": "연우는 연필 47개에서 5개를 더 모았고, 지민는 53개에서 2개를 사용했어요. 두 사람이 가진 연필를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "연우, 1개",
+      "solution": "연우는 47+5=52개, 지민는 53-2=51개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D06_COMPARE_ADJUST_029",
@@ -89677,9 +89677,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 공책 51개에서 4개를 더 모았고, 하준는 57개에서 2개를 사용했어요. 두 사람이 가진 공책를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 51+4=55개, 하준는 57-2=55개입니다. 차이는 0개입니다."
+      "problem": "민지는 공책 51개에서 4개를 더 모았고, 하준는 57개에서 3개를 사용했어요. 두 사람이 가진 공책를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 51+4=55개, 하준는 57-3=54개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D06_COMPARE_ADJUST_033",
@@ -89785,9 +89785,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 구슬 55개에서 3개를 더 모았고, 수빈는 61개에서 3개를 사용했어요. 두 사람이 가진 구슬를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 55+3=58개, 수빈는 61-3=58개입니다. 차이는 0개입니다."
+      "problem": "도윤는 구슬 55개에서 3개를 더 모았고, 수빈는 61개에서 4개를 사용했어요. 두 사람이 가진 구슬를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 55+3=58개, 수빈는 61-4=57개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D06_COMPARE_ADJUST_037",
@@ -90055,9 +90055,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 구슬 65개에서 3개를 더 모았고, 수빈는 69개에서 1개를 사용했어요. 두 사람이 가진 구슬를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 65+3=68개, 수빈는 69-1=68개입니다. 차이는 0개입니다."
+      "problem": "도윤는 구슬 65개에서 3개를 더 모았고, 수빈는 69개에서 2개를 사용했어요. 두 사람이 가진 구슬를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 65+3=68개, 수빈는 69-2=67개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D06_COMPARE_ADJUST_047",
@@ -99434,9 +99434,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "수빈는 연필 28개에서 4개를 더 모았고, 연우는 33개에서 1개를 사용했어요. 두 사람이 가진 연필를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "수빈, 0개",
-      "solution": "수빈는 28+4=32개, 연우는 33-1=32개입니다. 차이는 0개입니다."
+      "problem": "수빈는 연필 28개에서 4개를 더 모았고, 연우는 33개에서 2개를 사용했어요. 두 사람이 가진 연필를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "수빈, 1개",
+      "solution": "수빈는 28+4=32개, 연우는 33-2=31개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D07_COMPARE_ADJUST_008",
@@ -99542,9 +99542,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 공책 32개에서 3개를 더 모았고, 민지는 37개에서 2개를 사용했어요. 두 사람이 가진 공책를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 32+3=35개, 민지는 37-2=35개입니다. 차이는 0개입니다."
+      "problem": "태희는 공책 32개에서 3개를 더 모았고, 민지는 37개에서 3개를 사용했어요. 두 사람이 가진 공책를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 32+3=35개, 민지는 37-3=34개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D07_COMPARE_ADJUST_012",
@@ -100001,9 +100001,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "연우는 딱지 49개에서 5개를 더 모았고, 지민는 55개에서 1개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "연우, 0개",
-      "solution": "연우는 49+5=54개, 지민는 55-1=54개입니다. 차이는 0개입니다."
+      "problem": "연우는 딱지 49개에서 5개를 더 모았고, 지민는 55개에서 2개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "연우, 1개",
+      "solution": "연우는 49+5=54개, 지민는 55-2=53개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D07_COMPARE_ADJUST_029",
@@ -100109,9 +100109,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 책 53개에서 4개를 더 모았고, 하준는 59개에서 2개를 사용했어요. 두 사람이 가진 책를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 53+4=57개, 하준는 59-2=57개입니다. 차이는 0개입니다."
+      "problem": "민지는 책 53개에서 4개를 더 모았고, 하준는 59개에서 3개를 사용했어요. 두 사람이 가진 책를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 53+4=57개, 하준는 59-3=56개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D07_COMPARE_ADJUST_033",
@@ -100217,9 +100217,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 색종이 57개에서 3개를 더 모았고, 수빈는 63개에서 3개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 57+3=60개, 수빈는 63-3=60개입니다. 차이는 0개입니다."
+      "problem": "도윤는 색종이 57개에서 3개를 더 모았고, 수빈는 63개에서 4개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 57+3=60개, 수빈는 63-4=59개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D07_COMPARE_ADJUST_037",
@@ -100487,9 +100487,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 색종이 67개에서 3개를 더 모았고, 수빈는 71개에서 1개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 67+3=70개, 수빈는 71-1=70개입니다. 차이는 0개입니다."
+      "problem": "도윤는 색종이 67개에서 3개를 더 모았고, 수빈는 71개에서 2개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 67+3=70개, 수빈는 71-2=69개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D07_COMPARE_ADJUST_047",
@@ -101054,9 +101054,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "수빈는 연필 88개에서 4개를 더 모았고, 연우는 93개에서 1개를 사용했어요. 두 사람이 가진 연필를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "수빈, 0개",
-      "solution": "수빈는 88+4=92개, 연우는 93-1=92개입니다. 차이는 0개입니다."
+      "problem": "수빈는 연필 88개에서 4개를 더 모았고, 연우는 93개에서 2개를 사용했어요. 두 사람이 가진 연필를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "수빈, 1개",
+      "solution": "수빈는 88+4=92개, 연우는 93-2=91개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D07_DIVISION_REMAINDER_001",
@@ -111003,9 +111003,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 책 54개에서 4개를 더 모았고, 민지는 59개에서 1개를 사용했어요. 두 사람이 가진 책를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 54+4=58개, 민지는 59-1=58개입니다. 차이는 0개입니다."
+      "problem": "태희는 책 54개에서 4개를 더 모았고, 민지는 59개에서 2개를 사용했어요. 두 사람이 가진 책를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 54+4=58개, 민지는 59-2=57개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D08_COMPARE_ADJUST_032",
@@ -111570,9 +111570,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 카드 75개에서 5개를 더 모았고, 하준는 81개에서 1개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 75+5=80개, 하준는 81-1=80개입니다. 차이는 0개입니다."
+      "problem": "민지는 카드 75개에서 5개를 더 모았고, 하준는 81개에서 2개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 75+5=80개, 하준는 81-2=79개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D08_COMPARE_ADJUST_053",
@@ -111678,9 +111678,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 연필 79개에서 4개를 더 모았고, 수빈는 85개에서 2개를 사용했어요. 두 사람이 가진 연필를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 79+4=83개, 수빈는 85-2=83개입니다. 차이는 0개입니다."
+      "problem": "도윤는 연필 79개에서 4개를 더 모았고, 수빈는 85개에서 3개를 사용했어요. 두 사람이 가진 연필를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 79+4=83개, 수빈는 85-3=82개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D08_COMPARE_ADJUST_057",
@@ -121435,9 +121435,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 카드 56개에서 4개를 더 모았고, 민지는 61개에서 1개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 56+4=60개, 민지는 61-1=60개입니다. 차이는 0개입니다."
+      "problem": "태희는 카드 56개에서 4개를 더 모았고, 민지는 61개에서 2개를 사용했어요. 두 사람이 가진 카드를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 56+4=60개, 민지는 61-2=59개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D09_COMPARE_ADJUST_032",
@@ -122002,9 +122002,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 스티커 77개에서 5개를 더 모았고, 하준는 83개에서 1개를 사용했어요. 두 사람이 가진 스티커를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 77+5=82개, 하준는 83-1=82개입니다. 차이는 0개입니다."
+      "problem": "민지는 스티커 77개에서 5개를 더 모았고, 하준는 83개에서 2개를 사용했어요. 두 사람이 가진 스티커를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 77+5=82개, 하준는 83-2=81개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D09_COMPARE_ADJUST_053",
@@ -122110,9 +122110,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 딱지 81개에서 4개를 더 모았고, 수빈는 87개에서 2개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 81+4=85개, 수빈는 87-2=85개입니다. 차이는 0개입니다."
+      "problem": "도윤는 딱지 81개에서 4개를 더 모았고, 수빈는 87개에서 3개를 사용했어요. 두 사람이 가진 딱지를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 81+4=85개, 수빈는 87-3=84개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D09_COMPARE_ADJUST_057",
@@ -131867,9 +131867,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 스티커 58개에서 4개를 더 모았고, 민지는 63개에서 1개를 사용했어요. 두 사람이 가진 스티커를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 58+4=62개, 민지는 63-1=62개입니다. 차이는 0개입니다."
+      "problem": "태희는 스티커 58개에서 4개를 더 모았고, 민지는 63개에서 2개를 사용했어요. 두 사람이 가진 스티커를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 58+4=62개, 민지는 63-2=61개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D10_COMPARE_ADJUST_032",
@@ -132434,9 +132434,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 구슬 79개에서 5개를 더 모았고, 하준는 85개에서 1개를 사용했어요. 두 사람이 가진 구슬를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 79+5=84개, 하준는 85-1=84개입니다. 차이는 0개입니다."
+      "problem": "민지는 구슬 79개에서 5개를 더 모았고, 하준는 85개에서 2개를 사용했어요. 두 사람이 가진 구슬를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 79+5=84개, 하준는 85-2=83개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D10_COMPARE_ADJUST_053",
@@ -132542,9 +132542,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 쿠키 83개에서 4개를 더 모았고, 수빈는 89개에서 2개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 83+4=87개, 수빈는 89-2=87개입니다. 차이는 0개입니다."
+      "problem": "도윤는 쿠키 83개에서 4개를 더 모았고, 수빈는 89개에서 3개를 사용했어요. 두 사람이 가진 쿠키를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 83+4=87개, 수빈는 89-3=86개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D10_COMPARE_ADJUST_057",
@@ -142299,9 +142299,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "태희는 구슬 60개에서 4개를 더 모았고, 민지는 65개에서 1개를 사용했어요. 두 사람이 가진 구슬를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "태희, 0개",
-      "solution": "태희는 60+4=64개, 민지는 65-1=64개입니다. 차이는 0개입니다."
+      "problem": "태희는 구슬 60개에서 4개를 더 모았고, 민지는 65개에서 2개를 사용했어요. 두 사람이 가진 구슬를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "태희, 1개",
+      "solution": "태희는 60+4=64개, 민지는 65-2=63개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D11_COMPARE_ADJUST_032",
@@ -142866,9 +142866,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "민지는 색종이 81개에서 5개를 더 모았고, 하준는 87개에서 1개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "민지, 0개",
-      "solution": "민지는 81+5=86개, 하준는 87-1=86개입니다. 차이는 0개입니다."
+      "problem": "민지는 색종이 81개에서 5개를 더 모았고, 하준는 87개에서 2개를 사용했어요. 두 사람이 가진 색종이를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "민지, 1개",
+      "solution": "민지는 81+5=86개, 하준는 87-2=85개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D11_COMPARE_ADJUST_053",
@@ -142974,9 +142974,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 사탕 85개에서 4개를 더 모았고, 수빈는 91개에서 2개를 사용했어요. 두 사람이 가진 사탕를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 85+4=89개, 수빈는 91-2=89개입니다. 차이는 0개입니다."
+      "problem": "도윤는 사탕 85개에서 4개를 더 모았고, 수빈는 91개에서 3개를 사용했어요. 두 사람이 가진 사탕를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 85+4=89개, 수빈는 91-3=88개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D11_COMPARE_ADJUST_057",
@@ -152326,9 +152326,9 @@
       ],
       "requires_multi_step_reasoning": true,
       "representation_hint": "bar_model",
-      "problem": "도윤는 공책 47개에서 5개를 더 모았고, 수빈는 53개에서 1개를 사용했어요. 두 사람이 가진 공책를 비교하면 누가 몇 개 더 많을까요?",
-      "answer": "도윤, 0개",
-      "solution": "도윤는 47+5=52개, 수빈는 53-1=52개입니다. 차이는 0개입니다."
+      "problem": "도윤는 공책 47개에서 5개를 더 모았고, 수빈는 53개에서 2개를 사용했어요. 두 사람이 가진 공책를 비교하면 누가 몇 개 더 많을까요?",
+      "answer": "도윤, 1개",
+      "solution": "도윤는 47+5=52개, 수빈는 53-2=51개입니다. 차이는 1개입니다."
     },
     {
       "id": "EWP_G5G6_COMPLEX_D12_COMPARE_ADJUST_017",
