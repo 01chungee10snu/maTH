@@ -75,7 +75,7 @@ const CREATIVE_TEMPLATES = {
                     question: `📏 ${name1}, ${name2}, ${name3}이 키 순서대로 줄을 섰어요.\n${name1}이 가장 크고, ${name3}이 가장 작아요. ${name2}은 앞에서 몇 번째?`,
                     explanation: `가장 큰 사람이 맨 앞이면, ${name2}은 가운데인 2번째!`,
                     answer: '2번째',
-                    wrongs: ['1번째', '3번째', '모름']
+                    wrongs: ['1번째', '3번째', '4번째']
                 })
             }
         ],
@@ -214,7 +214,7 @@ const CREATIVE_TEMPLATES = {
                 question: `🏃 ${name1}이 ${name2}보다 빨라요.\n${name2}가 ${name3}보다 빨라요.\n가장 빠른 사람은 누구일까요?`,
                 explanation: `${name1} > ${name2} > ${name3}이므로 ${name1}이 가장 빨라요!`,
                 answer: name1,
-                wrongs: [name2, name3, '모름']
+                wrongs: [name2, name3, '두 사람이 같음']
             })
         },
         {
@@ -222,7 +222,7 @@ const CREATIVE_TEMPLATES = {
                 question: `📏 ${name1}이 ${name2}보다 키가 커요.\n${name3}이 ${name1}보다 키가 커요.\n가장 키가 큰 사람은?`,
                 explanation: `${name3} > ${name1} > ${name2}이므로 ${name3}이 가장 커요!`,
                 answer: name3,
-                wrongs: [name1, name2, '모름']
+                wrongs: [name1, name2, '두 사람이 같음']
             })
         }
     ],

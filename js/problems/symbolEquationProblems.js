@@ -178,6 +178,12 @@ function generateSymbolEquationProblem(difficulty) {
         wrongs.add(correctValue - 1 > 0 ? correctValue - 1 : correctValue + 2);
         wrongs.add(correctValue * 2);
         otherValues.forEach(v => wrongs.add(v));
+        let offset = 2;
+        while (wrongs.size < 4 && offset < 20) {
+            wrongs.add(correctValue + offset);
+            if (correctValue - offset > 0) wrongs.add(correctValue - offset);
+            offset += 1;
+        }
 
         return Array.from(wrongs)
             .filter(w => w !== correctValue && w > 0)

@@ -5,7 +5,7 @@
    있는 relationshipCoach 호환 문항으로 변환합니다.
    ========================================================================= */
 
-const EXPANDED_WORD_BANK_URL = 'data/elementary_word_problem_seed_bank.json?v=20260521-options-v4';
+const EXPANDED_WORD_BANK_URL = 'data/elementary_word_problem_seed_bank.json?v=20260521-options-v5';
 
 function clampExpandedBank(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -66,26 +66,89 @@ function extractExpandedLabelCandidates(item, answerLabel) {
         '첫 번째 상자', '두 번째 상자', '이어 붙인 길이', '리본 길이', '더 받은 수', '친구가 가진 수',
         '첫째 날', '둘째 날', '큰 컵', '작은 컵'
     ];
-    return uniqueExpandedList(candidates.filter(label => text.includes(label)));
+    const regexCandidates = [];
+    const patterns = [
+        /(리본|물병|상자|기차|막대|컵)\s*[A-D]/g,
+        /[A-D]\s*(컵|막대|상자|팀)/g,
+        /(빨간|파란|노란|초록|보라|하얀|검은|분홍|주황|남색)\s*(공|컵|끈|바구니|상자|막대|삽)(?![가-힣])/g,
+        /(큰|작은)\s*(컵|그릇|상자|막대)/g
+    ];
+    patterns.forEach(pattern => {
+        Array.from(text.matchAll(pattern)).forEach(match => regexCandidates.push(match[0].replace(/\s+/g, ' ').trim()));
+    });
+    return uniqueExpandedList([...candidates, ...regexCandidates].filter(label => text.includes(label)));
+}
+
+function buildTextDistractors(item, answer) {
+    const options = [];
+    const add = candidate => {
+        const value = normalizeExpandedText(candidate);
+        if (value && value !== answer && !options.includes(value)) options.push(value);
+    };
+
+    extractExpandedLabelCandidates(item, answer)
+        .filter(candidate => candidate !== answer)
+        .forEach(add);
+
+    if (answer === '같다') {
+        ['다르다', '첫 번째가 더 크다', '두 번째가 더 크다', '두 양이 다르다'].forEach(add);
+    } else if (/컵/.test(answer)) {
+        ['큰 컵', '작은 컵', '두 컵이 같다', '컵 크기는 관계없다'].forEach(add);
+    } else if (/^[가-힣]{2,3}$/.test(answer)) {
+        ['두 사람이 같다', '앞사람', '뒷사람'].forEach(add);
+    } else if (/[A-D]/.test(answer)) {
+        ['A', 'B', 'C', 'D', 'A와 B가 같다', 'B와 C가 같다'].forEach(add);
+    } else {
+        ['첫 번째 대상', '두 번째 대상', '두 대상이 같다', '반대 대상'].forEach(add);
+    }
+
+    return options.slice(0, 5);
+}
+
+function normalizeExpandedText(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
 }
 
 function buildLabeledNumberDistractors(item, answer, label, numberPart) {
     const labels = extractExpandedLabelCandidates(item, label);
-    const otherLabels = labels.filter(candidate => candidate !== label);
+    let otherLabels = labels.filter(candidate => candidate !== label);
     const options = [];
     const add = candidate => {
         if (candidate && candidate !== answer && !options.includes(candidate)) options.push(candidate);
     };
-
-    otherLabels.forEach(otherLabel => add(`${otherLabel}, ${formatExpandedNumberPart(numberPart, numberPart.value)}`));
-    getExpandedOffsets(numberPart.value).forEach(offset => {
-        const nextValue = numberPart.value + offset;
-        if (Number.isFinite(nextValue) && nextValue >= 0) add(`${label}, ${formatExpandedNumberPart(numberPart, nextValue)}`);
+    const sortedOtherLabels = [...otherLabels].sort((a, b) => {
+        const aMatch = /과|와/.test(a) ? 1 : 0;
+        const bMatch = /과|와/.test(b) ? 1 : 0;
+        return bMatch - aMatch;
     });
-    otherLabels.forEach(otherLabel => {
-        getExpandedOffsets(numberPart.value).forEach(offset => {
+
+    if (!sortedOtherLabels.length) {
+        otherLabels = ['다른 대상'];
+        sortedOtherLabels.push('다른 대상');
+    }
+
+    const offsets = getExpandedOffsets(numberPart.value)
+        .filter(offset => {
             const nextValue = numberPart.value + offset;
-            if (Number.isFinite(nextValue) && nextValue >= 0) add(`${otherLabel}, ${formatExpandedNumberPart(numberPart, nextValue)}`);
+            return Number.isFinite(nextValue) && nextValue >= 0;
+        });
+    const primaryOtherLabel = sortedOtherLabels[0];
+    add(`${primaryOtherLabel}, ${formatExpandedNumberPart(numberPart, numberPart.value)}`);
+    offsets.slice(0, 2).forEach(offset => {
+        add(`${label}, ${formatExpandedNumberPart(numberPart, numberPart.value + offset)}`);
+    });
+    if (offsets.length) {
+        add(`${primaryOtherLabel}, ${formatExpandedNumberPart(numberPart, numberPart.value + offsets[0])}`);
+    }
+
+    sortedOtherLabels.slice(1).forEach(otherLabel => add(`${otherLabel}, ${formatExpandedNumberPart(numberPart, numberPart.value)}`));
+    offsets.slice(2).forEach(offset => {
+        add(`${label}, ${formatExpandedNumberPart(numberPart, numberPart.value + offset)}`);
+    });
+    sortedOtherLabels.forEach(otherLabel => {
+        offsets.forEach(offset => {
+            const nextValue = numberPart.value + offset;
+            add(`${otherLabel}, ${formatExpandedNumberPart(numberPart, nextValue)}`);
         });
     });
 
@@ -141,11 +204,7 @@ function buildSeedDistractors(item) {
 
     const parsed = parseExpandedNumberPart(answer);
     if (!parsed || !Number.isFinite(parsed.value)) {
-        const labelDistractors = extractExpandedLabelCandidates(item, answer)
-            .filter(candidate => candidate !== answer);
-        return labelDistractors.length >= 3
-            ? labelDistractors.slice(0, 5)
-            : ['다시 계산이 필요해요', '문제 조건 부족', '알 수 없음'];
+        return buildTextDistractors(item, answer).slice(0, 5);
     }
 
     return getExpandedOffsets(parsed.value)

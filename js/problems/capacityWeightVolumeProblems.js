@@ -27,7 +27,7 @@ const CAPACITY_TEMPLATES = {
                 question: `🧃 ${name1}의 컵에는 물이 ${a}mL, 태희의 컵에는 ${b}mL가 있어요. 누구의 컵에 물이 더 많을까요?`,
                 explanation: `${Math.max(a, b)}mL > ${Math.min(a, b)}mL이므로, ${bigger}의 컵에 물이 더 많습니다.`,
                 answer: bigger,
-                wrongs: [bigger === name1 ? '태희' : name1, '같다', '모른다']
+                wrongs: [bigger === name1 ? '태희' : name1, '두 컵의 물이 같음', '두 컵 모두 아님']
             })
         }
     ],
@@ -65,7 +65,7 @@ const WEIGHT_TEMPLATES = {
                 question: `⚖️ ${itemA}의 무게가 ${a}g, ${itemB}의 무게가 ${b}g이에요. 더 무거운 것은 무엇일까요?`,
                 explanation: `${heavier}g > ${lighter}g이므로, ${a > b ? itemA : itemB}이(가) 더 무겁습니다.`,
                 answer: a > b ? itemA : itemB,
-                wrongs: [a > b ? itemB : itemA, '같다', '모름']
+                wrongs: [a > b ? itemB : itemA, '두 물건의 무게가 같음', '두 물건 모두 아님']
             })
         }
     ],

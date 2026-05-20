@@ -1152,9 +1152,9 @@ function genGeometryProblem(diff) {
         // ===== 넓이 비교 =====
         case 'area_compare': {
             const quizzes = [
-                { q: `📐 ${name1}이(가) 직사각형 2개를 비교해요.\n🅰️ 가로 6cm, 세로 4cm\n🅱️ 가로 5cm, 세로 5cm\n어느 것이 더 넓을까요?`, a: "🅱️", wrong: ["🅰️", "같다", "알 수 없다"], e: `🅰️: 6×4=24cm² / 🅱️: 5×5=25cm² → 🅱️가 더 넓음` },
-                { q: `◻️ 한 변이 4cm인 정사각형과 가로 8cm, 세로 2cm인 직사각형의 넓이를 비교하면?`, a: "같다", wrong: ["정사각형이 넓다", "직사각형이 넓다", "알 수 없다"], e: `정사각형: 4×4=16cm² / 직사각형: 8×2=16cm² → 같음` },
-                { q: `🔺 밑변 6cm, 높이 4cm인 삼각형과 한 변 3cm인 정사각형, 어느 것이 더 넓을까요?`, a: "삼각형", wrong: ["정사각형", "같다", "알 수 없다"], e: `삼각형: 6×4÷2=12cm² / 정사각형: 3×3=9cm² → 삼각형이 넓음` }
+                { q: `📐 ${name1}이(가) 직사각형 2개를 비교해요.\n🅰️ 가로 6cm, 세로 4cm\n🅱️ 가로 5cm, 세로 5cm\n어느 것이 더 넓을까요?`, a: "🅱️", wrong: ["🅰️", "같다", "둘 다 넓지 않다"], e: `🅰️: 6×4=24cm² / 🅱️: 5×5=25cm² → 🅱️가 더 넓음` },
+                { q: `◻️ 한 변이 4cm인 정사각형과 가로 8cm, 세로 2cm인 직사각형의 넓이를 비교하면?`, a: "같다", wrong: ["정사각형이 넓다", "직사각형이 넓다", "둘 다 넓지 않다"], e: `정사각형: 4×4=16cm² / 직사각형: 8×2=16cm² → 같음` },
+                { q: `🔺 밑변 6cm, 높이 4cm인 삼각형과 한 변 3cm인 정사각형, 어느 것이 더 넓을까요?`, a: "삼각형", wrong: ["정사각형", "같다", "둘 다 넓지 않다"], e: `삼각형: 6×4÷2=12cm² / 정사각형: 3×3=9cm² → 삼각형이 넓음` }
             ];
             const q = quizzes[Math.floor(Math.random() * quizzes.length)];
             question = q.q; answer = q.a; explanation = q.e;
@@ -1867,7 +1867,7 @@ function genCreativeProblem(diff) {
             question = `📏 ${name1}, ${name2}, ${name3}이 키 순서대로 줄을 섰어요.\n${name1}이 가장 크고, ${name3}이 가장 작아요. ${name2}은 앞에서 몇 번째?`;
             answer = '2번째';
             explanation = `가장 큰 사람이 맨 앞이면, ${name2}은 가운데인 2번째!`;
-            wrongs.add('1번째'); wrongs.add('3번째'); wrongs.add('모름');
+            wrongs.add('1번째'); wrongs.add('3번째'); wrongs.add('4번째');
             break;
         }
 
@@ -1952,7 +1952,7 @@ function genCreativeProblem(diff) {
             question = `🧠 ${name1}이(가) 말해요: "나는 사과 또는 바나나를 좋아해."\n${name1}이(가) 사과를 싫어한다면, 무엇을 좋아할까요?`;
             answer = '바나나';
             explanation = `"또는" 중 하나가 거짓이면, 다른 하나는 참!`;
-            wrongs.add('사과'); wrongs.add('둘 다'); wrongs.add('모름');
+            wrongs.add('사과'); wrongs.add('둘 다'); wrongs.add('바나나도 사과도 아님');
             break;
         }
 
@@ -1961,7 +1961,7 @@ function genCreativeProblem(diff) {
             question = `🧠 ${name1}, ${name2}이(가) 말해요.\n${name1}: "나는 사탕을 좋아해."\n${name2}: "나도 ${name1}이(가) 좋아하는 것을 좋아해."\n${name2}은 무엇을 좋아할까요?`;
             answer = '사탕';
             explanation = `${name1}이 사탕을 좋아하고, ${name2}은 ${name1}이 좋아하는 것을 좋아하므로 사탕!`;
-            wrongs.add('${name1}'); wrongs.add('초콜릿'); wrongs.add('모름');
+            wrongs.add(name1); wrongs.add('초콜릿'); wrongs.add('사탕도 초콜릿도 아님');
             break;
         }
 
@@ -1970,7 +1970,7 @@ function genCreativeProblem(diff) {
             question = `🧠 세 명이 각각 빨강, 파랑, 노랑 모자를 썼어요.\n${name1}은 빨강이 아니에요. ${name2}은 노랑이 아니에요.\n${name3}은 빨강이에요. ${name1}의 모자 색은?`;
             answer = '노랑';
             explanation = `${name3}=빨강, ${name1}≠빨강, ${name2}≠노랑\n→ ${name1}=노랑, ${name2}=파랑`;
-            wrongs.add('빨강'); wrongs.add('파랑'); wrongs.add('모름');
+            wrongs.add('빨강'); wrongs.add('파랑'); wrongs.add('초록');
             break;
         }
 
@@ -2132,9 +2132,9 @@ function genCreativeProblem(diff) {
         // ===== 1~2학년 영재교육: 비교 논리 =====
         case 'compare_logic': {
             const quizzes = [
-                { q: `🏃 ${name1}이 ${name2}보다 빨라요.\n${name2}가 ${name3}보다 빨라요.\n가장 빠른 사람은 누구일까요?`, a: name1, wrong: [name2, name3, '모름'], e: `${name1} > ${name2} > ${name3}이므로 ${name1}이 가장 빨라요!` },
-                { q: `📏 ${name1}이 ${name2}보다 키가 커요.\n${name3}이 ${name1}보다 키가 커요.\n가장 키가 큰 사람은?`, a: name3, wrong: [name1, name2, '모름'], e: `${name3} > ${name1} > ${name2}이므로 ${name3}이 가장 커요!` },
-                { q: `🎂 ${name1}이 ${name2}보다 나이가 많아요.\n${name2}가 ${name3}보다 나이가 많아요.\n가장 어린 사람은?`, a: name3, wrong: [name1, name2, '모름'], e: `${name1} > ${name2} > ${name3}이므로 ${name3}이 가장 어려요!` }
+                { q: `🏃 ${name1}이 ${name2}보다 빨라요.\n${name2}가 ${name3}보다 빨라요.\n가장 빠른 사람은 누구일까요?`, a: name1, wrong: [name2, name3, '두 사람이 같음'], e: `${name1} > ${name2} > ${name3}이므로 ${name1}이 가장 빨라요!` },
+                { q: `📏 ${name1}이 ${name2}보다 키가 커요.\n${name3}이 ${name1}보다 키가 커요.\n가장 키가 큰 사람은?`, a: name3, wrong: [name1, name2, '두 사람이 같음'], e: `${name3} > ${name1} > ${name2}이므로 ${name3}이 가장 커요!` },
+                { q: `🎂 ${name1}이 ${name2}보다 나이가 많아요.\n${name2}가 ${name3}보다 나이가 많아요.\n가장 어린 사람은?`, a: name3, wrong: [name1, name2, '두 사람이 같음'], e: `${name1} > ${name2} > ${name3}이므로 ${name3}이 가장 어려요!` }
             ];
             const q = quizzes[Math.floor(Math.random() * quizzes.length)];
             question = q.q;
@@ -2302,7 +2302,7 @@ function genCapacityProblem(diff) {
         question = `🧃 ${name1}의 컵에는 물이 ${a}mL, 태희의 컵에는 ${b}mL가 있어요. 누구의 컵에 물이 더 많을까요?`;
         answer = '태희';
         explanation = `${b}mL > ${a}mL이므로, 태희의 컵에 물이 더 많습니다.`;
-        wrongs.add(name1); wrongs.add('같다'); wrongs.add('모른다');
+        wrongs.add(name1); wrongs.add('두 컵의 물이 같음'); wrongs.add('두 컵 모두 아님');
     } else {
         // 들이 덧셈
         const a = Math.floor(Math.random() * 300) + 100;
@@ -2354,7 +2354,7 @@ function genWeightProblem(diff) {
         question = `⚖️ ${pair[0]}의 무게는 ${a}g, ${pair[1]}의 무게는 ${b}g이에요. 어느 것이 더 무거울까요?`;
         answer = pair[1];
         explanation = `${b}g > ${a}g이므로, ${pair[1]}이 더 무겁습니다.`;
-        wrongs.add(pair[0]); wrongs.add('같다'); wrongs.add('모른다');
+        wrongs.add(pair[0]); wrongs.add('두 물건의 무게가 같음'); wrongs.add('두 물건 모두 아님');
     } else {
         // 무게 덧셈
         const a = Math.floor(Math.random() * 300) + 100;
@@ -2400,7 +2400,7 @@ function genVolumeProblem(diff) {
         question = `📦 ${name1}의 상자에는 공 ${a}개가 들어가고, 태희의 상자에는 ${b}개가 들어가요. 누구의 상자가 더 클까요?`;
         answer = '태희의 상자';
         explanation = `${b}개 > ${a}개가 들어가므로, 태희의 상자가 더 큽니다.`;
-        wrongs.add(`${name1}의 상자`); wrongs.add('같다'); wrongs.add('모른다');
+        wrongs.add(`${name1}의 상자`); wrongs.add('두 상자가 같음'); wrongs.add('두 상자 모두 아님');
     }
 
     return {

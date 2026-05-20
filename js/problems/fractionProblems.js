@@ -34,8 +34,8 @@ const FRACTION_TEMPLATES = {
             template: (frac1, frac2, bigger, name1, name2) => ({
                 question: `🍕 ${name1}은 피자의 ${frac1}을, ${name2}은 ${frac2}을 먹었어요.\n누가 더 많이 먹었을까요?`,
                 explanation: `분모가 같으면 분자가 클수록 더 큽니다! ${bigger}이 더 커요.`,
-                answer: `${frac1}이 더 큰 경우` ? name1 : name2,
-                wrongs: ['같다', '모름']
+                answer: bigger,
+                wrongs: [bigger === name1 ? name2 : name1, '두 사람이 같음', '둘 다 아님']
             })
         }
     ],

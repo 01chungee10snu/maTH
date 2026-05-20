@@ -149,12 +149,24 @@ function buildFallbackDistractors(answerString, existingOptions, requiredCount) 
         });
     }
 
-    const genericCandidates = ['같다', '모른다', '첫 번째', '두 번째', '세 번째', '네 번째'];
-    genericCandidates.forEach(candidate => addUniqueOption(options, candidate, answerString));
+    if (/^\d+번째$/.test(answerString)) {
+        ['1번째', '2번째', '3번째', '4번째', '5번째'].forEach(candidate => addUniqueOption(options, candidate, answerString));
+    } else if (/^\d+등$/.test(answerString)) {
+        ['1등', '2등', '3등', '4등', '5등'].forEach(candidate => addUniqueOption(options, candidate, answerString));
+    } else {
+        const labelCandidates = [
+            '태희', '민지', '하준', '서아', '지우', '도윤', '수빈', '연우',
+            '하츄핑', '바로핑', '아자핑', '차차핑', '라라핑', '해핑', '무루핑', '오로라핑',
+            '사과', '바나나', '수박', '배', '상자 A', '상자 B', '컵 A', '컵 B',
+            '첫 번째 대상', '두 번째 대상', '세 번째 대상', '네 번째 대상'
+        ];
+        labelCandidates.forEach(candidate => addUniqueOption(options, candidate, answerString));
+    }
 
     let guard = 1;
     while (options.length < requiredCount && guard < 50) {
-        addUniqueOption(options, `${answerString}보다 ${guard}만큼 다름`, answerString);
+        const fallbackLabels = ['가 대상', '나 대상', '다 대상', '라 대상', '마 대상'];
+        addUniqueOption(options, fallbackLabels[(guard - 1) % fallbackLabels.length], answerString);
         guard += 1;
     }
 
