@@ -21,6 +21,25 @@ function createContext() {
   return context;
 }
 
+function createStorageContext() {
+  const context = createContext();
+  const store = {};
+  const localStorage = {
+    getItem(key) {
+      return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null;
+    },
+    setItem(key, value) {
+      store[key] = String(value);
+    },
+    removeItem(key) {
+      delete store[key];
+    }
+  };
+  context.localStorage = localStorage;
+  context.window.localStorage = localStorage;
+  return context;
+}
+
 function createConfigContext() {
   const context = createContext();
   context.window.devicePixelRatio = 1;
@@ -272,6 +291,57 @@ function testRelationshipCoachBankHasIrtMetadata() {
   assert.deepStrictEqual(problem.skill_tags, bank[0].skill_tags);
 }
 
+function testIrtAttemptLogCreatesSupabaseReadyPendingRecords() {
+  const context = createStorageContext();
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLog.js');
+
+  assert.strictEqual(typeof context.window.IrtLog.createAttemptRecord, 'function');
+
+  const problem = {
+    problem_id: 'REL_MATH_TEST',
+    problem_types: ['UNIT_COMPARE', 'INVERSE_RELATION'],
+    skill_tags: ['UNIT_COMPARE', 'INVERSE_RELATION'],
+    answer: 'C'
+  };
+  const stateBefore = context.window.IrtEngine.createInitialState('relationship_math');
+  const result = { correct: false, hintLevel: 4, stepSuccessRate: 0.4 };
+  const stateAfter = context.window.IrtEngine.updateState(stateBefore, problem, result);
+
+  const record = context.window.IrtLog.createAttemptRecord({
+    learnerId: 'local-child',
+    problem,
+    result,
+    stateBefore,
+    stateAfter,
+    selectedAnswer: 'A',
+    errorType: 'DIRECTION_CONFUSION',
+    elapsedSeconds: 42
+  });
+
+  assert.strictEqual(record.item_id, 'REL_MATH_TEST');
+  assert.strictEqual(record.topic, 'relationship_math');
+  assert.strictEqual(record.selected_answer, 'A');
+  assert.strictEqual(record.correct, false);
+  assert.strictEqual(record.hint_level, 4);
+  assert.strictEqual(record.step_success_rate, 0.4);
+  assert.strictEqual(record.response_score, context.window.IrtEngine.responseScore(result));
+  assert.strictEqual(record.theta_before, stateBefore.theta);
+  assert.strictEqual(record.theta_after, stateAfter.theta);
+  assert.strictEqual(record.skill_tags.join('|'), 'UNIT_COMPARE|INVERSE_RELATION');
+  assert.strictEqual(record.sync_status, 'pending');
+  assert.strictEqual(record.error_type, 'DIRECTION_CONFUSION');
+
+  context.window.IrtLog.appendAttempt(record);
+  assert.strictEqual(context.window.IrtLog.loadAttempts().length, 1);
+  assert.strictEqual(context.window.IrtLog.getPendingAttempts()[0].local_id, record.local_id);
+
+  context.window.IrtLog.markAttemptsSynced([record.local_id]);
+  const synced = context.window.IrtLog.loadAttempts()[0];
+  assert.strictEqual(synced.sync_status, 'synced');
+  assert.ok(synced.synced_at);
+}
+
 testCurriculumTopicSections();
 testProblemOptionsStayUniqueAndComplete();
 testRelationshipCoachProblemContract();
@@ -280,5 +350,6 @@ testSupabaseClientUsesPublicConfig();
 testIrtEngineUpdatesLearnerStateAndSelectsItems();
 testIrtSelectionAvoidsImmediateItemRepeatWhenAlternativesExist();
 testRelationshipCoachBankHasIrtMetadata();
+testIrtAttemptLogCreatesSupabaseReadyPendingRecords();
 
 console.log('app contract tests passed');

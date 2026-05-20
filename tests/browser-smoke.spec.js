@@ -52,6 +52,7 @@ test('map and relationship coach smoke test', async ({ page }) => {
   expect(highSchoolMap.disabledTopics).toBeGreaterThan(0);
 
   const relationCoach = await page.evaluate(() => {
+    localStorage.removeItem('taehee-irt-attempt-log');
     startRelationCoachMode();
     ensureProblem();
     const thetaBefore = STATE.irt?.theta ?? 0;
@@ -71,11 +72,14 @@ test('map and relationship coach smoke test', async ({ page }) => {
     return {
       ok: true,
       type: STATE.problem.type,
+      problemId: STATE.problem.problem_id,
       answerOptions: STATE.problem.options.length,
       optionHitboxes: STATE.hitboxes.filter(box => box.id.startsWith('opt_')).length,
       thetaBefore,
       thetaAfter: STATE.irt.theta,
-      irtAttempts: STATE.irt.attemptCount
+      irtAttempts: STATE.irt.attemptCount,
+      pendingLogs: IrtLog.getPendingAttempts().length,
+      latestLog: IrtLog.getPendingAttempts().slice(-1)[0]
     };
   });
 
@@ -85,6 +89,10 @@ test('map and relationship coach smoke test', async ({ page }) => {
   expect(relationCoach.optionHitboxes).toBe(4);
   expect(relationCoach.irtAttempts).toBeGreaterThan(0);
   expect(relationCoach.thetaAfter).toBeGreaterThan(relationCoach.thetaBefore);
+  expect(relationCoach.pendingLogs).toBe(1);
+  expect(relationCoach.latestLog.item_id).toBe(relationCoach.problemId);
+  expect(relationCoach.latestLog.sync_status).toBe('pending');
+  expect(relationCoach.latestLog.correct).toBe(true);
 
   const visibleError = await page.locator('#err').evaluate(el => ({
     text: el.textContent,

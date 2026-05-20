@@ -58,3 +58,26 @@
 - `learner_skill_states`: 학습자별 theta 및 skill mastery
 
 아동 데이터는 보호자 동의와 삭제 정책이 확정되기 전까지 local-first로 유지한다.
+
+## 로컬 우선 풀이 로그 큐
+
+앱은 IRT 업데이트가 일어날 때마다 `taehee-irt-attempt-log` localStorage 큐에 풀이 기록을 남긴다. 이 기록은 Supabase `learning_attempts`에 그대로 매핑될 수 있도록 다음 필드를 포함한다.
+
+| 필드 | 의미 |
+| --- | --- |
+| `local_id` | 기기 내 임시 로그 ID |
+| `learner_id` | 로그인 전 기본값 `local-child` |
+| `item_id` | `REL_MATH_###` 문제 ID |
+| `topic` | IRT 주제, 초기값 `relationship_math` |
+| `skill_tags` | 문항이 훈련하는 관계 추론 skill |
+| `selected_answer` | 아이가 고른 답 |
+| `correct` | 최종 정답 여부 |
+| `hint_level` | 정답 확인 전 사용한 힌트 단계 |
+| `step_success_rate` | 기준량, 방향, 시각화 등 사고 단계 성공률 |
+| `response_score` | 힌트와 사고 단계를 반영한 IRT 응답 점수 |
+| `theta_before`, `theta_after` | 풀이 전후 학습자 능력 추정치 |
+| `standard_error_after` | 업데이트 후 추정 오차 |
+| `error_type` | 오답일 때 추정한 오개념 코드 |
+| `sync_status` | `pending` 또는 `synced` |
+
+Supabase 동기화는 익명 쓰기 정책을 열지 않는다. 운영 적용 시에는 보호자 동의, 사용자 인증, RLS 정책, 삭제 요청 처리 방식을 먼저 확정한 뒤 `pending` 로그만 서버에 업로드하고 성공한 항목을 `synced`로 표시한다.

@@ -373,11 +373,31 @@ function getRelationCoachStepSuccessRate() {
 function updateIrtAfterAnswer(correct) {
     if (!window.IrtEngine || !STATE.problem?.irt) return;
     ensureIrtState();
-    STATE.irt = window.IrtEngine.updateState(STATE.irt, STATE.problem, {
+    const stateBefore = { ...STATE.irt };
+    const result = {
         correct: !!correct,
         hintLevel: STATE.relationCoach?.hintLevel || 0,
         stepSuccessRate: getRelationCoachStepSuccessRate()
-    });
+    };
+    STATE.irt = window.IrtEngine.updateState(STATE.irt, STATE.problem, result);
+
+    if (window.IrtLog) {
+        const elapsedSeconds = Math.max(0, Math.round((Date.now() - (STATE.relationCoach?.startedAt || Date.now())) / 1000));
+        const errorType = correct
+            ? null
+            : (STATE.relationCoach?.errors?.slice(-1)[0] || window.RelationCoach?.inferError?.(STATE.problem, null) || null);
+        const record = window.IrtLog.createAttemptRecord({
+            learnerId: 'local-child',
+            problem: STATE.problem,
+            result,
+            stateBefore,
+            stateAfter: STATE.irt,
+            selectedAnswer: STATE.selected,
+            errorType,
+            elapsedSeconds
+        });
+        window.IrtLog.appendAttempt(record);
+    }
 }
 
 function genNumberProblem(diff) {
