@@ -40,12 +40,40 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
     drawMap();
     return {
       gradeButtons: STATE.hitboxes.filter(box => box.id.startsWith('grade_')).length,
+      hasAdaptiveStartButton: STATE.hitboxes.some(box => box.id === 'btn_adaptive_start'),
       hasSeparateRelationCoachButton: STATE.hitboxes.some(box => box.id === 'btn_relation_coach')
     };
   });
 
   expect(topLevelMap.gradeButtons).toBe(3);
+  expect(topLevelMap.hasAdaptiveStartButton).toBe(true);
   expect(topLevelMap.hasSeparateRelationCoachButton).toBe(false);
+
+  const adaptiveStart = await page.evaluate(() => {
+    localStorage.removeItem('taehee-irt-attempt-log');
+    STATE.mode = 'map';
+    STATE.mapSelection = { grade: null, subGrade: null, domain: null };
+    STATE.currentCurriculum = 'division';
+    STATE.problem = null;
+    STATE.selected = null;
+    STATE.relationCoach = null;
+    startAdaptiveLearning();
+    return {
+      mode: STATE.mode,
+      learningEntry: STATE.learningEntry,
+      topic: STATE.currentCurriculum,
+      type: STATE.problem?.type,
+      hasIrtState: Boolean(STATE.irt),
+      mapGrade: STATE.mapSelection.grade
+    };
+  });
+
+  expect(adaptiveStart.mode).toBe('quiz');
+  expect(adaptiveStart.learningEntry).toBe('adaptive');
+  expect(adaptiveStart.topic).toBe('자연수의 곱셈과 나눗셈');
+  expect(adaptiveStart.type).toBe('relationshipCoach');
+  expect(adaptiveStart.hasIrtState).toBe(true);
+  expect(adaptiveStart.mapGrade).toBe(null);
 
   const highSchoolMap = await page.evaluate(() => {
     STATE.mode = 'map';

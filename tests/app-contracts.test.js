@@ -197,6 +197,54 @@ function testRelationThinkingTopicsAreElementaryIntegrated() {
   assert.strictEqual(filtered.map(item => item.problem_id).join('|'), 'fraction');
 }
 
+function testAdaptiveLearningFlowStartsWithoutManualSchoolSelection() {
+  const context = createContext();
+  runScript(context, 'js/relationCurriculum.js');
+  runScript(context, 'js/adaptiveLearningFlow.js');
+
+  assert.strictEqual(typeof context.window.AdaptiveLearningFlow.chooseStartTopic, 'function');
+
+  const initialTopic = context.window.AdaptiveLearningFlow.chooseStartTopic({
+    currentTopic: 'division',
+    irtState: null
+  });
+  assert.strictEqual(initialTopic, '자연수의 곱셈과 나눗셈');
+
+  const fractionTopic = context.window.AdaptiveLearningFlow.chooseStartTopic({
+    currentTopic: '자연수의 곱셈과 나눗셈',
+    irtState: {
+      skillStates: {
+        EQUAL_SHARING: { attempts: 4, mastery: 0.85 },
+        FRACTION_RELATION: { attempts: 3, mastery: 0.32 }
+      }
+    }
+  });
+  assert.strictEqual(fractionTopic, '분수와 소수의 이해');
+
+  const patch = context.window.AdaptiveLearningFlow.createStartPatch({
+    currentCurriculum: 'division',
+    mapSelection: { grade: 'elementary_school', subGrade: '3-4학년', domain: '수와 연산' },
+    problem: { question: 'old' },
+    selected: 'old-answer',
+    relationCoach: { stepIndex: 2 },
+    symbolAnswers: { square: 1, circle: 2, triangle: 3 },
+    irt: null
+  });
+
+  assert.strictEqual(patch.mode, 'quiz');
+  assert.strictEqual(patch.currentCurriculum, '자연수의 곱셈과 나눗셈');
+  assert.strictEqual(patch.mapSelection.grade, null);
+  assert.strictEqual(patch.mapSelection.subGrade, null);
+  assert.strictEqual(patch.mapSelection.domain, null);
+  assert.strictEqual(patch.problem, null);
+  assert.strictEqual(patch.selected, null);
+  assert.strictEqual(patch.relationCoach, null);
+  assert.strictEqual(patch.symbolAnswers.square, null);
+  assert.strictEqual(patch.symbolAnswers.circle, null);
+  assert.strictEqual(patch.symbolAnswers.triangle, null);
+  assert.strictEqual(patch.learningEntry, 'adaptive');
+}
+
 function testElementaryWordProblemSeedBankContract() {
   const bankPath = path.join(root, 'data/elementary_word_problem_seed_bank.json');
   assert.ok(fs.existsSync(bankPath), 'elementary word problem seed bank must exist');
@@ -605,6 +653,7 @@ async function runTests() {
   testProblemOptionsStayUniqueAndComplete();
   testRelationshipCoachProblemContract();
   testRelationThinkingTopicsAreElementaryIntegrated();
+  testAdaptiveLearningFlowStartsWithoutManualSchoolSelection();
   testElementaryWordProblemSeedBankContract();
   testSupabasePublicConfigContract();
   testSupabaseClientUsesPublicConfig();

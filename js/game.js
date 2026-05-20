@@ -267,7 +267,8 @@ function saveState() {
         mapSelection: STATE.mapSelection,
         collectionTab: STATE.collectionTab,
         relationCoach: STATE.relationCoach,
-        irt: STATE.irt
+        irt: STATE.irt,
+        learningEntry: STATE.learningEntry
     };
     localStorage.setItem(LS_KEY, JSON.stringify(s));
 }
@@ -289,6 +290,7 @@ function loadState() {
         STATE.collectionTab = s.collectionTab || '전체';
         STATE.relationCoach = s.relationCoach || null;
         STATE.irt = s.irt || null;
+        STATE.learningEntry = s.learningEntry || null;
 
         // 홈 모드인 경우 맵 모드로 강제 전환 (메인 페이지 변경)
         if (STATE.mode === 'home') {
@@ -2362,6 +2364,28 @@ function drawMap() {
     const contentH = H - contentY - 20;
 
     if (!STATE.mapSelection.grade) {
+        const adaptiveBtnW = Math.min(430, W - 60);
+        const adaptiveBtnH = 96;
+        const adaptiveBtnX = (W - adaptiveBtnW) / 2;
+        const adaptiveBtnY = contentY + 18;
+
+        CTX.save();
+        roundRect(CTX, adaptiveBtnX, adaptiveBtnY, adaptiveBtnW, adaptiveBtnH, 24);
+        CTX.fillStyle = '#0f766e';
+        CTX.shadowColor = 'rgba(15, 118, 110, 0.22)';
+        CTX.shadowBlur = 14;
+        CTX.fill();
+        CTX.restore();
+
+        CTX.fillStyle = '#ffffff';
+        CTX.font = 'bold 34px Jua, sans-serif';
+        CTX.textAlign = 'center';
+        CTX.textBaseline = 'middle';
+        CTX.fillText('오늘의 문제 시작', adaptiveBtnX + adaptiveBtnW / 2, adaptiveBtnY + 36);
+        CTX.font = '20px Jua, sans-serif';
+        CTX.fillText('현재 수준 맞춤', adaptiveBtnX + adaptiveBtnW / 2, adaptiveBtnY + 70);
+        STATE.hitboxes.push({ id: 'btn_adaptive_start', x: adaptiveBtnX, y: adaptiveBtnY, w: adaptiveBtnW, h: adaptiveBtnH });
+
         // 1단계: 학교급 선택 (초등학교, 중학교, 고등학교)
         const levels = [
             { id: 'elementary_school', label: '초등학교', color: '#fca5a5' },
@@ -2370,10 +2394,15 @@ function drawMap() {
         ];
 
         const btnW = Math.min(340, W - 60);
-        const btnH = 90;
-        const gap = 35;
+        const btnH = 72;
+        const gap = 20;
         const totalH = levels.length * btnH + (levels.length - 1) * gap;
-        let startY = contentY + (contentH - totalH) / 2;
+        let startY = adaptiveBtnY + adaptiveBtnH + 76;
+
+        CTX.fillStyle = '#374151';
+        CTX.font = 'bold 24px Jua, sans-serif';
+        CTX.textAlign = 'center';
+        CTX.fillText('학습 지도', W / 2, startY - 28);
 
         levels.forEach(lvl => {
             const bx = (W - btnW) / 2;
@@ -2388,7 +2417,7 @@ function drawMap() {
             CTX.restore();
 
             CTX.fillStyle = '#ffffff';
-            CTX.font = 'bold 38px Jua, sans-serif';
+            CTX.font = 'bold 30px Jua, sans-serif';
             CTX.textAlign = 'center';
             CTX.textBaseline = 'middle';
             CTX.fillText(lvl.label, bx + btnW / 2, by + btnH / 2);
@@ -4179,6 +4208,29 @@ function ensureProblem() {
     ensureRelationCoachState();
 }
 
+function startAdaptiveLearning() {
+    ensureIrtState();
+    const patch = window.AdaptiveLearningFlow?.createStartPatch
+        ? window.AdaptiveLearningFlow.createStartPatch(STATE)
+        : {
+            mode: 'quiz',
+            currentCurriculum: '자연수의 곱셈과 나눗셈',
+            mapSelection: { grade: null, subGrade: null, domain: null },
+            problem: null,
+            selected: null,
+            isCorrect: null,
+            confirmed: null,
+            relationCoach: null,
+            symbolAnswers: { square: null, circle: null, triangle: null },
+            learningEntry: 'adaptive'
+        };
+
+    Object.assign(STATE, patch);
+    ensureIrtState();
+    ensureProblem();
+    saveState();
+}
+
 function checkAnswer() {
     if (STATE.selected == null) return;
     
@@ -4471,7 +4523,8 @@ function resetAll() {
         collectionTab: '전체',
         symbolAnswers: { square: null, circle: null, triangle: null },
         relationCoach: null,
-        irt: window.IrtEngine ? window.IrtEngine.createInitialState('relationship_math') : null
+        irt: window.IrtEngine ? window.IrtEngine.createInitialState('relationship_math') : null,
+        learningEntry: null
     };
     saveState();
 }
@@ -4502,7 +4555,10 @@ function onPointer(evt) {
                     STATE.mapSelection = { grade: null, subGrade: null, domain: null };
                     break;
                 case 'btn_start_game':
-                    STATE.mode = 'map';
+                    startAdaptiveLearning();
+                    break;
+                case 'btn_adaptive_start':
+                    startAdaptiveLearning();
                     break;
                 case 'btn_collection':
                     STATE.mode = 'collection';

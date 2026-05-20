@@ -59,7 +59,9 @@ let STATE = {
   // 문장제 관계 사고 진행 상태
   relationCoach: null,
   // IRT 기반 적응형 학습 상태
-  irt: null
+  irt: null,
+  // 학습 진입 방식: adaptive | map
+  learningEntry: null
 };
 
 let TINIPINGS = [];
