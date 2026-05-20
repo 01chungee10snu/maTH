@@ -22,12 +22,14 @@ test('map and relationship coach smoke test', async ({ page }) => {
   const supabaseConfig = await page.evaluate(() => ({
     configured: window.MathAppSupabase?.isConfigured(),
     url: window.MathAppSupabase?.getConfig().url,
-    keyPrefix: window.MathAppSupabase?.getConfig().publishableKey.slice(0, 15)
+    keyPrefix: window.MathAppSupabase?.getConfig().publishableKey.slice(0, 15),
+    hasIrtSync: typeof window.IrtSync?.syncPendingAttempts === 'function'
   }));
 
   expect(supabaseConfig.configured).toBe(true);
   expect(supabaseConfig.url).toBe('https://gegwjdcxcarmopiaknwj.supabase.co');
   expect(supabaseConfig.keyPrefix).toBe('sb_publishable_');
+  expect(supabaseConfig.hasIrtSync).toBe(true);
 
   const highSchoolMap = await page.evaluate(() => {
     STATE.mode = 'map';

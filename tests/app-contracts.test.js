@@ -342,14 +342,75 @@ function testIrtAttemptLogCreatesSupabaseReadyPendingRecords() {
   assert.ok(synced.synced_at);
 }
 
-testCurriculumTopicSections();
-testProblemOptionsStayUniqueAndComplete();
-testRelationshipCoachProblemContract();
-testSupabasePublicConfigContract();
-testSupabaseClientUsesPublicConfig();
-testIrtEngineUpdatesLearnerStateAndSelectsItems();
-testIrtSelectionAvoidsImmediateItemRepeatWhenAlternativesExist();
-testRelationshipCoachBankHasIrtMetadata();
-testIrtAttemptLogCreatesSupabaseReadyPendingRecords();
+async function testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners() {
+  const context = createStorageContext();
+  const inserted = [];
+  context.window.MathAppSupabase = {
+    getClient() {
+      return {
+        auth: {
+          getUser: async () => ({ data: { user: { id: '00000000-0000-4000-8000-000000000001' } }, error: null })
+        },
+        from(table) {
+          return {
+            insert: async rows => {
+              inserted.push({ table, rows });
+              return { data: rows, error: null };
+            }
+          };
+        }
+      };
+    }
+  };
 
-console.log('app contract tests passed');
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLog.js');
+  runScript(context, 'js/irtSync.js');
+
+  const record = context.window.IrtLog.createAttemptRecord({
+    problem: {
+      problem_id: 'REL_MATH_SYNC',
+      problem_types: ['UNIT_COMPARE'],
+      skill_tags: ['UNIT_COMPARE', 'DIRECTION_CONFUSION']
+    },
+    result: { correct: true, hintLevel: 1, stepSuccessRate: 1 },
+    stateBefore: { topic: 'relationship_math', theta: 0, standardError: 1 },
+    stateAfter: { topic: 'relationship_math', theta: 0.2, standardError: 0.9 },
+    selectedAnswer: 'B',
+    elapsedSeconds: 28
+  });
+  context.window.IrtLog.appendAttempt(record);
+
+  const result = await context.window.IrtSync.syncPendingAttempts();
+
+  assert.strictEqual(result.ok, true);
+  assert.strictEqual(result.synced, 1);
+  assert.strictEqual(inserted.length, 1);
+  assert.strictEqual(inserted[0].table, 'learning_attempts');
+  assert.strictEqual(inserted[0].rows[0].learner_id, '00000000-0000-4000-8000-000000000001');
+  assert.strictEqual(inserted[0].rows[0].local_attempt_id, record.local_id);
+  assert.strictEqual(inserted[0].rows[0].item_id, 'REL_MATH_SYNC');
+  assert.strictEqual(inserted[0].rows[0].skill_tags.join('|'), 'UNIT_COMPARE|DIRECTION_CONFUSION');
+  assert.strictEqual(inserted[0].rows[0].standard_error_after, 0.9);
+  assert.strictEqual(context.window.IrtLog.getPendingAttempts().length, 0);
+}
+
+async function runTests() {
+  testCurriculumTopicSections();
+  testProblemOptionsStayUniqueAndComplete();
+  testRelationshipCoachProblemContract();
+  testSupabasePublicConfigContract();
+  testSupabaseClientUsesPublicConfig();
+  testIrtEngineUpdatesLearnerStateAndSelectsItems();
+  testIrtSelectionAvoidsImmediateItemRepeatWhenAlternativesExist();
+  testRelationshipCoachBankHasIrtMetadata();
+  testIrtAttemptLogCreatesSupabaseReadyPendingRecords();
+  await testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners();
+}
+
+runTests()
+  .then(() => console.log('app contract tests passed'))
+  .catch(error => {
+    console.error(error);
+    process.exitCode = 1;
+  });

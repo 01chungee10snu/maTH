@@ -19,8 +19,11 @@ create table if not exists public.math_items (
 create table if not exists public.learning_attempts (
   id uuid primary key default gen_random_uuid(),
   learner_id uuid not null,
+  local_attempt_id text,
   item_id text not null references public.math_items(item_id),
   topic text not null,
+  problem_types text[] not null default '{}',
+  skill_tags text[] not null default '{}',
   selected_answer text,
   correct boolean not null,
   hint_level integer not null default 0,
@@ -28,10 +31,15 @@ create table if not exists public.learning_attempts (
   response_score numeric not null,
   theta_before numeric,
   theta_after numeric,
+  standard_error_after numeric,
   error_type text,
   elapsed_seconds integer,
   created_at timestamptz not null default now()
 );
+
+create unique index if not exists learning_attempts_learner_local_attempt_idx
+on public.learning_attempts(learner_id, local_attempt_id)
+where local_attempt_id is not null;
 
 create table if not exists public.learner_skill_states (
   learner_id uuid not null,
