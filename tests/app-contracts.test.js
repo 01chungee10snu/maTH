@@ -197,6 +197,38 @@ function testRelationThinkingTopicsAreElementaryIntegrated() {
   assert.strictEqual(filtered.map(item => item.problem_id).join('|'), 'fraction');
 }
 
+function testElementaryWordProblemSeedBankContract() {
+  const bankPath = path.join(root, 'data/elementary_word_problem_seed_bank.json');
+  assert.ok(fs.existsSync(bankPath), 'elementary word problem seed bank must exist');
+
+  const bank = JSON.parse(fs.readFileSync(bankPath, 'utf8'));
+  assert.strictEqual(bank.metadata.scope, 'elementary_school_only');
+  assert.strictEqual(bank.metadata.item_count, bank.items.length);
+  assert.ok(bank.items.length >= 70);
+
+  const validGradeBands = new Set(['G1_G2', 'G3_G4', 'G5_G6']);
+  const ids = new Set();
+  const counts = new Map();
+
+  for (const item of bank.items) {
+    assert.ok(item.id);
+    assert.ok(!ids.has(item.id), `duplicate seed id: ${item.id}`);
+    ids.add(item.id);
+    assert.ok(validGradeBands.has(item.grade_band), `${item.id} must stay elementary-only`);
+    assert.ok(item.topic);
+    assert.ok(item.type);
+    assert.ok(Array.isArray(item.skill_tags) && item.skill_tags.length > 0);
+    assert.ok(item.problem.length >= 20);
+    assert.ok(item.answer);
+    assert.ok(item.solution);
+    counts.set(item.grade_band, (counts.get(item.grade_band) || 0) + 1);
+  }
+
+  for (const gradeBand of validGradeBands) {
+    assert.ok((counts.get(gradeBand) || 0) >= 15, `${gradeBand} needs at least 15 seed items`);
+  }
+}
+
 function testIrtEngineUpdatesLearnerStateAndSelectsItems() {
   const context = createContext();
   runScript(context, 'js/irtEngine.js');
@@ -421,6 +453,7 @@ async function runTests() {
   testProblemOptionsStayUniqueAndComplete();
   testRelationshipCoachProblemContract();
   testRelationThinkingTopicsAreElementaryIntegrated();
+  testElementaryWordProblemSeedBankContract();
   testSupabasePublicConfigContract();
   testSupabaseClientUsesPublicConfig();
   testIrtEngineUpdatesLearnerStateAndSelectsItems();
