@@ -463,9 +463,71 @@ async function testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners() {
   assert.strictEqual(context.window.IrtLog.getPendingAttempts().length, 0);
 }
 
+function testMeasurementQualityRatesReliabilityAndValidityConservatively() {
+  const context = createContext();
+  runScript(context, 'js/measurementQuality.js');
+
+  const skills = [
+    'DIRECT_COMPARE',
+    'EQUAL_SHARING',
+    'QUOTATIVE_DIVISION',
+    'UNIT_COMPARE',
+    'MULTIPLICATIVE_COMPARE',
+    'FRACTION_RELATION',
+    'INVERSE_RELATION',
+    'PROPORTION',
+    'RANKING',
+    'COMPOSITE_RELATION',
+    'DIRECTION_CONFUSION'
+  ];
+  const itemBank = skills.flatMap((skill, index) => [0, 1, 2].map(offset => ({
+    problem_id: `ITEM_${index}_${offset}`,
+    grade_band: index < 4 ? 'G1_G2' : index < 8 ? 'G3_G4' : 'G5_G6',
+    problem_types: [skill],
+    skill_tags: [skill],
+    irt: { model: 'rasch', b: -1 + index * 0.2 + offset * 0.05 }
+  })));
+  const attempts = Array.from({ length: 36 }, (_, index) => {
+    const skill = skills[index % 9];
+    return {
+      item_id: `ITEM_${index % 9}_${index % 3}`,
+      skill_tags: [skill],
+      correct: index % 5 !== 0,
+      hint_level: index % 4,
+      response_score: index % 5 === 0 ? 0.25 : 0.84,
+      step_success_rate: index % 5 === 0 ? 0.4 : 1
+    };
+  });
+
+  const quality = context.window.MeasurementQuality.evaluate({
+    attempts,
+    irtState: { theta: 0.42, standardError: 0.34, attemptCount: 36 },
+    itemBank
+  });
+
+  assert.ok(quality.reliability.score >= 70);
+  assert.strictEqual(quality.reliability.level, '안정적');
+  assert.ok(quality.validity.score >= 75);
+  assert.strictEqual(quality.validity.level, '운영 타당도 축적');
+  assert.ok(quality.interpretation.canUseFor.some(text => text.includes('개인화')));
+  assert.ok(quality.interpretation.cannotUseFor.some(text => text.includes('표준화')));
+
+  const earlyQuality = context.window.MeasurementQuality.evaluate({
+    attempts: attempts.slice(0, 2),
+    irtState: { theta: 0.1, standardError: 0.9, attemptCount: 2 },
+    itemBank
+  });
+
+  assert.strictEqual(earlyQuality.reliability.level, '관찰 단계');
+  assert.ok(earlyQuality.reliability.warnings.length > 0);
+  assert.ok(earlyQuality.validity.gaps.length > 0);
+  assert.ok(earlyQuality.interpretation.cannotUseFor.some(text => text.includes('능력 비교')));
+}
+
 function testMathAbilityReportSummarizesIrtEvidenceForParents() {
   const context = createStorageContext();
   runScript(context, 'js/irtLog.js');
+  runScript(context, 'js/measurementQuality.js');
   runScript(context, 'js/mathAbilityReport.js');
 
   context.window.IrtLog.saveAttempts([
@@ -534,6 +596,8 @@ function testMathAbilityReportSummarizesIrtEvidenceForParents() {
   assert.strictEqual(report.weakSkills[0].skill, 'DIRECTION_CONFUSION');
   assert.ok(report.parentNarrative.includes('추정'));
   assert.ok(report.recommendations.length >= 2);
+  assert.strictEqual(report.quality.reliability.level, '관찰 단계');
+  assert.ok(report.quality.validity.gaps.length > 0);
 }
 
 async function runTests() {
@@ -549,6 +613,7 @@ async function runTests() {
   testRelationshipCoachBankHasIrtMetadata();
   testIrtAttemptLogCreatesSupabaseReadyPendingRecords();
   await testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners();
+  testMeasurementQualityRatesReliabilityAndValidityConservatively();
   testMathAbilityReportSummarizesIrtEvidenceForParents();
 }
 

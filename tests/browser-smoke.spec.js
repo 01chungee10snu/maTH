@@ -131,6 +131,8 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
       hasParentReportTab: STATE.hitboxes.some(box => box.id === 'tab_부모 리포트'),
       totalAttempts: report.summary.totalAttempts,
       confidenceLabel: report.measurement.confidenceLabel,
+      reliabilityLevel: report.quality.reliability.level,
+      validityGaps: report.quality.validity.gaps.length,
       recommendations: report.recommendations.length
     };
   });
@@ -138,6 +140,8 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
   expect(parentReport.hasParentReportTab).toBe(true);
   expect(parentReport.totalAttempts).toBe(1);
   expect(parentReport.confidenceLabel).toBe('데이터 부족');
+  expect(parentReport.reliabilityLevel).toBe('관찰 단계');
+  expect(parentReport.validityGaps).toBeGreaterThan(0);
   expect(parentReport.recommendations).toBeGreaterThan(0);
 
   const visibleError = await page.locator('#err').evaluate(el => ({

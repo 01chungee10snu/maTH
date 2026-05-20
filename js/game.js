@@ -4031,6 +4031,7 @@ function drawParentReportPanel(W, H, startY) {
 
     const m = report.measurement;
     const s = report.summary;
+    const q = report.quality;
     const topY = cardY + Math.round(28 * SCALE);
     const tileGap = Math.round(12 * SCALE);
     const tileW = (cardW - Math.round(44 * SCALE) - tileGap * 2) / 3;
@@ -4053,6 +4054,7 @@ function drawParentReportPanel(W, H, startY) {
     [
         `풀이 기록 ${s.totalAttempts}문항 · 정답률 ${s.correctRate}% · 독립 풀이율 ${s.independentSolveRate}%`,
         `평균 힌트 단계 ${s.averageHintLevel} · 평균 IRT 응답 점수 ${s.averageResponseScore}`,
+        q ? `측정 품질: 신뢰도 ${q.reliability.level}(${q.reliability.score}) · 타당도 ${q.validity.level}(${q.validity.score})` : '측정 품질: 평가 기준을 불러오지 못했습니다.',
         report.parentNarrative
     ].forEach(line => {
         getLines(CTX, line, cardW - Math.round(48 * SCALE)).forEach(wrapped => {
@@ -4062,11 +4064,17 @@ function drawParentReportPanel(W, H, startY) {
     });
 
     y += Math.round(12 * SCALE);
-    drawReportListSection(cardX + Math.round(24 * SCALE), y, cardW - Math.round(48 * SCALE), '보완할 사고 단계', report.weakSkills.map(item => (
+    y = drawReportListSection(cardX + Math.round(24 * SCALE), y, cardW - Math.round(48 * SCALE), '측정 품질 확인', [
+        ...(q?.reliability.warnings || []),
+        ...(q?.validity.gaps || [])
+    ].slice(0, 4));
+
+    y += Math.round(14 * SCALE);
+    y = drawReportListSection(cardX + Math.round(24 * SCALE), y, cardW - Math.round(48 * SCALE), '보완할 사고 단계', report.weakSkills.map(item => (
         `${item.label}: 응답점수 ${item.averageResponseScore}, 힌트 ${item.averageHintLevel}`
     )));
 
-    y += Math.round(112 * SCALE);
+    y += Math.round(14 * SCALE);
     drawReportListSection(cardX + Math.round(24 * SCALE), y, cardW - Math.round(48 * SCALE), '다음 추천 학습', report.recommendations);
 }
 
@@ -4108,6 +4116,7 @@ function drawReportListSection(x, y, w, title, items) {
             y += Math.round(23 * SCALE);
         });
     });
+    return y;
 }
 
 function drawComplete() {

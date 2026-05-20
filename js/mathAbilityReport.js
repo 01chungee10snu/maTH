@@ -180,7 +180,12 @@ function buildRecommendations(weakSkills, summary) {
     return Array.from(new Set(recommendations)).slice(0, 4);
 }
 
-function buildParentNarrative(measurement, summary, weakSkills) {
+function buildQualityRecommendations(quality) {
+    if (!quality?.minimumNextActions) return [];
+    return quality.minimumNextActions.map(action => `측정 품질: ${action}`);
+}
+
+function buildParentNarrative(measurement, summary, weakSkills, quality) {
     if (!summary.totalAttempts) {
         return '아직 IRT 풀이 기록이 없어 수리능력 추정을 시작하지 못했습니다. 먼저 관계 사고가 필요한 초등 문장제를 몇 문항 풀어보세요.';
     }
@@ -188,13 +193,17 @@ function buildParentNarrative(measurement, summary, weakSkills) {
     const weakText = weakSkills.length
         ? `보완이 필요한 영역은 ${weakSkills.map(item => item.label).join(', ')}입니다.`
         : '뚜렷하게 반복되는 약점은 아직 관찰되지 않았습니다.';
+    const qualityText = quality
+        ? `신뢰도는 ${quality.reliability.level}, 타당도는 ${quality.validity.level}입니다.`
+        : '';
 
-    return `현재 수리능력은 ${measurement.band} 단계로 추정됩니다. 추정치는 ${measurement.theta}이고 표준오차는 ${measurement.standardError}이므로 ${measurement.confidenceLabel} 수준으로 해석해야 합니다. ${weakText}`;
+    return `현재 수리능력은 ${measurement.band} 단계로 추정됩니다. 추정치는 ${measurement.theta}이고 표준오차는 ${measurement.standardError}이므로 ${measurement.confidenceLabel} 수준으로 해석해야 합니다. ${qualityText} ${weakText}`;
 }
 
 function buildParentReport(options = {}) {
     const attempts = getAttempts(options.attempts);
     const irtState = options.irtState || {};
+    const itemBank = options.itemBank || window.RelationshipCoachProblems?.bank || [];
     const summary = summarizeAttempts(attempts);
     const latestRecord = attempts[attempts.length - 1] || {};
     const theta = roundAbility(
@@ -219,6 +228,13 @@ function buildParentReport(options = {}) {
         band: getAbilityBand(theta),
         confidenceLabel: getConfidenceLabel(summary.totalAttempts || irtState.attemptCount || 0, standardError)
     };
+    const quality = window.MeasurementQuality?.evaluate
+        ? window.MeasurementQuality.evaluate({ attempts, irtState, itemBank })
+        : null;
+    const recommendations = [
+        ...buildRecommendations(weakSkills, summary),
+        ...buildQualityRecommendations(quality)
+    ];
 
     return {
         generatedAt: new Date().toISOString(),
@@ -227,8 +243,9 @@ function buildParentReport(options = {}) {
         skillEvidence,
         weakSkills,
         strengths,
-        recommendations: buildRecommendations(weakSkills, summary),
-        parentNarrative: buildParentNarrative(measurement, summary, weakSkills)
+        quality,
+        recommendations: Array.from(new Set(recommendations)).slice(0, 5),
+        parentNarrative: buildParentNarrative(measurement, summary, weakSkills, quality)
     };
 }
 
