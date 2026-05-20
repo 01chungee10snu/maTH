@@ -62,6 +62,47 @@ function createConfigContext() {
   return context;
 }
 
+const COMPLEX_WORD_PROBLEM_TAGS = new Set([
+  'BASE_UNIT_IDENTIFICATION',
+  'COMPARE_RELATION',
+  'COMPOSITE_RELATION',
+  'FRACTION_RELATION',
+  'INVERSE_RELATION',
+  'MULTI_STEP_RELATION',
+  'MULTIPLICATIVE_COMPARE',
+  'PROPORTION',
+  'RANKING',
+  'TRANSFER',
+  'UNIT_COMPARE'
+]);
+
+function getProblemText(item) {
+  return String(item.problem || item.question || '');
+}
+
+function isComplexWordProblemItem(item) {
+  const tags = new Set([
+    ...(item.skill_tags || []),
+    ...(item.reasoning_tags || []),
+    ...(item.problem_types || [])
+  ]);
+  const sentenceCount = (getProblemText(item).match(/[.?!?]/g) || []).length;
+  return item.requires_multi_step_reasoning === true
+    && Number(item.reasoning_depth || 0) >= 2
+    && getProblemText(item).length >= 40
+    && sentenceCount >= 2
+    && Array.from(COMPLEX_WORD_PROBLEM_TAGS).some(tag => tags.has(tag));
+}
+
+function assertComplexRatio(label, items, minimumRatio) {
+  const complex = items.filter(isComplexWordProblemItem).length;
+  const ratio = items.length ? complex / items.length : 0;
+  assert.ok(
+    ratio >= minimumRatio,
+    `${label} complex word problem ratio ${(ratio * 100).toFixed(1)}% is below ${(minimumRatio * 100).toFixed(0)}%`
+  );
+}
+
 function testSupabasePublicConfigContract() {
   const context = createConfigContext();
 
@@ -299,13 +340,17 @@ function testElementaryWordProblemSeedBankContract() {
   const bank = JSON.parse(fs.readFileSync(bankPath, 'utf8'));
   assert.strictEqual(bank.metadata.scope, 'elementary_school_only');
   assert.strictEqual(bank.metadata.item_count, bank.items.length);
-  assert.ok(bank.items.length >= 1000);
-  assert.ok(bank.metadata.family_count >= 50);
+  assert.ok(bank.items.length >= 6000);
+  assert.ok(bank.metadata.family_count >= 100);
   assert.strictEqual(bank.metadata.difficulty_scale, '1-12');
+  assert.strictEqual(bank.metadata.schema_version, 3);
+  assert.ok(bank.metadata.target_complex_word_problem_ratio >= 0.85);
 
   const validGradeBands = new Set(['G1_G2', 'G3_G4', 'G5_G6']);
   const ids = new Set();
   const counts = new Map();
+  const gradeItems = new Map();
+  const difficultyItems = new Map();
   const familySet = new Set();
   const difficultySet = new Set();
 
@@ -322,9 +367,23 @@ function testElementaryWordProblemSeedBankContract() {
     assert.ok(item.difficulty >= 1 && item.difficulty <= 12);
     assert.ok(item.level_label);
     assert.ok(item.problem.length >= 20);
+    assert.ok(Number.isInteger(item.reasoning_depth));
+    assert.ok(item.reasoning_depth >= 1 && item.reasoning_depth <= 4);
+    assert.ok(Array.isArray(item.reasoning_tags));
+    assert.strictEqual(typeof item.requires_multi_step_reasoning, 'boolean');
+    assert.ok(item.representation_hint);
     assert.ok(item.answer);
     assert.ok(item.solution);
+    if (item.grade_band === 'G1_G2') {
+      assert.ok(
+        !/DIVISION|FRACTION|UNIT_RATE/.test(item.type_family),
+        `${item.id} assigns premature advanced relation family to G1_G2`
+      );
+      assert.ok(!/\d+\/\d+/.test(item.problem), `${item.id} should not use fraction notation in G1_G2`);
+    }
     counts.set(item.grade_band, (counts.get(item.grade_band) || 0) + 1);
+    gradeItems.set(item.grade_band, [...(gradeItems.get(item.grade_band) || []), item]);
+    difficultyItems.set(item.difficulty, [...(difficultyItems.get(item.difficulty) || []), item]);
     familySet.add(item.type_family);
     difficultySet.add(item.difficulty);
   }
@@ -337,10 +396,22 @@ function testElementaryWordProblemSeedBankContract() {
   for (let difficulty = 1; difficulty <= 12; difficulty += 1) {
     assert.ok(difficultySet.has(difficulty), `difficulty ${difficulty} needs seed items`);
   }
+
+  assertComplexRatio('overall bank', bank.items, 0.88);
+  for (const gradeBand of validGradeBands) {
+    assertComplexRatio(`${gradeBand} bank`, gradeItems.get(gradeBand), 0.8);
+  }
+  for (let difficulty = 1; difficulty <= 12; difficulty += 1) {
+    assertComplexRatio(`difficulty ${difficulty}`, difficultyItems.get(difficulty), 0.8);
+  }
+  [8, 9, 10, 11, 12].forEach(difficulty => {
+    assertComplexRatio(`upper difficulty ${difficulty}`, difficultyItems.get(difficulty), 0.85);
+  });
 }
 
 function testExpandedSeedBankConvertsIntoIrtRuntimeItems() {
   const context = createContext();
+  runScript(context, 'js/relationCurriculum.js');
   runScript(context, 'js/problems/problemBase.js');
   runScript(context, 'js/problems/relationshipCoachProblems.js');
   runScript(context, 'js/expandedWordProblemBank.js');
@@ -348,17 +419,30 @@ function testExpandedSeedBankConvertsIntoIrtRuntimeItems() {
   const rawBank = JSON.parse(fs.readFileSync(path.join(root, 'data/elementary_word_problem_seed_bank.json'), 'utf8'));
   const converted = context.window.ExpandedWordProblemBank.convert(rawBank);
 
-  assert.ok(converted.length >= 1000);
+  assert.ok(converted.length >= 6000);
   assert.ok(converted.every(item => item.problem_id && item.problem_id.startsWith('EWP_')));
   assert.ok(converted.every(item => item.source === 'elementary_seed_bank'));
   assert.ok(converted.every(item => item.irt?.model === 'rasch' && typeof item.irt.b === 'number'));
   assert.ok(converted.some(item => item.irt.b <= -1.8));
   assert.ok(converted.some(item => item.irt.b >= 1.8));
   assert.ok(converted.every(item => Array.isArray(item.entities) && item.entities.length >= 4));
+  assert.ok(converted.every(item => Number.isInteger(item.reasoning_depth) && item.reasoning_depth >= 1));
+  assertComplexRatio('converted runtime bank', converted, 0.88);
+  [
+    '자연수의 곱셈과 나눗셈',
+    '분수의 곱셈과 나눗셈',
+    '들이와 무게',
+    '비와 비율',
+    '평균'
+  ].forEach(topic => {
+    const topicItems = context.window.RelationCurriculum.filterItemsForTopic(converted, topic);
+    assert.ok(topicItems.length >= 400, `${topic} needs a broad adaptive candidate pool`);
+    assertComplexRatio(`${topic} adaptive pool`, topicItems, 0.9);
+  });
 
   const merged = context.window.ExpandedWordProblemBank.merge(rawBank);
-  assert.ok(merged.added >= 1000);
-  assert.ok(context.window.RelationshipCoachProblems.bank.length >= 1050);
+  assert.ok(merged.added >= 6000);
+  assert.ok(context.window.RelationshipCoachProblems.bank.length >= 6050);
 
   const seedProblem = context.window.RelationshipCoachProblems.generateForItem(converted[0]);
   assert.strictEqual(seedProblem.type, 'relationshipCoach');
@@ -674,6 +758,43 @@ function testIrtLearningPolicyPromotesDiagnosisPracticeAndMastery() {
   assert.strictEqual(stableSelection.item.problem_id, 'mastery_check');
 }
 
+function testIrtLearningPolicyPrefersComplexReasoningWhenFitIsComparable() {
+  const context = createContext();
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLearningPolicy.js');
+
+  const state = {
+    ...context.window.IrtEngine.createInitialState('relationship_math'),
+    theta: 0,
+    standardError: 0.9,
+    attemptCount: 2,
+    lastItemIds: [],
+    skillStates: {}
+  };
+  const selection = context.window.IrtLearningPolicy.selectNextItem([
+    {
+      problem_id: 'simple_one_step',
+      skill_tags: ['UNIT_COMPARE'],
+      problem_types: ['UNIT_COMPARE'],
+      reasoning_depth: 1,
+      requires_multi_step_reasoning: false,
+      irt: { model: 'rasch', b: 0 }
+    },
+    {
+      problem_id: 'complex_word_problem',
+      skill_tags: ['UNIT_COMPARE', 'COMPOSITE_RELATION'],
+      problem_types: ['UNIT_COMPARE', 'COMPOSITE_RELATION', 'MULTI_STEP_RELATION'],
+      reasoning_tags: ['MULTI_STEP_RELATION', 'COMPOSITE_RELATION'],
+      reasoning_depth: 3,
+      requires_multi_step_reasoning: true,
+      irt: { model: 'rasch', b: 0 }
+    }
+  ], state);
+
+  assert.strictEqual(selection.item.problem_id, 'complex_word_problem');
+  assert.ok(context.window.IrtLearningPolicy.getReasoningDepth(selection.item) >= 3);
+}
+
 function testIrtDiagnosticUsesBroadSkillsInsteadOfRepeatingGranularTypes() {
   const context = createContext();
   runScript(context, 'js/irtEngine.js');
@@ -790,11 +911,13 @@ function testExpandedIrtPolicyKeepsLongRunVarietyAndPhaseProgression() {
   const bank = context.window.RelationshipCoachProblems.bank;
   let state = context.window.IrtEngine.createInitialState('relationship_math');
   const selectedIds = [];
+  const selectedItems = [];
   const phases = new Set();
 
   for (let index = 0; index < 40; index += 1) {
     const selection = context.window.IrtLearningPolicy.selectNextItem(bank, state);
     selectedIds.push(selection.item.problem_id);
+    selectedItems.push(selection.item);
     phases.add(selection.phase);
     state = context.window.IrtEngine.updateState(state, selection.item, {
       correct: index % 5 !== 0,
@@ -803,8 +926,9 @@ function testExpandedIrtPolicyKeepsLongRunVarietyAndPhaseProgression() {
     });
   }
 
-  assert.ok(bank.length >= 1100);
+  assert.ok(bank.length >= 6050);
   assert.ok(new Set(selectedIds).size >= 36, `large-bank policy repeated too much: ${selectedIds.join(',')}`);
+  assertComplexRatio('selected adaptive run', selectedItems, 0.8);
   assert.ok(phases.has('diagnostic'));
   assert.ok(phases.has('targeted_practice') || phases.has('adaptive_practice'));
 }
@@ -1115,6 +1239,7 @@ async function runTests() {
   testIrtSelectionAvoidsImmediateItemRepeatWhenAlternativesExist();
   testIrtSelectionMaintainsItemDiversityAcrossAdaptiveRun();
   testIrtLearningPolicyPromotesDiagnosisPracticeAndMastery();
+  testIrtLearningPolicyPrefersComplexReasoningWhenFitIsComparable();
   testIrtDiagnosticUsesBroadSkillsInsteadOfRepeatingGranularTypes();
   testIrtPolicyDiversifiesFamiliesWithinTargetSkill();
   testExpandedIrtPolicyKeepsLongRunVarietyAndPhaseProgression();

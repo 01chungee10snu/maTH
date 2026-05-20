@@ -43,8 +43,8 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
     placeholderTinipingImages: TINIPINGS.filter(item => item.imageStatus === 'placeholder').length
   }));
 
-  expect(runtimeBank.itemCount).toBeGreaterThanOrEqual(1050);
-  expect(runtimeBank.expandedCount).toBeGreaterThanOrEqual(1000);
+  expect(runtimeBank.itemCount).toBeGreaterThanOrEqual(6050);
+  expect(runtimeBank.expandedCount).toBeGreaterThanOrEqual(6000);
   expect(runtimeBank.hasExpandedLoader).toBe(true);
   expect(runtimeBank.loadedTinipingImages).toBeGreaterThanOrEqual(140);
   expect(runtimeBank.placeholderTinipingImages).toBeLessThanOrEqual(8);

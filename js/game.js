@@ -407,6 +407,9 @@ function applySavedLearnerState(saved, profile) {
     if (!STATE.activeLearnerId) {
         STATE.mode = 'learnerSelect';
     }
+    if (['quiz', 'explain', 'catch'].includes(STATE.mode) && !STATE.problem) {
+        STATE.mode = 'map';
+    }
 }
 
 function saveState() {

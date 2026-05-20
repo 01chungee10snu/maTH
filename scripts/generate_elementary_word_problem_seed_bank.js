@@ -59,6 +59,16 @@ function pick(list, i) {
   return list[i % list.length];
 }
 
+function hasFinalConsonant(word) {
+  const char = String(word).trim().slice(-1);
+  const code = char.charCodeAt(0);
+  return code >= 0xac00 && code <= 0xd7a3 && ((code - 0xac00) % 28) !== 0;
+}
+
+function withParticle(word, whenFinal, whenOpen) {
+  return `${word}${hasFinalConsonant(word) ? whenFinal : whenOpen}`;
+}
+
 function gcd(a, b) {
   while (b) [a, b] = [b, a % b];
   return Math.abs(a);
@@ -82,7 +92,59 @@ function level(difficulty) {
   return LEVEL_LABELS[difficulty];
 }
 
-function makeItem(gradeBand, topic, family, variant, difficulty, skillTags, problem, answer, solution) {
+const COMPLEX_REASONING_TAGS = new Set([
+  'BASE_UNIT_IDENTIFICATION',
+  'COMPARE_RELATION',
+  'COMPOSITE_RELATION',
+  'DIRECTION_REASONING',
+  'FRACTION_RELATION',
+  'INVERSE_RELATION',
+  'MULTI_STEP_RELATION',
+  'MULTIPLICATIVE_COMPARE',
+  'PROPORTION',
+  'RANKING',
+  'TRANSFER',
+  'UNIT_COMPARE'
+]);
+
+function inferReasoningTags(family, skillTags, problem) {
+  const tags = new Set();
+  const text = `${family} ${skillTags.join(' ')} ${problem}`.toUpperCase();
+
+  if (/COMPARE|차이|더 .*많|더 .*크|더 .*긴|가장|순서|RANK/.test(text)) tags.add('COMPARE_RELATION');
+  if (/UNKNOWN|처음|늘어난|필요|몇 .*받아야|몇 .*있었/.test(text)) tags.add('BASE_UNIT_IDENTIFICATION');
+  if (/INVERSE|적은 횟수|더 적은/.test(text)) tags.add('INVERSE_RELATION');
+  if (/FRACTION|분수|1\/|\/\d/.test(text)) tags.add('FRACTION_RELATION');
+  if (/RATIO|비례|비율|PERCENT|%|RATE|SCALE/.test(text)) tags.add('PROPORTION');
+  if (/UNIT|1권|1개|한 명|한 컵|1분|1cm/.test(text)) tags.add('UNIT_COMPARE');
+  if (/COMPOSITE|MIXED|TWO_STEP|MULTI|REMAINDER|TRANSFER|SCALE|PROPORTIONAL|AVERAGE_AND_PERCENT|FRACTION_RATIO|UNKNOWN_SCORE|UNKNOWN_HEIGHT/.test(text)) {
+    tags.add('MULTI_STEP_RELATION');
+  }
+  if (skillTags.length >= 3 || /COMPOSITE|MIXED|TWO_STEP|MULTI/.test(text)) tags.add('COMPOSITE_RELATION');
+
+  return Array.from(tags);
+}
+
+function inferReasoningDepth(difficulty, skillTags, reasoningTags) {
+  if (reasoningTags.includes('COMPOSITE_RELATION') || reasoningTags.includes('MULTI_STEP_RELATION')) {
+    return Math.min(4, difficulty >= 9 ? 4 : difficulty >= 5 ? 3 : 2);
+  }
+  if (reasoningTags.length >= 2 || skillTags.length >= 3) return Math.min(3, difficulty >= 6 ? 3 : 2);
+  return 1;
+}
+
+function inferRepresentationHint(reasoningTags, skillTags) {
+  const all = [...reasoningTags, ...skillTags].join(' ');
+  if (/FRACTION|PERCENT|RATIO|PROPORTION/.test(all)) return 'bar_model';
+  if (/DATA|RANK|COMPARE/.test(all)) return 'table';
+  if (/TIME|DISTANCE|LENGTH|SCALE/.test(all)) return 'number_line';
+  if (/EQUAL_SHARING|QUOTATIVE|GROUP/.test(all)) return 'unit_blocks';
+  return 'bar_model';
+}
+
+function makeItem(gradeBand, topic, family, variant, difficulty, skillTags, problem, answer, solution, options = {}) {
+  const reasoningTags = options.reasoningTags || inferReasoningTags(family, skillTags, problem);
+  const reasoningDepth = options.reasoningDepth || inferReasoningDepth(difficulty, skillTags, reasoningTags);
   return {
     id: `EWP_${gradeBand.replace(/_/g, '')}_${family}_${String(variant).padStart(3, '0')}`,
     grade_band: gradeBand,
@@ -93,13 +155,17 @@ function makeItem(gradeBand, topic, family, variant, difficulty, skillTags, prob
     skill_tags: skillTags,
     difficulty,
     level_label: level(difficulty),
+    reasoning_depth: reasoningDepth,
+    reasoning_tags: reasoningTags,
+    requires_multi_step_reasoning: Boolean(options.requiresMultiStep ?? reasoningDepth >= 2),
+    representation_hint: options.representationHint || inferRepresentationHint(reasoningTags, skillTags),
     problem,
     answer,
     solution
   };
 }
 
-const families = [
+const baseFamilies = [
   {
     gradeBand: 'G1_G2',
     topic: '두 자리 수 범위의 덧셈과 뺄셈',
@@ -1071,11 +1137,366 @@ const families = [
   }
 ];
 
+function gradeBandForDifficulty(difficulty) {
+  if (difficulty <= 2) return 'G1_G2';
+  if (difficulty <= 5) return 'G3_G4';
+  return 'G5_G6';
+}
+
+function topicForComplexPattern(difficulty, pattern) {
+  if (difficulty <= 2) {
+    if (pattern === 'data') return '표와 그래프';
+    if (pattern === 'measurement') return '길이, 시각, 시간';
+    if (pattern === 'groups') return '곱셈의 의미';
+    return '두 자리 수 범위의 덧셈과 뺄셈';
+  }
+  if (difficulty <= 5) {
+    if (pattern === 'fraction') return '분수와 소수의 이해';
+    if (pattern === 'measurement') return '들이와 무게';
+    if (pattern === 'data') return '막대그래프';
+    return '자연수의 곱셈과 나눗셈';
+  }
+  if (pattern === 'ratio') return difficulty >= 9 ? '비례식과 비례배분' : '비와 비율';
+  if (pattern === 'fraction') return '분수의 곱셈과 나눗셈';
+  if (pattern === 'data') return difficulty >= 9 ? '평균' : '띠그래프와 원그래프';
+  if (pattern === 'measurement') return difficulty >= 9 ? '직육면체의 부피와 겉넓이' : '시간과 길이';
+  return difficulty >= 8 ? '비와 비율' : '자연수의 혼합 계산';
+}
+
+function buildComplexCompare(difficulty, i) {
+  const nameA = pick(names, i);
+  const nameB = pick(names, i + 1);
+  const obj = pick(objects, i + difficulty);
+  const baseA = 8 + difficulty * 2 + i;
+  const addA = 2 + (i % 5) + Math.floor(difficulty / 4);
+  const baseB = baseA + 3 + (i % 4);
+  const useB = 1 + (i % 3);
+  const finalA = baseA + addA;
+  const finalB = baseB - useB;
+  const diff = Math.abs(finalA - finalB);
+  const winner = finalA >= finalB ? nameA : nameB;
+  return [
+    `${nameA}는 ${obj} ${baseA}개에서 ${addA}개를 더 모았고, ${nameB}는 ${baseB}개에서 ${useB}개를 사용했어요. 두 사람이 가진 ${obj}를 비교하면 누가 몇 개 더 많을까요?`,
+    `${winner}, ${diff}개`,
+    `${nameA}는 ${baseA}+${addA}=${finalA}개, ${nameB}는 ${baseB}-${useB}=${finalB}개입니다. 차이는 ${diff}개입니다.`
+  ];
+}
+
+function buildComplexDivision(difficulty, i) {
+  const obj = pick(objects, i + 2);
+  const container = pick(containers, i + 3);
+  const people = 3 + (i % 5);
+  const extra = 1 + (i % 3);
+  const each = Math.max(2, difficulty + 1 + (i % 4));
+  const total = people * each + extra;
+  return [
+    `${obj} ${total}개를 ${people}명에게 똑같이 나누어 주고 남는 것은 ${container}에 넣으려고 해요. 한 명이 몇 개씩 받고 ${container}에는 몇 개가 남을까요?`,
+    `${each}개씩, ${extra}개`,
+    `${total}÷${people}=${each} 나머지 ${extra}이므로 한 명은 ${each}개씩 받고 ${extra}개가 남습니다.`
+  ];
+}
+
+function buildComplexUnitRate(difficulty, i) {
+  const count = 2 + (i % 5) + Math.floor(difficulty / 4);
+  const unit = 300 + difficulty * 90 + i * 20;
+  const discount = 100 + (i % 5) * 20;
+  const target = count + 2 + (i % 4);
+  const total = count * unit;
+  const targetTotal = target * unit - discount;
+  return [
+    `공책 ${count}권의 값이 ${total}원이에요. 같은 가격의 공책 ${target}권을 사고 할인 ${discount}원을 받으면 얼마를 내야 할까요?`,
+    `${targetTotal}원`,
+    `1권 값은 ${total}÷${count}=${unit}원입니다. ${target}권은 ${target * unit}원이고 할인 후 ${targetTotal}원입니다.`
+  ];
+}
+
+function buildComplexFractionRatio(difficulty, i) {
+  const den = 4 + (i % 5) + Math.floor(difficulty / 6);
+  const unit = 3 + (i % 5);
+  const total = den * unit;
+  const num = 2 + (i % Math.max(2, den - 2));
+  const used = unit * num;
+  const left = total - used;
+  return [
+    `색종이 ${total}장의 ${num}/${den}를 작품에 사용하고, 남은 것 중 ${unit}장을 친구에게 주었어요. 마지막에 남은 색종이는 몇 장일까요?`,
+    `${left - unit}장`,
+    `${total}장의 ${num}/${den}는 ${used}장입니다. 남은 ${left}장에서 ${unit}장을 주면 ${left - unit}장입니다.`
+  ];
+}
+
+function buildComplexDataRanking(difficulty, i) {
+  const a = 7 + difficulty + i;
+  const b = a + 3 + (i % 4);
+  const c = a - 2 + (i % 3);
+  const d = b + 1 + (i % 5);
+  const values = [
+    { label: '월요일', value: a },
+    { label: '화요일', value: b },
+    { label: '수요일', value: c },
+    { label: '목요일', value: d }
+  ].sort((x, y) => y.value - x.value);
+  const second = values[1];
+  const diff = values[0].value - second.value;
+  return [
+    `독서 기록이 월요일 ${a}쪽, 화요일 ${b}쪽, 수요일 ${c}쪽, 목요일 ${d}쪽이에요. 두 번째로 많이 읽은 날은 언제이고, 가장 많이 읽은 날과 몇 쪽 차이일까요?`,
+    `${second.label}, ${diff}쪽`,
+    `읽은 쪽수를 큰 순서로 놓으면 ${values.map(item => `${item.label} ${item.value}쪽`).join(', ')}입니다. 두 번째는 ${second.label}이고 차이는 ${diff}쪽입니다.`
+  ];
+}
+
+function buildComplexMeasurement(difficulty, i) {
+  const start = 8 + (i % 5);
+  const move = 25 + difficulty * 3 + i;
+  const rest = 5 + (i % 4) * 5;
+  const secondMove = 12 + difficulty + (i % 6);
+  const total = move + secondMove;
+  const elapsed = rest + 20 + (i % 5) * 5;
+  const endTotal = start * 60 + rest + elapsed;
+  const endHour = Math.floor(endTotal / 60);
+  const endMin = endTotal % 60;
+  return [
+    `${pick(names, i)}가 ${start}시 ${rest}분에 출발해 ${move}m를 걷고 잠깐 쉬었다가 ${secondMove}m를 더 걸었어요. 모두 몇 m를 걸었고, 출발 후 ${elapsed}분이 지났다면 몇 시 몇 분일까요?`,
+    `${total}m, ${endHour}시 ${endMin}분`,
+    `걸은 거리는 ${move}+${secondMove}=${total}m입니다. ${start}시 ${rest}분에서 ${elapsed}분 뒤는 ${endHour}시 ${endMin}분입니다.`
+  ];
+}
+
+function buildEarlyChangeCompare(difficulty, i) {
+  const nameA = pick(names, i);
+  const nameB = pick(names, i + 1);
+  const obj = pick(objects, i + 2);
+  const startA = 8 + difficulty + (i % 18);
+  const gainA = 2 + (i % 5);
+  const startB = startA + 3 + (i % 4);
+  const useB = 1 + (i % 3);
+  const finalA = startA + gainA;
+  const finalB = startB - useB;
+  const diff = Math.abs(finalA - finalB);
+  const winner = finalA >= finalB ? nameA : nameB;
+  return [
+    `${nameA}는 ${obj} ${startA}개에서 ${gainA}개를 더 모았고, ${nameB}는 ${startB}개에서 ${useB}개를 사용했어요. 두 사람이 가진 ${withParticle(obj, '을', '를')} 비교하면 누가 몇 개 더 많을까요?`,
+    `${winner}, ${diff}개`,
+    `${nameA}는 ${startA}+${gainA}=${finalA}개, ${nameB}는 ${startB}-${useB}=${finalB}개입니다. 차이는 ${diff}개입니다.`
+  ];
+}
+
+function buildEarlyPartWholeCompare(difficulty, i) {
+  const obj = pick(objects, i + 4);
+  const a1 = 3 + (i % 7);
+  const a2 = 4 + ((i + difficulty) % 6);
+  const b1 = 2 + ((i + 2) % 7);
+  const b2 = 5 + ((i + 3) % 6);
+  const totalA = a1 + a2;
+  const totalB = b1 + b2;
+  const diff = Math.abs(totalA - totalB);
+  const winner = totalA >= totalB ? '첫 번째 상자' : '두 번째 상자';
+  return [
+    `첫 번째 상자에는 ${pick(colors, i)} ${obj} ${a1}개와 ${pick(colors, i + 1)} ${obj} ${a2}개가 있고, 두 번째 상자에는 ${pick(colors, i + 2)} ${obj} ${b1}개와 ${pick(colors, i + 3)} ${obj} ${b2}개가 있어요. 어느 상자에 ${withParticle(obj, '이', '가')} 몇 개 더 많을까요?`,
+    `${winner}, ${diff}개`,
+    `첫 번째 상자는 ${a1}+${a2}=${totalA}개, 두 번째 상자는 ${b1}+${b2}=${totalB}개입니다. 차이는 ${diff}개입니다.`
+  ];
+}
+
+function buildEarlyUnknownChangeCompare(difficulty, i) {
+  const obj = pick(objects, i + 6);
+  const start = 9 + difficulty + (i % 15);
+  const total = start + 4 + (i % 6);
+  const friend = 7 + ((i + 2) % 12);
+  const change = total - start;
+  const diff = Math.abs(change - friend);
+  const larger = change >= friend ? '더 받은 수' : '친구가 가진 수';
+  return [
+    `${pick(names, i)}가 ${obj} ${start}개를 가지고 있다가 몇 개를 더 받아 ${total}개가 되었어요. 친구는 ${obj} ${friend}개를 가지고 있어요. 더 받은 ${obj} 수와 친구가 가진 ${obj} 수 중 어느 쪽이 몇 개 더 많을까요?`,
+    `${larger}, ${diff}개`,
+    `더 받은 수는 ${total}-${start}=${change}개입니다. ${change}개와 ${friend}개를 비교하면 차이는 ${diff}개입니다.`
+  ];
+}
+
+function buildEarlyDataTotalCompare(difficulty, i) {
+  const a = 2 + (i % 6);
+  const b = 3 + ((i + difficulty) % 6);
+  const c = 2 + ((i + 1) % 5);
+  const d = 4 + ((i + 2) % 5);
+  const first = a + b;
+  const second = c + d;
+  const diff = Math.abs(first - second);
+  const winner = first >= second ? '월요일과 화요일' : '수요일과 목요일';
+  return [
+    `독서 기록에서 월요일은 ${a}권, 화요일은 ${b}권, 수요일은 ${c}권, 목요일은 ${d}권을 읽었어요. 월요일과 화요일을 합한 수와 수요일과 목요일을 합한 수 중 어느 쪽이 몇 권 더 많을까요?`,
+    `${winner}, ${diff}권`,
+    `월요일과 화요일은 ${a}+${b}=${first}권, 수요일과 목요일은 ${c}+${d}=${second}권입니다. 차이는 ${diff}권입니다.`
+  ];
+}
+
+function buildEarlyMeasurementCompare(difficulty, i) {
+  const first = 12 + difficulty + (i % 15);
+  const second = 5 + (i % 9);
+  const ribbon = 14 + ((i + 3) % 14);
+  const total = first + second;
+  const diff = Math.abs(total - ribbon);
+  const larger = total >= ribbon ? '이어 붙인 길이' : '리본 길이';
+  return [
+    `막대 ${first}cm와 ${second}cm를 이어 붙였어요. 리본은 ${ribbon}cm입니다. 이어 붙인 막대의 길이와 리본의 길이 중 어느 쪽이 몇 cm 더 길까요?`,
+    `${larger}, ${diff}cm`,
+    `이어 붙인 막대는 ${first}+${second}=${total}cm입니다. ${total}cm와 ${ribbon}cm의 차이는 ${diff}cm입니다.`
+  ];
+}
+
+function buildEarlyEqualGroupsLeftover(difficulty, i) {
+  const obj = pick(objects, i + 8);
+  const groups = 2 + (i % 4);
+  const size = 2 + ((i + difficulty) % 5);
+  const used = 1 + (i % 4);
+  const total = groups * size;
+  const left = total - used;
+  return [
+    `${pick(containers, i)} ${groups}개에 ${withParticle(obj, '이', '가')} ${size}개씩 들어 있어요. 그중 ${used}개를 사용하면 ${withParticle(obj, '은', '는')} 몇 개 남을까요?`,
+    `${left}개`,
+    `${size}개씩 ${groups}묶음은 ${total}개입니다. ${used}개를 사용하면 ${total}-${used}=${left}개가 남습니다.`
+  ];
+}
+
+const earlyComplexPatternBuilders = [
+  {
+    code: 'EARLY_CHANGE_COMPARE',
+    pattern: 'compare',
+    skillTags: ['ADDITION', 'SUBTRACTION', 'COMPARE_RELATION', 'COMPOSITE_RELATION'],
+    reasoningTags: ['MULTI_STEP_RELATION', 'COMPARE_RELATION', 'COMPOSITE_RELATION'],
+    representationHint: 'bar_model',
+    build: buildEarlyChangeCompare
+  },
+  {
+    code: 'EARLY_PART_WHOLE_COMPARE',
+    pattern: 'compare',
+    skillTags: ['ADDITION', 'PART_WHOLE', 'COMPARE_RELATION', 'COMPOSITE_RELATION'],
+    reasoningTags: ['MULTI_STEP_RELATION', 'COMPARE_RELATION', 'COMPOSITE_RELATION'],
+    representationHint: 'bar_model',
+    build: buildEarlyPartWholeCompare
+  },
+  {
+    code: 'EARLY_UNKNOWN_CHANGE_COMPARE',
+    pattern: 'compare',
+    skillTags: ['SUBTRACTION', 'UNKNOWN_CHANGE', 'COMPARE_RELATION', 'BASE_UNIT_IDENTIFICATION'],
+    reasoningTags: ['BASE_UNIT_IDENTIFICATION', 'COMPARE_RELATION', 'MULTI_STEP_RELATION'],
+    representationHint: 'bar_model',
+    build: buildEarlyUnknownChangeCompare
+  },
+  {
+    code: 'EARLY_DATA_TOTAL_COMPARE',
+    pattern: 'data',
+    skillTags: ['DATA_REASONING', 'ADDITION', 'COMPARE_RELATION', 'COMPOSITE_RELATION'],
+    reasoningTags: ['RANKING', 'COMPARE_RELATION', 'MULTI_STEP_RELATION'],
+    representationHint: 'table',
+    build: buildEarlyDataTotalCompare
+  },
+  {
+    code: 'EARLY_MEASUREMENT_COMPARE',
+    pattern: 'measurement',
+    skillTags: ['MEASUREMENT', 'ADDITION', 'COMPARE_RELATION', 'COMPOSITE_RELATION'],
+    reasoningTags: ['UNIT_COMPARE', 'COMPARE_RELATION', 'MULTI_STEP_RELATION'],
+    representationHint: 'number_line',
+    build: buildEarlyMeasurementCompare
+  },
+  {
+    code: 'EARLY_EQUAL_GROUPS_LEFTOVER',
+    pattern: 'groups',
+    skillTags: ['MULTIPLICATION_MEANING', 'EQUAL_GROUPS', 'COMPOSITE_RELATION'],
+    reasoningTags: ['UNIT_COMPARE', 'MULTI_STEP_RELATION', 'COMPOSITE_RELATION'],
+    representationHint: 'unit_blocks',
+    build: buildEarlyEqualGroupsLeftover
+  }
+];
+
+const standardComplexPatternBuilders = [
+  {
+    code: 'COMPARE_ADJUST',
+    pattern: 'compare',
+    skillTags: ['ADDITION', 'SUBTRACTION', 'COMPARE_RELATION', 'COMPOSITE_RELATION'],
+    reasoningTags: ['MULTI_STEP_RELATION', 'COMPARE_RELATION', 'COMPOSITE_RELATION'],
+    representationHint: 'bar_model',
+    build: buildComplexCompare
+  },
+  {
+    code: 'DIVISION_REMAINDER',
+    pattern: 'division',
+    skillTags: ['EQUAL_SHARING', 'QUOTATIVE_DIVISION', 'UNIT_COMPARE', 'COMPOSITE_RELATION'],
+    reasoningTags: ['MULTI_STEP_RELATION', 'UNIT_COMPARE', 'COMPOSITE_RELATION'],
+    representationHint: 'unit_blocks',
+    build: buildComplexDivision
+  },
+  {
+    code: 'UNIT_RATE_TRANSFER',
+    pattern: 'ratio',
+    skillTags: ['UNIT_COMPARE', 'PROPORTION', 'MULTIPLICATIVE_COMPARE', 'COMPOSITE_RELATION'],
+    reasoningTags: ['BASE_UNIT_IDENTIFICATION', 'PROPORTION', 'MULTI_STEP_RELATION', 'TRANSFER'],
+    representationHint: 'table',
+    build: buildComplexUnitRate
+  },
+  {
+    code: 'FRACTION_LEFTOVER',
+    pattern: 'fraction',
+    skillTags: ['FRACTION_RELATION', 'PART_WHOLE', 'COMPOSITE_RELATION'],
+    reasoningTags: ['FRACTION_RELATION', 'MULTI_STEP_RELATION', 'COMPOSITE_RELATION'],
+    representationHint: 'bar_model',
+    build: buildComplexFractionRatio
+  },
+  {
+    code: 'DATA_RANKING_COMPARE',
+    pattern: 'data',
+    skillTags: ['DATA_REASONING', 'RANKING', 'COMPARE_RELATION', 'COMPOSITE_RELATION'],
+    reasoningTags: ['RANKING', 'COMPARE_RELATION', 'MULTI_STEP_RELATION'],
+    representationHint: 'table',
+    build: buildComplexDataRanking
+  },
+  {
+    code: 'MEASUREMENT_ROUTE_TIME',
+    pattern: 'measurement',
+    skillTags: ['MEASUREMENT', 'UNIT_COMPARE', 'CHANGE_RELATION', 'COMPOSITE_RELATION'],
+    reasoningTags: ['MULTI_STEP_RELATION', 'UNIT_COMPARE', 'TRANSFER', 'COMPOSITE_RELATION'],
+    representationHint: 'number_line',
+    build: buildComplexMeasurement
+  }
+];
+
+function createComplexFamilies() {
+  const generated = [];
+  for (let difficulty = 1; difficulty <= 12; difficulty += 1) {
+    const patternBuilders = difficulty <= 2 ? earlyComplexPatternBuilders : standardComplexPatternBuilders;
+    patternBuilders.forEach(pattern => {
+      generated.push({
+        gradeBand: gradeBandForDifficulty(difficulty),
+        topic: topicForComplexPattern(difficulty, pattern.pattern),
+        family: `COMPLEX_D${String(difficulty).padStart(2, '0')}_${pattern.code}`,
+        difficulty,
+        skillTags: pattern.skillTags,
+        reasoningTags: pattern.reasoningTags,
+        reasoningDepth: difficulty >= 9 ? 4 : difficulty >= 4 ? 3 : 2,
+        requiresMultiStep: true,
+        representationHint: pattern.representationHint,
+        build(i) {
+          return pattern.build(difficulty, i);
+        }
+      });
+    });
+  }
+  return generated;
+}
+
+const families = [...baseFamilies, ...createComplexFamilies()];
+
+function variantsForFamily(family) {
+  if (!family.family.startsWith('COMPLEX_')) return 20;
+  if (family.difficulty <= 2) return 90;
+  if (family.difficulty === 3) return 77;
+  if (family.difficulty === 7) return 67;
+  return 64;
+}
+
 function generate() {
   const items = [];
-  const variantsPerFamily = 20;
 
   for (const family of families) {
+    const variantsPerFamily = variantsForFamily(family);
     for (let i = 0; i < variantsPerFamily; i += 1) {
       const [problem, answer, solution] = family.build(i);
       items.push(makeItem(
@@ -1087,7 +1508,13 @@ function generate() {
         family.skillTags,
         problem,
         answer,
-        solution
+        solution,
+        {
+          reasoningTags: family.reasoningTags,
+          reasoningDepth: family.reasoningDepth,
+          requiresMultiStep: family.requiresMultiStep,
+          representationHint: family.representationHint
+        }
       ));
     }
   }
@@ -1101,7 +1528,9 @@ function generate() {
       item_count: items.length,
       family_count: families.length,
       difficulty_scale: '1-12',
-      schema_version: 2
+      schema_version: 3,
+      target_complex_word_problem_ratio: 0.85,
+      complexity_policy: 'Most items require at least two reasoning moves such as relation identification, comparison, unit-rate inference, ranking, transfer, or multi-step composition. Lower elementary items use age-appropriate addition, subtraction, measurement, data, and grouping contexts rather than premature fraction, division, or unit-rate notation.'
     },
     items
   };

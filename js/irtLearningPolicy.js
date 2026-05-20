@@ -52,6 +52,36 @@ function getPolicyFamily(item) {
     return null;
 }
 
+function getPolicyReasoningDepth(item) {
+    const depth = Number(item?.reasoning_depth);
+    if (Number.isFinite(depth)) return clampPolicy(depth, 1, 4);
+    if (item?.requires_multi_step_reasoning) return 2;
+    const tags = [
+        ...(Array.isArray(item?.skill_tags) ? item.skill_tags : []),
+        ...(Array.isArray(item?.reasoning_tags) ? item.reasoning_tags : []),
+        ...(Array.isArray(item?.problem_types) ? item.problem_types : [])
+    ].join(' ');
+    if (/COMPOSITE_RELATION|MULTI_STEP_RELATION|PROPORTION|FRACTION_RELATION|INVERSE_RELATION|RANKING/.test(tags)) return 3;
+    if (/UNIT_COMPARE|COMPARE_RELATION|MULTIPLICATIVE_COMPARE/.test(tags)) return 2;
+    return 1;
+}
+
+function isPolicyComplexWordProblem(item) {
+    const tags = [
+        ...(Array.isArray(item?.skill_tags) ? item.skill_tags : []),
+        ...(Array.isArray(item?.reasoning_tags) ? item.reasoning_tags : []),
+        ...(Array.isArray(item?.problem_types) ? item.problem_types : [])
+    ];
+    const hasComplexTag = tags.some(tag => /BASE_UNIT_IDENTIFICATION|COMPARE_RELATION|COMPOSITE_RELATION|FRACTION_RELATION|INVERSE_RELATION|MULTI_STEP_RELATION|MULTIPLICATIVE_COMPARE|PROPORTION|RANKING|TRANSFER|UNIT_COMPARE/.test(tag));
+    const text = String(item?.question || item?.problem || '');
+    const sentenceCount = (text.match(/[.?!?]/g) || []).length;
+    return (item?.requires_multi_step_reasoning === true || getPolicyReasoningDepth(item) >= 3)
+        && getPolicyReasoningDepth(item) >= 2
+        && text.length >= 40
+        && sentenceCount >= 2
+        && hasComplexTag;
+}
+
 function getSkillState(state, skill) {
     return state?.skillStates?.[skill] || { attempts: 0, mastery: 0 };
 }
@@ -67,8 +97,12 @@ function getWeakSkills(state = {}) {
 }
 
 function getUnderMeasuredSkill(items, state = {}) {
+    const complexItems = (items || []).filter(isPolicyComplexWordProblem);
+    const sourceItems = complexItems.length >= Math.min(30, Math.ceil((items || []).length * 0.2))
+        ? complexItems
+        : (items || []);
     const counts = new Map();
-    (items || []).forEach(item => {
+    sourceItems.forEach(item => {
         getPolicySkills(item).forEach(skill => {
             if (!counts.has(skill)) counts.set(skill, getSkillState(state, skill).attempts || 0);
         });
@@ -134,12 +168,15 @@ function scorePolicyItem(item, state = {}, context = {}) {
     const skillMasteryValues = skills.map(skill => getSkillState(state, skill).mastery || 0);
     const minSkillAttempts = skillAttempts.length ? Math.min(...skillAttempts) : 0;
     const skillMastery = skillMasteryValues.length ? Math.min(...skillMasteryValues) : 0;
+    const reasoningDepth = getPolicyReasoningDepth(item);
 
     const probabilityFit = clampPolicy(1 - Math.abs(p - targetProbability) / 0.5, 0, 1);
     const targetSkillBonus = targetSkill && skills.includes(targetSkill) ? 4.5 : 0;
     const diagnosticCoverageBonus = phase === 'diagnostic' ? clampPolicy((4 - minSkillAttempts) / 4, 0, 1) * 2.5 : 0;
     const weakSkillBonus = phase === 'targeted_practice' ? clampPolicy((IRT_POLICY_WEAK_MASTERY - skillMastery) / IRT_POLICY_WEAK_MASTERY, 0, 1) * 1.5 : 0;
     const masteryChallengeBonus = phase === 'mastery_check' ? clampPolicy((getPolicyDifficulty(item) - theta + 0.6) / 1.2, 0, 1) * 1.4 : 0;
+    const complexReasoningBonus = clampPolicy((reasoningDepth - 1) / 3, 0, 1) * 1.25;
+    const shallowWordProblemPenalty = reasoningDepth <= 1 ? 0.9 : 0;
     const tooHardPenalty = phase === 'targeted_practice' && p < 0.35 ? 2.5 : 0;
     const tooEasyPenalty = phase === 'mastery_check' && p > 0.8 ? 1.5 : 0;
 
@@ -150,8 +187,10 @@ function scorePolicyItem(item, state = {}, context = {}) {
         + diagnosticCoverageBonus
         + weakSkillBonus
         + masteryChallengeBonus
+        + complexReasoningBonus
         - getRecentPenalty(item, state)
         - getRecentFamilyPenalty(item, state)
+        - shallowWordProblemPenalty
         - tooHardPenalty
         - tooEasyPenalty
     );
@@ -172,9 +211,13 @@ function selectPolicyNextItem(items, state = {}) {
     const immediateId = state.presentedItemIds?.[0] || state.lastItemIds?.[0];
     const notImmediate = pool.filter(item => item.problem_id !== immediateId);
     const fresh = notImmediate.filter(item => !recent.has(item.problem_id));
-    const candidatePool = fresh.length >= Math.min(30, Math.ceil(pool.length * 0.1))
+    const broadCandidatePool = fresh.length >= Math.min(30, Math.ceil(pool.length * 0.1))
         ? fresh
         : notImmediate;
+    const complexCandidatePool = broadCandidatePool.filter(isPolicyComplexWordProblem);
+    const candidatePool = complexCandidatePool.length >= Math.min(20, Math.ceil(broadCandidatePool.length * 0.15))
+        ? complexCandidatePool
+        : broadCandidatePool;
     const candidates = candidatePool
         .map(item => ({
             item,
@@ -224,6 +267,8 @@ function summarizeLearningPolicy(state = {}) {
 window.IrtLearningPolicy = {
     getPhase: getLearningPhase,
     getWeakSkills,
+    getReasoningDepth: getPolicyReasoningDepth,
+    isComplexWordProblem: isPolicyComplexWordProblem,
     scoreItem: scorePolicyItem,
     selectNextItem: selectPolicyNextItem,
     summarize: summarizeLearningPolicy

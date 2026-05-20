@@ -5,7 +5,7 @@
    있는 relationshipCoach 호환 문항으로 변환합니다.
    ========================================================================= */
 
-const EXPANDED_WORD_BANK_URL = 'data/elementary_word_problem_seed_bank.json';
+const EXPANDED_WORD_BANK_URL = 'data/elementary_word_problem_seed_bank.json?v=20260521-complex-v3';
 
 function clampExpandedBank(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -84,7 +84,7 @@ function convertSeedItem(item) {
         level: Number(item.difficulty || 6),
         skill_tags: skillTags,
         irt: { model: 'rasch', b: seedDifficultyToTheta(item.difficulty) },
-        problem_types: uniqueExpandedList([item.type_family, item.type, ...skillTags]),
+        problem_types: uniqueExpandedList([item.type_family, item.type, ...skillTags, ...(item.reasoning_tags || [])]),
         question: item.problem,
         base_unit: item.topic || item.curriculum_domain || '문장제 관계',
         entities: buildSeedEntities(item),
@@ -96,7 +96,11 @@ function convertSeedItem(item) {
         curriculum_domain: item.curriculum_domain,
         topic: item.topic,
         type_family: item.type_family,
-        level_label: item.level_label
+        level_label: item.level_label,
+        reasoning_depth: Number(item.reasoning_depth || 1),
+        reasoning_tags: uniqueExpandedList(item.reasoning_tags || []),
+        requires_multi_step_reasoning: Boolean(item.requires_multi_step_reasoning),
+        representation_hint: item.representation_hint || 'bar_model'
     };
 }
 
