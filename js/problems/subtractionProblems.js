@@ -139,7 +139,7 @@ function generateSubtractionProblem(difficulty) {
     if (a < b) [a, b] = [b, a]; // 항상 a >= b
 
     const answer = a - b;
-    const name1 = getRandomCharacter();
+    const [name1, name2] = getTwoCharacters ? getTwoCharacters() : [getRandomCharacter(), getRandomCharacter()];
 
     // 템플릿 선택
     let templates;
@@ -152,7 +152,7 @@ function generateSubtractionProblem(difficulty) {
     }
 
     const template = templates[Math.floor(Math.random() * templates.length)];
-    const result = template.template(a, b, name1);
+    const result = template.template(a, b, name1, name2);
 
     // 매력적 오답 생성 (흔한 실수 반영)
     const wrongs = new Set();

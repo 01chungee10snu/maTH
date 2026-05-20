@@ -157,8 +157,8 @@ function generateWeightProblem(difficulty) {
 
     } else if (type === 1) {
         // 무게 비교
-        const a = Math.floor(Math.random() * 400) + 100;
-        const b = Math.floor(Math.random() * 400) + 100;
+        let a = Math.floor(Math.random() * 400) + 100;
+        let b = Math.floor(Math.random() * 400) + 100;
         if (a === b) {
             a += 50;
         }

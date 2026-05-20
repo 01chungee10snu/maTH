@@ -5,7 +5,7 @@
    있는 relationshipCoach 호환 문항으로 변환합니다.
    ========================================================================= */
 
-const EXPANDED_WORD_BANK_URL = 'data/elementary_word_problem_seed_bank.json?v=20260521-options-v5';
+const EXPANDED_WORD_BANK_URL = 'data/elementary_word_problem_seed_bank.json?v=20260521-quality-v1';
 
 function clampExpandedBank(value, min, max) {
     return Math.max(min, Math.min(max, value));

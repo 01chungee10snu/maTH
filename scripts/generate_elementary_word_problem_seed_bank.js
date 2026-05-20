@@ -69,6 +69,26 @@ function withParticle(word, whenFinal, whenOpen) {
   return `${word}${hasFinalConsonant(word) ? whenFinal : whenOpen}`;
 }
 
+function normalizeGeneratedKorean(text) {
+  const terms = [
+    ...names,
+    ...objects,
+    ...containers,
+    ...colors.flatMap(color => objects.map(object => `${color} ${object}`)),
+    ...colors.flatMap(color => containers.map(container => `${color} ${container}`))
+  ].sort((a, b) => b.length - a.length);
+
+  let result = String(text);
+  terms.forEach(term => {
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    result = result
+      .replace(new RegExp(`${escaped}가(?=[^가-힣]|$)`, 'g'), withParticle(term, '이', '가'))
+      .replace(new RegExp(`${escaped}는(?=[^가-힣]|$)`, 'g'), withParticle(term, '은', '는'))
+      .replace(new RegExp(`${escaped}를(?=[^가-힣]|$)`, 'g'), withParticle(term, '을', '를'));
+  });
+  return result;
+}
+
 function gcd(a, b) {
   while (b) [a, b] = [b, a % b];
   return Math.abs(a);
@@ -143,7 +163,10 @@ function inferRepresentationHint(reasoningTags, skillTags) {
 }
 
 function makeItem(gradeBand, topic, family, variant, difficulty, skillTags, problem, answer, solution, options = {}) {
-  const reasoningTags = options.reasoningTags || inferReasoningTags(family, skillTags, problem);
+  const normalizedProblem = normalizeGeneratedKorean(problem);
+  const normalizedSolution = normalizeGeneratedKorean(solution);
+  const reasoningTags = options.reasoningTags || inferReasoningTags(family, skillTags, normalizedProblem);
+  if (!reasoningTags.length) reasoningTags.push('DIRECT_REASONING');
   const reasoningDepth = options.reasoningDepth || inferReasoningDepth(difficulty, skillTags, reasoningTags);
   return {
     id: `EWP_${gradeBand.replace(/_/g, '')}_${family}_${String(variant).padStart(3, '0')}`,
@@ -159,9 +182,9 @@ function makeItem(gradeBand, topic, family, variant, difficulty, skillTags, prob
     reasoning_tags: reasoningTags,
     requires_multi_step_reasoning: Boolean(options.requiresMultiStep ?? reasoningDepth >= 2),
     representation_hint: options.representationHint || inferRepresentationHint(reasoningTags, skillTags),
-    problem,
+    problem: normalizedProblem,
     answer,
-    solution
+    solution: normalizedSolution
   };
 }
 
