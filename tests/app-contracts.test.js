@@ -426,6 +426,108 @@ function testIrtSelectionMaintainsItemDiversityAcrossAdaptiveRun() {
   assert.ok(maxRepeat <= 2, `item repeated too often: ${JSON.stringify(counts)}`);
 }
 
+function testIrtLearningPolicyPromotesDiagnosisPracticeAndMastery() {
+  const context = createContext();
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLearningPolicy.js');
+
+  assert.strictEqual(typeof context.window.IrtLearningPolicy.selectNextItem, 'function');
+
+  const diagnosticState = {
+    ...context.window.IrtEngine.createInitialState('relationship_math'),
+    theta: 0,
+    standardError: 0.9,
+    attemptCount: 4,
+    lastItemIds: [],
+    skillStates: {
+      ADDITION: { attempts: 4, mastery: 0.8 },
+      CHANGE_RELATION: { attempts: 4, mastery: 0.8 }
+    }
+  };
+  const diagnosticPool = [
+    { problem_id: 'exact_overdone', skill_tags: ['ADDITION'], problem_types: ['ADDITION'], irt: { model: 'rasch', b: 0 } },
+    { problem_id: 'under_measured', skill_tags: ['FRACTION_RELATION'], problem_types: ['FRACTION_RELATION'], irt: { model: 'rasch', b: 0.25 } },
+    { problem_id: 'hard_unrelated', skill_tags: ['GEOMETRY'], problem_types: ['GEOMETRY'], irt: { model: 'rasch', b: 1.8 } }
+  ];
+  const diagnosticSelection = context.window.IrtLearningPolicy.selectNextItem(diagnosticPool, diagnosticState);
+  assert.strictEqual(diagnosticSelection.item.problem_id, 'under_measured');
+  assert.strictEqual(diagnosticSelection.phase, 'diagnostic');
+  assert.strictEqual(diagnosticSelection.targetSkill, 'FRACTION_RELATION');
+
+  const weakState = {
+    ...context.window.IrtEngine.createInitialState('relationship_math'),
+    theta: 0.2,
+    standardError: 0.42,
+    attemptCount: 18,
+    lastItemIds: [],
+    skillStates: {
+      FRACTION_RELATION: { attempts: 4, mastery: 0.31 },
+      ADDITION: { attempts: 8, mastery: 0.92 }
+    }
+  };
+  const weakPool = [
+    { problem_id: 'info_only', skill_tags: ['ADDITION'], problem_types: ['ADDITION'], irt: { model: 'rasch', b: 0.2 } },
+    { problem_id: 'weak_manageable', skill_tags: ['FRACTION_RELATION'], problem_types: ['FRACTION_RELATION'], irt: { model: 'rasch', b: -0.35 } },
+    { problem_id: 'weak_too_hard', skill_tags: ['FRACTION_RELATION'], problem_types: ['FRACTION_RELATION'], irt: { model: 'rasch', b: 1.9 } }
+  ];
+  const weakSelection = context.window.IrtLearningPolicy.selectNextItem(weakPool, weakState);
+  assert.strictEqual(weakSelection.item.problem_id, 'weak_manageable');
+  assert.strictEqual(weakSelection.phase, 'targeted_practice');
+  assert.strictEqual(weakSelection.targetSkill, 'FRACTION_RELATION');
+  assert.ok(weakSelection.utility > 0);
+
+  const stableState = {
+    ...context.window.IrtEngine.createInitialState('relationship_math'),
+    theta: 0.75,
+    standardError: 0.32,
+    attemptCount: 36,
+    lastItemIds: [],
+    skillStates: {
+      ADDITION: { attempts: 8, mastery: 0.9 },
+      FRACTION_RELATION: { attempts: 8, mastery: 0.86 },
+      PROPORTION: { attempts: 6, mastery: 0.82 }
+    }
+  };
+  const stableSelection = context.window.IrtLearningPolicy.selectNextItem([
+    { problem_id: 'too_easy', skill_tags: ['ADDITION'], problem_types: ['ADDITION'], irt: { model: 'rasch', b: -1.4 } },
+    { problem_id: 'mastery_check', skill_tags: ['PROPORTION'], problem_types: ['PROPORTION'], irt: { model: 'rasch', b: 0.9 } }
+  ], stableState);
+  assert.strictEqual(stableSelection.phase, 'mastery_check');
+  assert.strictEqual(stableSelection.item.problem_id, 'mastery_check');
+}
+
+function testExpandedIrtPolicyKeepsLongRunVarietyAndPhaseProgression() {
+  const context = createContext();
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLearningPolicy.js');
+  runScript(context, 'js/problems/problemBase.js');
+  runScript(context, 'js/problems/relationshipCoachProblems.js');
+  runScript(context, 'js/expandedWordProblemBank.js');
+
+  const rawBank = JSON.parse(fs.readFileSync(path.join(root, 'data/elementary_word_problem_seed_bank.json'), 'utf8'));
+  context.window.ExpandedWordProblemBank.merge(rawBank);
+  const bank = context.window.RelationshipCoachProblems.bank;
+  let state = context.window.IrtEngine.createInitialState('relationship_math');
+  const selectedIds = [];
+  const phases = new Set();
+
+  for (let index = 0; index < 40; index += 1) {
+    const selection = context.window.IrtLearningPolicy.selectNextItem(bank, state);
+    selectedIds.push(selection.item.problem_id);
+    phases.add(selection.phase);
+    state = context.window.IrtEngine.updateState(state, selection.item, {
+      correct: index % 5 !== 0,
+      hintLevel: index % 4,
+      stepSuccessRate: index % 5 === 0 ? 0.35 : 1
+    });
+  }
+
+  assert.ok(bank.length >= 1100);
+  assert.ok(new Set(selectedIds).size >= 36, `large-bank policy repeated too much: ${selectedIds.join(',')}`);
+  assert.ok(phases.has('diagnostic'));
+  assert.ok(phases.has('targeted_practice') || phases.has('adaptive_practice'));
+}
+
 function testRelationshipCoachBankHasIrtMetadata() {
   const context = createContext();
   runScript(context, 'js/problems/problemBase.js');
@@ -638,6 +740,7 @@ function testMathAbilityReportSummarizesIrtEvidenceForParents() {
   const context = createStorageContext();
   runScript(context, 'js/irtLog.js');
   runScript(context, 'js/measurementQuality.js');
+  runScript(context, 'js/irtLearningPolicy.js');
   runScript(context, 'js/mathAbilityReport.js');
 
   context.window.IrtLog.saveAttempts([
@@ -708,6 +811,8 @@ function testMathAbilityReportSummarizesIrtEvidenceForParents() {
   assert.ok(report.recommendations.length >= 2);
   assert.strictEqual(report.quality.reliability.level, '관찰 단계');
   assert.ok(report.quality.validity.gaps.length > 0);
+  assert.strictEqual(report.learningPolicy.phase, 'diagnostic');
+  assert.ok(report.learningPolicy.description.includes('진단'));
 }
 
 async function runTests() {
@@ -723,6 +828,8 @@ async function runTests() {
   testIrtEngineUpdatesLearnerStateAndSelectsItems();
   testIrtSelectionAvoidsImmediateItemRepeatWhenAlternativesExist();
   testIrtSelectionMaintainsItemDiversityAcrossAdaptiveRun();
+  testIrtLearningPolicyPromotesDiagnosisPracticeAndMastery();
+  testExpandedIrtPolicyKeepsLongRunVarietyAndPhaseProgression();
   testRelationshipCoachBankHasIrtMetadata();
   testIrtAttemptLogCreatesSupabaseReadyPendingRecords();
   await testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners();

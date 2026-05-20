@@ -88,7 +88,7 @@ function updateIrtState(previousState, item, result = {}) {
     const standardError = Math.max(0.25, 1 / Math.sqrt(1 + attemptCount * Math.max(0.08, information) * 4));
     const lastItemIds = [item?.problem_id || item?.problemKey, ...(state.lastItemIds || [])]
         .filter(Boolean)
-        .slice(0, 12);
+        .slice(0, 50);
     const skillStates = { ...(state.skillStates || {}) };
 
     getItemSkills(item).forEach(skill => {

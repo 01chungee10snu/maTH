@@ -25,13 +25,15 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
     configured: window.MathAppSupabase?.isConfigured(),
     url: window.MathAppSupabase?.getConfig().url,
     keyPrefix: window.MathAppSupabase?.getConfig().publishableKey.slice(0, 15),
-    hasIrtSync: typeof window.IrtSync?.syncPendingAttempts === 'function'
+    hasIrtSync: typeof window.IrtSync?.syncPendingAttempts === 'function',
+    hasLearningPolicy: typeof window.IrtLearningPolicy?.selectNextItem === 'function'
   }));
 
   expect(supabaseConfig.configured).toBe(true);
   expect(supabaseConfig.url).toBe('https://gegwjdcxcarmopiaknwj.supabase.co');
   expect(supabaseConfig.keyPrefix).toBe('sb_publishable_');
   expect(supabaseConfig.hasIrtSync).toBe(true);
+  expect(supabaseConfig.hasLearningPolicy).toBe(true);
 
   const runtimeBank = await page.evaluate(() => ({
     itemCount: RelationshipCoachProblems.bank.length,
@@ -75,6 +77,7 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
       learningEntry: STATE.learningEntry,
       topic: STATE.currentCurriculum,
       type: STATE.problem?.type,
+      learningPhase: STATE.problem?.selection_policy?.phase,
       hasIrtState: Boolean(STATE.irt),
       mapGrade: STATE.mapSelection.grade
     };
@@ -84,6 +87,7 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
   expect(adaptiveStart.learningEntry).toBe('adaptive');
   expect(adaptiveStart.topic).toBe('자연수의 곱셈과 나눗셈');
   expect(adaptiveStart.type).toBe('relationshipCoach');
+  expect(adaptiveStart.learningPhase).toBe('diagnostic');
   expect(adaptiveStart.hasIrtState).toBe(true);
   expect(adaptiveStart.mapGrade).toBe(null);
 
@@ -158,6 +162,7 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
   expect(relationCoach.latestLog.item_id).toBe(relationCoach.problemId);
   expect(relationCoach.latestLog.sync_status).toBe('pending');
   expect(relationCoach.latestLog.correct).toBe(true);
+  expect(relationCoach.latestLog.learning_phase).toBeTruthy();
 
   const parentReport = await page.evaluate(() => {
     STATE.mode = 'collection';

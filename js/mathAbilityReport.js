@@ -231,6 +231,9 @@ function buildParentReport(options = {}) {
     const quality = window.MeasurementQuality?.evaluate
         ? window.MeasurementQuality.evaluate({ attempts, irtState, itemBank })
         : null;
+    const learningPolicy = window.IrtLearningPolicy?.summarize
+        ? window.IrtLearningPolicy.summarize(irtState)
+        : null;
     const recommendations = [
         ...buildRecommendations(weakSkills, summary),
         ...buildQualityRecommendations(quality)
@@ -244,6 +247,7 @@ function buildParentReport(options = {}) {
         weakSkills,
         strengths,
         quality,
+        learningPolicy,
         recommendations: Array.from(new Set(recommendations)).slice(0, 5),
         parentNarrative: buildParentNarrative(measurement, summary, weakSkills, quality)
     };

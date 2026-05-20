@@ -309,7 +309,17 @@ function genProblem(diff) {
             : window.RelationCurriculum?.filterItemsForTopic
                 ? window.RelationCurriculum.filterItemsForTopic(window.RelationshipCoachProblems.bank, topic)
                 : window.RelationshipCoachProblems.bank;
-        const selectedItem = window.IrtEngine.selectNextItem(pool, STATE.irt);
+        const policySelection = window.IrtLearningPolicy?.selectNextItem?.(pool, STATE.irt);
+        const selectedItem = policySelection?.item || window.IrtEngine.selectNextItem(pool, STATE.irt);
+        if (selectedItem && policySelection) {
+            selectedItem.selection_policy = {
+                phase: policySelection.phase,
+                targetSkill: policySelection.targetSkill,
+                utility: policySelection.utility,
+                probability: policySelection.probability,
+                reason: policySelection.reason
+            };
+        }
         if (selectedItem && window.RelationshipCoachProblems.generateForItem) {
             return window.RelationshipCoachProblems.generateForItem(selectedItem, diff);
         }
@@ -4086,6 +4096,7 @@ function drawParentReportPanel(W, H, startY) {
         `풀이 기록 ${s.totalAttempts}문항 · 정답률 ${s.correctRate}% · 독립 풀이율 ${s.independentSolveRate}%`,
         `평균 힌트 단계 ${s.averageHintLevel} · 평균 IRT 응답 점수 ${s.averageResponseScore}`,
         q ? `측정 품질: 신뢰도 ${q.reliability.level}(${q.reliability.score}) · 타당도 ${q.validity.level}(${q.validity.score})` : '측정 품질: 평가 기준을 불러오지 못했습니다.',
+        report.learningPolicy ? `학습 정책: ${report.learningPolicy.description}` : '학습 정책: 기본 적응형 출제를 사용합니다.',
         report.parentNarrative
     ].forEach(line => {
         getLines(CTX, line, cardW - Math.round(48 * SCALE)).forEach(wrapped => {
