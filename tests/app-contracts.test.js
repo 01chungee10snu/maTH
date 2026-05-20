@@ -496,6 +496,109 @@ function testIrtLearningPolicyPromotesDiagnosisPracticeAndMastery() {
   assert.strictEqual(stableSelection.item.problem_id, 'mastery_check');
 }
 
+function testIrtDiagnosticUsesBroadSkillsInsteadOfRepeatingGranularTypes() {
+  const context = createContext();
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLearningPolicy.js');
+
+  let state = {
+    ...context.window.IrtEngine.createInitialState('relationship_math'),
+    theta: -1.2,
+    standardError: 0.9,
+    attemptCount: 3,
+    lastItemIds: [],
+    skillStates: {}
+  };
+  const pool = [
+    {
+      problem_id: 'add_change_1',
+      skill_tags: ['ADDITION', 'UNKNOWN_CHANGE'],
+      problem_types: ['ADD_JOIN_CHANGE_UNKNOWN', 'ADD_JOIN_CHANGE_UNKNOWN_V1', 'ADDITION', 'UNKNOWN_CHANGE'],
+      irt: { model: 'rasch', b: -1.55 }
+    },
+    {
+      problem_id: 'add_change_2',
+      skill_tags: ['ADDITION', 'UNKNOWN_CHANGE'],
+      problem_types: ['ADD_JOIN_CHANGE_UNKNOWN', 'ADD_JOIN_CHANGE_UNKNOWN_V2', 'ADDITION', 'UNKNOWN_CHANGE'],
+      irt: { model: 'rasch', b: -1.55 }
+    },
+    {
+      problem_id: 'fraction_1',
+      skill_tags: ['FRACTION_RELATION'],
+      problem_types: ['FRAC_EQUIVALENCE', 'FRAC_EQUIVALENCE_V1', 'FRACTION_RELATION'],
+      irt: { model: 'rasch', b: -1.5 }
+    }
+  ];
+
+  const first = context.window.IrtLearningPolicy.selectNextItem(pool, state);
+  assert.strictEqual(first.item.problem_id, 'add_change_1');
+
+  state = context.window.IrtEngine.updateState(state, first.item, {
+    correct: true,
+    hintLevel: 0,
+    stepSuccessRate: 1
+  });
+
+  const second = context.window.IrtLearningPolicy.selectNextItem(pool, state);
+  assert.strictEqual(second.phase, 'diagnostic');
+  assert.strictEqual(second.targetSkill, 'FRACTION_RELATION');
+  assert.strictEqual(second.item.problem_id, 'fraction_1');
+}
+
+function testIrtPolicyDiversifiesFamiliesWithinTargetSkill() {
+  const context = createContext();
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLearningPolicy.js');
+
+  let state = {
+    ...context.window.IrtEngine.createInitialState('relationship_math'),
+    theta: 0.2,
+    standardError: 0.42,
+    attemptCount: 18,
+    lastItemIds: [],
+    skillStates: {
+      FRACTION_RELATION: { attempts: 4, mastery: 0.32 }
+    }
+  };
+  const pool = [
+    {
+      problem_id: 'fraction_equiv_1',
+      type_family: 'FRAC_EQUIVALENCE',
+      skill_tags: ['FRACTION_RELATION'],
+      problem_types: ['FRAC_EQUIVALENCE', 'FRAC_EQUIVALENCE_V1', 'FRACTION_RELATION'],
+      irt: { model: 'rasch', b: -0.45 }
+    },
+    {
+      problem_id: 'fraction_equiv_2',
+      type_family: 'FRAC_EQUIVALENCE',
+      skill_tags: ['FRACTION_RELATION'],
+      problem_types: ['FRAC_EQUIVALENCE', 'FRAC_EQUIVALENCE_V2', 'FRACTION_RELATION'],
+      irt: { model: 'rasch', b: -0.45 }
+    },
+    {
+      problem_id: 'fraction_compare_1',
+      type_family: 'FRAC_COMPARE_SAME_NUMERATOR',
+      skill_tags: ['FRACTION_RELATION'],
+      problem_types: ['FRAC_COMPARE_SAME_NUMERATOR', 'FRAC_COMPARE_SAME_NUMERATOR_V1', 'FRACTION_RELATION'],
+      irt: { model: 'rasch', b: -0.55 }
+    }
+  ];
+
+  const first = context.window.IrtLearningPolicy.selectNextItem(pool, state);
+  assert.strictEqual(first.item.problem_id, 'fraction_equiv_1');
+
+  state = context.window.IrtEngine.updateState(state, first.item, {
+    correct: true,
+    hintLevel: 1,
+    stepSuccessRate: 1
+  });
+
+  const second = context.window.IrtLearningPolicy.selectNextItem(pool, state);
+  assert.strictEqual(second.phase, 'targeted_practice');
+  assert.strictEqual(second.targetSkill, 'FRACTION_RELATION');
+  assert.strictEqual(second.item.problem_id, 'fraction_compare_1');
+}
+
 function testExpandedIrtPolicyKeepsLongRunVarietyAndPhaseProgression() {
   const context = createContext();
   runScript(context, 'js/irtEngine.js');
@@ -829,6 +932,8 @@ async function runTests() {
   testIrtSelectionAvoidsImmediateItemRepeatWhenAlternativesExist();
   testIrtSelectionMaintainsItemDiversityAcrossAdaptiveRun();
   testIrtLearningPolicyPromotesDiagnosisPracticeAndMastery();
+  testIrtDiagnosticUsesBroadSkillsInsteadOfRepeatingGranularTypes();
+  testIrtPolicyDiversifiesFamiliesWithinTargetSkill();
   testExpandedIrtPolicyKeepsLongRunVarietyAndPhaseProgression();
   testRelationshipCoachBankHasIrtMetadata();
   testIrtAttemptLogCreatesSupabaseReadyPendingRecords();

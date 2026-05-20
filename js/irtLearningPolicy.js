@@ -37,10 +37,19 @@ function getPolicyInformation(theta, item) {
 }
 
 function getPolicySkills(item) {
-    return Array.from(new Set([
-        ...(item?.skill_tags || []),
-        ...(item?.problem_types || [])
-    ].filter(Boolean)));
+    const skillTags = Array.isArray(item?.skill_tags) ? item.skill_tags.filter(Boolean) : [];
+    if (skillTags.length) return Array.from(new Set(skillTags));
+
+    const problemTypes = Array.isArray(item?.problem_types) ? item.problem_types.filter(Boolean) : [];
+    return Array.from(new Set(problemTypes));
+}
+
+function getPolicyFamily(item) {
+    if (window.IrtEngine?.getItemFamily) return window.IrtEngine.getItemFamily(item);
+    if (item?.type_family) return item.type_family;
+    if (Array.isArray(item?.problem_types) && item.problem_types.length) return item.problem_types[0];
+    if (item?.question_type) return item.question_type;
+    return null;
 }
 
 function getSkillState(state, skill) {
@@ -97,6 +106,14 @@ function getRecentPenalty(item, state = {}) {
     return 2.5 - Math.min(index, 10) * 0.15;
 }
 
+function getRecentFamilyPenalty(item, state = {}) {
+    const family = getPolicyFamily(item);
+    if (!family) return 0;
+    const index = (state.lastItemFamilies || []).indexOf(family);
+    if (index < 0) return 0;
+    return 1.4 - Math.min(index, 8) * 0.12;
+}
+
 function scorePolicyItem(item, state = {}, context = {}) {
     const theta = Number.isFinite(state.theta) ? state.theta : 0;
     const phase = context.phase || getLearningPhase(context.items || [], state);
@@ -105,8 +122,10 @@ function scorePolicyItem(item, state = {}, context = {}) {
     const p = getPolicyProbability(theta, item);
     const information = getPolicyInformation(theta, item);
     const skills = getPolicySkills(item);
-    const minSkillAttempts = Math.min(...skills.map(skill => getSkillState(state, skill).attempts || 0), 0);
-    const skillMastery = Math.min(...skills.map(skill => getSkillState(state, skill).mastery || 0), 0);
+    const skillAttempts = skills.map(skill => getSkillState(state, skill).attempts || 0);
+    const skillMasteryValues = skills.map(skill => getSkillState(state, skill).mastery || 0);
+    const minSkillAttempts = skillAttempts.length ? Math.min(...skillAttempts) : 0;
+    const skillMastery = skillMasteryValues.length ? Math.min(...skillMasteryValues) : 0;
 
     const probabilityFit = clampPolicy(1 - Math.abs(p - targetProbability) / 0.5, 0, 1);
     const targetSkillBonus = targetSkill && skills.includes(targetSkill) ? 4.5 : 0;
@@ -124,6 +143,7 @@ function scorePolicyItem(item, state = {}, context = {}) {
         + weakSkillBonus
         + masteryChallengeBonus
         - getRecentPenalty(item, state)
+        - getRecentFamilyPenalty(item, state)
         - tooHardPenalty
         - tooEasyPenalty
     );

@@ -22,6 +22,7 @@ function createInitialIrtState(topic = 'relationship_math') {
         standardError: 1,
         attemptCount: 0,
         lastItemIds: [],
+        lastItemFamilies: [],
         skillStates: {},
         updatedAt: new Date().toISOString()
     };
@@ -65,6 +66,13 @@ function getItemSkills(item) {
     return Array.from(new Set(skills.filter(Boolean)));
 }
 
+function getItemFamily(item) {
+    if (item?.type_family) return item.type_family;
+    if (Array.isArray(item?.problem_types) && item.problem_types.length) return item.problem_types[0];
+    if (item?.question_type) return item.question_type;
+    return null;
+}
+
 function updateSkillState(previous, score) {
     const state = previous || { attempts: 0, mastery: 0, lastScore: 0 };
     const attempts = state.attempts + 1;
@@ -89,6 +97,9 @@ function updateIrtState(previousState, item, result = {}) {
     const lastItemIds = [item?.problem_id || item?.problemKey, ...(state.lastItemIds || [])]
         .filter(Boolean)
         .slice(0, 50);
+    const lastItemFamilies = [getItemFamily(item), ...(state.lastItemFamilies || [])]
+        .filter(Boolean)
+        .slice(0, 50);
     const skillStates = { ...(state.skillStates || {}) };
 
     getItemSkills(item).forEach(skill => {
@@ -101,6 +112,7 @@ function updateIrtState(previousState, item, result = {}) {
         standardError,
         attemptCount,
         lastItemIds,
+        lastItemFamilies,
         skillStates,
         updatedAt: new Date().toISOString()
     };
@@ -136,8 +148,12 @@ function selectNextIrtItem(items, state = createInitialIrtState()) {
         const bRecentIndex = (state.lastItemIds || []).indexOf(b.problem_id);
         const aRecent = aRecentIndex >= 0 ? 1.25 - Math.min(aRecentIndex, 8) * 0.1 : 0;
         const bRecent = bRecentIndex >= 0 ? 1.25 - Math.min(bRecentIndex, 8) * 0.1 : 0;
-        const aScore = Math.abs(getIrtDifficulty(a) - theta) - getItemInformation(theta, a) + aRecent + getSkillWeaknessPenalty(a, state);
-        const bScore = Math.abs(getIrtDifficulty(b) - theta) - getItemInformation(theta, b) + bRecent + getSkillWeaknessPenalty(b, state);
+        const aFamilyIndex = (state.lastItemFamilies || []).indexOf(getItemFamily(a));
+        const bFamilyIndex = (state.lastItemFamilies || []).indexOf(getItemFamily(b));
+        const aFamilyRecent = aFamilyIndex >= 0 ? 0.8 - Math.min(aFamilyIndex, 6) * 0.08 : 0;
+        const bFamilyRecent = bFamilyIndex >= 0 ? 0.8 - Math.min(bFamilyIndex, 6) * 0.08 : 0;
+        const aScore = Math.abs(getIrtDifficulty(a) - theta) - getItemInformation(theta, a) + aRecent + aFamilyRecent + getSkillWeaknessPenalty(a, state);
+        const bScore = Math.abs(getIrtDifficulty(b) - theta) - getItemInformation(theta, b) + bRecent + bFamilyRecent + getSkillWeaknessPenalty(b, state);
         return aScore - bScore;
     })[0];
 }
@@ -162,6 +178,7 @@ window.IrtEngine = {
     probability: raschProbability,
     information: getItemInformation,
     responseScore: getResponseScore,
+    getItemFamily,
     updateState: updateIrtState,
     selectNextItem: selectNextIrtItem,
     summarize: summarizeIrtState
