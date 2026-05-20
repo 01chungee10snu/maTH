@@ -86,7 +86,7 @@ function convertSeedItem(item) {
         irt: { model: 'rasch', b: seedDifficultyToTheta(item.difficulty) },
         problem_types: uniqueExpandedList([item.type_family, item.type, ...skillTags, ...(item.reasoning_tags || [])]),
         question: item.problem,
-        base_unit: item.topic || item.curriculum_domain || '문장제 관계',
+        base_unit: '문제에서 묻는 값',
         entities: buildSeedEntities(item),
         question_type: inferSeedQuestionType(item),
         operation,

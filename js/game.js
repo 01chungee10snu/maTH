@@ -3289,11 +3289,12 @@ function drawRelationshipCoachQuiz(W, H, cardX, cardY, cardW, cardH) {
     const coachState = STATE.relationCoach;
     const steps = window.RelationCoach?.getSteps(problem) || [];
     const step = window.RelationCoach?.getCurrentStep(problem, coachState);
+    const guideActive = coachState?.guideActive === true;
 
     CTX.fillStyle = '#0f766e';
     CTX.font = `bold ${Math.round(27 * SCALE)}px Jua, sans-serif`;
     CTX.textAlign = 'center';
-    CTX.fillText('문장제 사고 훈련', cardX + cardW / 2, cardY + Math.round(38 * SCALE));
+    CTX.fillText(guideActive ? '풀이 도움' : '문제 풀이', cardX + cardW / 2, cardY + Math.round(38 * SCALE));
 
     CTX.fillStyle = '#111827';
     CTX.font = `bold ${Math.round(20 * SCALE)}px Jua, sans-serif`;
@@ -3305,6 +3306,50 @@ function drawRelationshipCoachQuiz(W, H, cardX, cardY, cardW, cardH) {
     });
 
     currentY += Math.round(10 * SCALE);
+
+    if (!guideActive) {
+        const optionsBottom = drawCoachOptionButtons(
+            problem.options,
+            STATE.selected || '',
+            cardX + 25,
+            currentY,
+            cardW - 50,
+            Math.round(62 * SCALE),
+            'opt'
+        );
+
+        const gap = Math.round(10 * SCALE);
+        const buttonAreaW = cardW - 50;
+        const helpW = Math.max(120, Math.min(Math.round(170 * SCALE), buttonAreaW * 0.38));
+        const checkW = buttonAreaW - helpW - gap;
+        const btnH = Math.max(56, Math.round(62 * SCALE));
+        const btnY = optionsBottom + Math.round(22 * SCALE);
+        const helpX = cardX + 25;
+        const checkX = helpX + helpW + gap;
+
+        roundRect(CTX, helpX, btnY, helpW, btnH, 16);
+        CTX.fillStyle = '#fef3c7';
+        CTX.fill();
+        CTX.strokeStyle = '#f59e0b';
+        CTX.lineWidth = 2;
+        CTX.stroke();
+        CTX.fillStyle = '#92400e';
+        CTX.font = `bold ${Math.round(21 * SCALE)}px Jua, sans-serif`;
+        CTX.textAlign = 'center';
+        CTX.textBaseline = 'middle';
+        CTX.fillText('풀이 도움', helpX + helpW / 2, btnY + btnH / 2);
+        STATE.hitboxes.push({ id: 'btn_open_coach', x: helpX, y: btnY, w: helpW, h: btnH });
+
+        roundRect(CTX, checkX, btnY, checkW, btnH, 16);
+        CTX.fillStyle = STATE.selected == null ? '#d1d5db' : '#14b8a6';
+        CTX.fill();
+        CTX.fillStyle = '#ffffff';
+        CTX.font = `bold ${Math.round(23 * SCALE)}px Jua, sans-serif`;
+        CTX.fillText('정답 확인', checkX + checkW / 2, btnY + btnH / 2);
+        CTX.textBaseline = 'alphabetic';
+        STATE.hitboxes.push({ id: 'btn_check', x: checkX, y: btnY, w: checkW, h: btnH, disabled: STATE.selected == null });
+        return;
+    }
 
     if (step) {
         const panelX = cardX + 18;
@@ -3395,7 +3440,7 @@ function drawRelationshipCoachQuiz(W, H, cardX, cardY, cardW, cardH) {
         CTX.font = `bold ${Math.round(23 * SCALE)}px Jua, sans-serif`;
         CTX.textAlign = 'center';
         CTX.textBaseline = 'middle';
-        CTX.fillText('다음 사고 단계', nextX + nextW / 2, nextY + nextH / 2);
+        CTX.fillText('다음', nextX + nextW / 2, nextY + nextH / 2);
         CTX.textBaseline = 'alphabetic';
         STATE.hitboxes.push({ id: 'btn_coach_next', x: nextX, y: nextY, w: nextW, h: nextH, disabled });
         return;
@@ -3404,7 +3449,7 @@ function drawRelationshipCoachQuiz(W, H, cardX, cardY, cardW, cardH) {
     CTX.fillStyle = '#0f766e';
     CTX.font = `bold ${Math.round(21 * SCALE)}px Jua, sans-serif`;
     CTX.textAlign = 'center';
-    CTX.fillText('관계 정리가 끝났어요. 이제 답을 골라볼까요?', cardX + cardW / 2, currentY);
+    CTX.fillText('이제 답을 골라볼까요?', cardX + cardW / 2, currentY);
     currentY += Math.round(32 * SCALE);
 
     const optionsBottom = drawCoachOptionButtons(
@@ -4895,7 +4940,16 @@ function onPointer(evt) {
                 case 'btn_coach_hint':
                     ensureRelationCoachState();
                     if (STATE.relationCoach) {
+                        STATE.relationCoach.guideActive = true;
                         STATE.relationCoach.hintLevel = Math.min(7, (STATE.relationCoach.hintLevel || 0) + 1);
+                    }
+                    saveState();
+                    break;
+                case 'btn_open_coach':
+                    ensureRelationCoachState();
+                    if (STATE.relationCoach) {
+                        STATE.relationCoach.guideActive = true;
+                        STATE.selected = null;
                     }
                     saveState();
                     break;

@@ -211,6 +211,7 @@ function testRelationshipCoachProblemContract() {
   assert.ok(problem.options.includes(problem.answer));
 
   const state = context.window.RelationCoach.createState(problem);
+  assert.strictEqual(state.guideActive, false);
   const firstStep = context.window.RelationCoach.getCurrentStep(problem, state);
   const result = context.window.RelationCoach.evaluateStep(problem, firstStep, firstStep.answer);
 
@@ -449,6 +450,9 @@ function testExpandedSeedBankConvertsIntoIrtRuntimeItems() {
   assert.ok(seedProblem.options.includes(seedProblem.answer));
   assert.strictEqual(seedProblem.irt.model, 'rasch');
   assert.ok(seedProblem.coachSteps.some(step => step.id === 'operation'));
+  const seedBaseStep = seedProblem.coachSteps.find(step => step.id === 'base');
+  assert.strictEqual(seedBaseStep.answer, '문제에서 묻는 값');
+  assert.ok(!seedBaseStep.options.some(option => option.value === seedProblem.topic));
 }
 
 function testTinipingAssetPolicyDoesNotUseWrongCharacterFallbacks() {

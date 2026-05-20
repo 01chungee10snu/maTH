@@ -17,6 +17,7 @@ function createRelationCoachState(problem) {
         selections: {},
         feedback: '',
         hintLevel: 0,
+        guideActive: false,
         errors: [],
         startedAt: Date.now()
     };
@@ -124,7 +125,8 @@ function appendRelationCoachAttempt(problem, state, selectedAnswer, answerCorrec
         attempt: log.filter(item => item.problem_id === problem.problem_id).length + 1,
         base_unit_correct: !state?.errors?.includes('BASE_UNIT_CONFUSION'),
         direction_mapping_correct: !state?.errors?.includes('DIRECTION_CONFUSION'),
-        visualization_used: true,
+        visualization_used: Boolean(state?.guideActive || state?.hintLevel),
+        scaffold_opened: Boolean(state?.guideActive || state?.hintLevel),
         hint_level: state?.hintLevel || 0,
         selected_answer: selectedAnswer,
         answer_correct: !!answerCorrect,

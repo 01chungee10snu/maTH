@@ -153,6 +153,10 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
     STATE.selected = null;
     STATE.relationCoach = null;
     startAdaptiveLearning();
+    lastCssW = null;
+    lastCssH = null;
+    setHiDPI();
+    drawQuiz();
     return {
       mode: STATE.mode,
       learningEntry: STATE.learningEntry,
@@ -160,7 +164,10 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
       type: STATE.problem?.type,
       learningPhase: STATE.problem?.selection_policy?.phase,
       hasIrtState: Boolean(STATE.irt),
-      mapGrade: STATE.mapSelection.grade
+      mapGrade: STATE.mapSelection.grade,
+      answerOptionHitboxes: STATE.hitboxes.filter(box => box.id.startsWith('opt_')).length,
+      hasOpenCoachButton: STATE.hitboxes.some(box => box.id === 'btn_open_coach'),
+      hasCoachNextButton: STATE.hitboxes.some(box => box.id === 'btn_coach_next')
     };
   });
 
@@ -171,6 +178,9 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
   expect(adaptiveStart.learningPhase).toBe('diagnostic');
   expect(adaptiveStart.hasIrtState).toBe(true);
   expect(adaptiveStart.mapGrade).toBe(null);
+  expect(adaptiveStart.answerOptionHitboxes).toBe(4);
+  expect(adaptiveStart.hasOpenCoachButton).toBe(true);
+  expect(adaptiveStart.hasCoachNextButton).toBe(false);
 
   const repeatedStartup = await page.evaluate(() => {
     localStorage.removeItem(IrtLog.getStorageKey());

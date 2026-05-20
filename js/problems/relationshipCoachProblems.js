@@ -979,6 +979,10 @@ function getRelationAnswerOptions(problem) {
 }
 
 function buildCoachSteps(problem) {
+    if (problem.source === 'elementary_seed_bank') {
+        return buildSeedCoachSteps(problem);
+    }
+
     const baseOptions = [
         relationOption(problem.base_unit),
         ...problem.entities.map(entity => relationOption(entity.label))
@@ -1049,6 +1053,91 @@ function buildCoachSteps(problem) {
             options: explanationOptions,
             answer: problem.explanation,
             hint: '기준량과 관계 방향이 모두 들어간 설명을 고르세요.',
+            errorType: 'EXPLANATION_GAP'
+        }
+    ];
+}
+
+function getSeedRepresentationLabel(problem) {
+    const hint = String(problem.representation_hint || '');
+    if (hint === 'table') return '표로 조건 정리';
+    if (hint === 'number_line') return '수직선이나 순서표로 정리';
+    if (hint === 'unit_blocks') return '묶음 그림으로 정리';
+    return '바 모델로 관계 정리';
+}
+
+function buildSeedCoachSteps(problem) {
+    const directionSummary = getRelationDirectionSummary(problem);
+    const representation = getSeedRepresentationLabel(problem);
+    const explanationOptions = [
+        relationOption(problem.explanation),
+        relationOption('문제에 나온 가장 큰 숫자를 고르면 됩니다.'),
+        relationOption('처음 나온 대상이 항상 정답입니다.')
+    ];
+
+    return [
+        {
+            id: 'base',
+            label: '구할 것 확인',
+            prompt: '마지막 질문이 무엇을 묻고 있을까?',
+            options: [
+                relationOption('문제에서 묻는 값'),
+                relationOption('가장 먼저 나온 숫자'),
+                relationOption('가장 큰 숫자'),
+                relationOption('단원 이름')
+            ],
+            answer: '문제에서 묻는 값',
+            hint: '문장 끝의 질문을 다시 읽고, 무엇을 답해야 하는지 확인하세요.',
+            errorType: 'BASE_UNIT_CONFUSION'
+        },
+        {
+            id: 'direction',
+            label: '조건 순서',
+            prompt: '계산하기 전에 먼저 어떻게 정리해야 할까?',
+            options: [
+                relationOption(directionSummary),
+                relationOption('숫자가 큰 것부터 무조건 고릅니다.'),
+                relationOption('문장에 먼저 나온 숫자만 사용합니다.')
+            ],
+            answer: directionSummary,
+            hint: '무엇을 먼저 구하고, 그 다음 무엇을 비교하거나 계산할지 순서를 정하세요.',
+            errorType: 'DIRECTION_CONFUSION'
+        },
+        {
+            id: 'visualization',
+            label: '정리 방법',
+            prompt: '이 문제는 어떤 방식으로 정리하면 좋을까?',
+            options: [
+                relationOption(representation),
+                relationOption('정답 선택지만 보고 고르기'),
+                relationOption('숫자만 큰 순서로 나열하기')
+            ],
+            answer: representation,
+            hint: '조건이 두 개 이상이면 표, 바, 묶음, 수직선 중 하나로 정리하면 실수가 줄어듭니다.',
+            errorType: 'NUMBER_SIZE_BIAS'
+        },
+        {
+            id: 'operation',
+            label: '연산 선택',
+            prompt: '마지막으로 어떤 사고나 연산이 필요할까?',
+            options: [
+                relationOption('덧셈'),
+                relationOption('뺄셈'),
+                relationOption('곱셈'),
+                relationOption('나눗셈'),
+                relationOption('관계 비교')
+            ],
+            answer: problem.operation,
+            hint: '질문이 전체, 차이, 한 몫, 묶음 수, 순위 중 무엇을 묻는지 확인하세요.',
+            errorType: 'OPERATION_SELECTION_ERROR'
+        },
+        {
+            id: 'explanation',
+            label: '설명 확인',
+            prompt: '왜 그 답이 되는지 가장 잘 설명한 문장은?',
+            options: explanationOptions,
+            answer: problem.explanation,
+            hint: '계산 순서와 질문에 대한 답이 모두 들어간 설명을 고르세요.',
             errorType: 'EXPLANATION_GAP'
         }
     ];
