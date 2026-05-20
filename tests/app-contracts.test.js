@@ -292,6 +292,34 @@ function testElementaryWordProblemSeedBankContract() {
   }
 }
 
+function testExpandedSeedBankConvertsIntoIrtRuntimeItems() {
+  const context = createContext();
+  runScript(context, 'js/problems/problemBase.js');
+  runScript(context, 'js/problems/relationshipCoachProblems.js');
+  runScript(context, 'js/expandedWordProblemBank.js');
+
+  const rawBank = JSON.parse(fs.readFileSync(path.join(root, 'data/elementary_word_problem_seed_bank.json'), 'utf8'));
+  const converted = context.window.ExpandedWordProblemBank.convert(rawBank);
+
+  assert.ok(converted.length >= 1000);
+  assert.ok(converted.every(item => item.problem_id && item.problem_id.startsWith('EWP_')));
+  assert.ok(converted.every(item => item.source === 'elementary_seed_bank'));
+  assert.ok(converted.every(item => item.irt?.model === 'rasch' && typeof item.irt.b === 'number'));
+  assert.ok(converted.some(item => item.irt.b <= -1.8));
+  assert.ok(converted.some(item => item.irt.b >= 1.8));
+  assert.ok(converted.every(item => Array.isArray(item.entities) && item.entities.length >= 4));
+
+  const merged = context.window.ExpandedWordProblemBank.merge(rawBank);
+  assert.ok(merged.added >= 1000);
+  assert.ok(context.window.RelationshipCoachProblems.bank.length >= 1050);
+
+  const seedProblem = context.window.RelationshipCoachProblems.generateForItem(converted[0]);
+  assert.strictEqual(seedProblem.type, 'relationshipCoach');
+  assert.ok(seedProblem.options.includes(seedProblem.answer));
+  assert.strictEqual(seedProblem.irt.model, 'rasch');
+  assert.ok(seedProblem.coachSteps.some(step => step.id === 'operation'));
+}
+
 function testIrtEngineUpdatesLearnerStateAndSelectsItems() {
   const context = createContext();
   runScript(context, 'js/irtEngine.js');
@@ -689,6 +717,7 @@ async function runTests() {
   testRelationThinkingTopicsAreElementaryIntegrated();
   testAdaptiveLearningFlowStartsWithoutManualSchoolSelection();
   testElementaryWordProblemSeedBankContract();
+  testExpandedSeedBankConvertsIntoIrtRuntimeItems();
   testSupabasePublicConfigContract();
   testSupabaseClientUsesPublicConfig();
   testIrtEngineUpdatesLearnerStateAndSelectsItems();

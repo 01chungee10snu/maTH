@@ -16,7 +16,9 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
       && typeof CURRICULUM_DATA !== 'undefined'
       && !!CURRICULUM_DATA
       && typeof TINIPINGS !== 'undefined'
-      && TINIPINGS.length > 0;
+      && TINIPINGS.length > 0
+      && typeof RelationshipCoachProblems !== 'undefined'
+      && RelationshipCoachProblems.bank.length >= 1000;
   });
 
   const supabaseConfig = await page.evaluate(() => ({
@@ -30,6 +32,16 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
   expect(supabaseConfig.url).toBe('https://gegwjdcxcarmopiaknwj.supabase.co');
   expect(supabaseConfig.keyPrefix).toBe('sb_publishable_');
   expect(supabaseConfig.hasIrtSync).toBe(true);
+
+  const runtimeBank = await page.evaluate(() => ({
+    itemCount: RelationshipCoachProblems.bank.length,
+    expandedCount: RelationshipCoachProblems.bank.filter(item => item.source === 'elementary_seed_bank').length,
+    hasExpandedLoader: typeof ExpandedWordProblemBank?.load === 'function'
+  }));
+
+  expect(runtimeBank.itemCount).toBeGreaterThanOrEqual(1050);
+  expect(runtimeBank.expandedCount).toBeGreaterThanOrEqual(1000);
+  expect(runtimeBank.hasExpandedLoader).toBe(true);
 
   const topLevelMap = await page.evaluate(() => {
     STATE.mode = 'map';

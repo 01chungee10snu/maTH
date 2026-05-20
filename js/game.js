@@ -4718,7 +4718,8 @@ loadState();
 Promise.all([
     document.fonts.ready,
     loadTinipingImages(),
-    loadCurriculumData()
+    loadCurriculumData(),
+    window.ExpandedWordProblemBank?.load?.() || Promise.resolve({ ok: false, reason: 'expanded_bank_unavailable' })
 ]).then(() => {
     console.log('모든 리소스 로드 완료');
     loadEncyclopedia();
