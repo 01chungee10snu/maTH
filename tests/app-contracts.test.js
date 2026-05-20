@@ -204,11 +204,15 @@ function testElementaryWordProblemSeedBankContract() {
   const bank = JSON.parse(fs.readFileSync(bankPath, 'utf8'));
   assert.strictEqual(bank.metadata.scope, 'elementary_school_only');
   assert.strictEqual(bank.metadata.item_count, bank.items.length);
-  assert.ok(bank.items.length >= 70);
+  assert.ok(bank.items.length >= 1000);
+  assert.ok(bank.metadata.family_count >= 50);
+  assert.strictEqual(bank.metadata.difficulty_scale, '1-12');
 
   const validGradeBands = new Set(['G1_G2', 'G3_G4', 'G5_G6']);
   const ids = new Set();
   const counts = new Map();
+  const familySet = new Set();
+  const difficultySet = new Set();
 
   for (const item of bank.items) {
     assert.ok(item.id);
@@ -217,15 +221,26 @@ function testElementaryWordProblemSeedBankContract() {
     assert.ok(validGradeBands.has(item.grade_band), `${item.id} must stay elementary-only`);
     assert.ok(item.topic);
     assert.ok(item.type);
+    assert.ok(item.type_family);
     assert.ok(Array.isArray(item.skill_tags) && item.skill_tags.length > 0);
+    assert.ok(Number.isInteger(item.difficulty));
+    assert.ok(item.difficulty >= 1 && item.difficulty <= 12);
+    assert.ok(item.level_label);
     assert.ok(item.problem.length >= 20);
     assert.ok(item.answer);
     assert.ok(item.solution);
     counts.set(item.grade_band, (counts.get(item.grade_band) || 0) + 1);
+    familySet.add(item.type_family);
+    difficultySet.add(item.difficulty);
   }
 
   for (const gradeBand of validGradeBands) {
-    assert.ok((counts.get(gradeBand) || 0) >= 15, `${gradeBand} needs at least 15 seed items`);
+    assert.ok((counts.get(gradeBand) || 0) >= 200, `${gradeBand} needs at least 200 seed items`);
+  }
+
+  assert.ok(familySet.size >= 50);
+  for (let difficulty = 1; difficulty <= 12; difficulty += 1) {
+    assert.ok(difficultySet.has(difficulty), `difficulty ${difficulty} needs seed items`);
   }
 }
 
