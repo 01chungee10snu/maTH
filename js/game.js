@@ -393,6 +393,9 @@ function genProblem(diff) {
             };
         }
         if (selectedItem && window.RelationshipCoachProblems.generateForItem) {
+            if (window.IrtEngine.registerExposure) {
+                STATE.irt = window.IrtEngine.registerExposure(STATE.irt, selectedItem);
+            }
             return window.RelationshipCoachProblems.generateForItem(selectedItem, diff);
         }
     }
@@ -2506,212 +2509,112 @@ function drawMap() {
     CTX.font = 'bold 32px Jua, sans-serif';
     CTX.textAlign = 'center';
     CTX.textBaseline = 'middle';
-    CTX.fillText('수학 탐험 지도', W / 2, 47);
-
-    // 홈 버튼 (맵 초기화)
-    const homeBtnW = 100;
-    const homeBtnH = 46;
-    const homeBtnX = 30;
-    const homeBtnY = 24;
-
-    CTX.save();
-    roundRect(CTX, homeBtnX, homeBtnY, homeBtnW, homeBtnH, 10);
-    CTX.fillStyle = '#fce7f3';
-    CTX.fill();
-    CTX.strokeStyle = '#ec4899';
-    CTX.lineWidth = 2;
-    CTX.stroke();
-    CTX.restore();
-
-    CTX.fillStyle = '#db2777';
-    CTX.font = 'bold 20px Jua, sans-serif';
-    CTX.fillText('처음으로', homeBtnX + homeBtnW / 2, homeBtnY + homeBtnH / 2);
-    STATE.hitboxes.push({ id: 'btn_map_home', x: homeBtnX, y: homeBtnY, w: homeBtnW, h: homeBtnH });
+    CTX.fillText('오늘의 맞춤 수학', W / 2, 47);
 
     CTX.textAlign = 'left';
     CTX.textBaseline = 'alphabetic';
 
-    const contentY = 110;
-    const contentH = H - contentY - 20;
+    const contentY = 112;
+    const cardX = Math.round(24 * SCALE);
+    const cardW = W - Math.round(48 * SCALE);
+    const summaryH = Math.round(148 * SCALE);
+    const summaryY = contentY;
+    const irtSummary = window.IrtEngine?.summarize ? window.IrtEngine.summarize(STATE.irt) : null;
+    const attempts = irtSummary?.attemptCount || 0;
+    const thetaLabel = irtSummary ? `수준 추정 ${irtSummary.theta}` : '수준 추정 준비중';
+    const confidence = irtSummary ? `오차 ${irtSummary.standardError}` : '문제 풀이 후 갱신';
 
-    if (!STATE.mapSelection.grade) {
-        const adaptiveBtnW = Math.min(430, W - 60);
-        const adaptiveBtnH = 96;
-        const adaptiveBtnX = (W - adaptiveBtnW) / 2;
-        const adaptiveBtnY = contentY + 18;
+    CTX.save();
+    roundRect(CTX, cardX, summaryY, cardW, summaryH, Math.round(22 * SCALE));
+    const summaryG = CTX.createLinearGradient(cardX, summaryY, cardX + cardW, summaryY + summaryH);
+    summaryG.addColorStop(0, '#fff7ed');
+    summaryG.addColorStop(1, '#eef2ff');
+    CTX.fillStyle = summaryG;
+    CTX.shadowColor = 'rgba(15, 23, 42, 0.08)';
+    CTX.shadowBlur = Math.round(18 * SCALE);
+    CTX.fill();
+    CTX.restore();
 
+    CTX.fillStyle = '#111827';
+    drawFittedCanvasText('매일 풀수록 더 맞춰지는 수학 루틴', W / 2, summaryY + Math.round(36 * SCALE), cardW - Math.round(36 * SCALE), {
+        initialSize: Math.round(27 * SCALE),
+        minSize: Math.round(18 * SCALE),
+        weight: 'bold'
+    });
+    CTX.fillStyle = '#4b5563';
+    drawFittedCanvasText(`풀이 ${attempts}문항 · ${thetaLabel} · ${confidence}`, W / 2, summaryY + Math.round(72 * SCALE), cardW - Math.round(36 * SCALE), {
+        initialSize: Math.round(20 * SCALE),
+        minSize: Math.round(14 * SCALE),
+        weight: 'bold'
+    });
+    CTX.fillStyle = '#6b7280';
+    drawFittedCanvasText('학교급을 고르지 않고 현재 기록과 약점에 맞춰 바로 출제합니다.', W / 2, summaryY + Math.round(108 * SCALE), cardW - Math.round(36 * SCALE), {
+        initialSize: Math.round(18 * SCALE),
+        minSize: Math.round(13 * SCALE),
+        weight: 'bold'
+    });
+
+    const adaptiveBtnW = Math.min(460, W - 60);
+    const adaptiveBtnH = Math.round(104 * SCALE);
+    const adaptiveBtnX = (W - adaptiveBtnW) / 2;
+    const adaptiveBtnY = summaryY + summaryH + Math.round(28 * SCALE);
+
+    CTX.save();
+    roundRect(CTX, adaptiveBtnX, adaptiveBtnY, adaptiveBtnW, adaptiveBtnH, Math.round(24 * SCALE));
+    const startG = CTX.createLinearGradient(adaptiveBtnX, adaptiveBtnY, adaptiveBtnX + adaptiveBtnW, adaptiveBtnY + adaptiveBtnH);
+    startG.addColorStop(0, '#0f766e');
+    startG.addColorStop(1, '#2563eb');
+    CTX.fillStyle = startG;
+    CTX.shadowColor = 'rgba(37, 99, 235, 0.24)';
+    CTX.shadowBlur = Math.round(18 * SCALE);
+    CTX.fill();
+    CTX.restore();
+
+    CTX.fillStyle = '#ffffff';
+    CTX.font = `bold ${Math.round(33 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'center';
+    CTX.textBaseline = 'middle';
+    CTX.fillText('오늘의 문제 시작', adaptiveBtnX + adaptiveBtnW / 2, adaptiveBtnY + adaptiveBtnH * 0.38);
+    CTX.font = `${Math.round(20 * SCALE)}px Jua, sans-serif`;
+    CTX.fillText('IRT 맞춤 출제', adaptiveBtnX + adaptiveBtnW / 2, adaptiveBtnY + adaptiveBtnH * 0.72);
+    STATE.hitboxes.push({ id: 'btn_adaptive_start', x: adaptiveBtnX, y: adaptiveBtnY, w: adaptiveBtnW, h: adaptiveBtnH });
+
+    const secondaryY = adaptiveBtnY + adaptiveBtnH + Math.round(28 * SCALE);
+    const gap = Math.round(14 * SCALE);
+    const secondaryW = (cardW - gap) / 2;
+    const secondaryH = Math.round(76 * SCALE);
+    const secondaryButtons = [
+        { id: 'btn_collection', label: '리포트 보기', sub: '부모 리포트 · 티니핑', x: cardX },
+        { id: 'btn_reset', label: '처음부터', sub: '기록 초기화', x: cardX + secondaryW + gap }
+    ];
+
+    secondaryButtons.forEach(button => {
         CTX.save();
-        roundRect(CTX, adaptiveBtnX, adaptiveBtnY, adaptiveBtnW, adaptiveBtnH, 24);
-        CTX.fillStyle = '#0f766e';
-        CTX.shadowColor = 'rgba(15, 118, 110, 0.22)';
-        CTX.shadowBlur = 14;
+        roundRect(CTX, button.x, secondaryY, secondaryW, secondaryH, Math.round(18 * SCALE));
+        CTX.fillStyle = button.id === 'btn_collection' ? '#fdf2f8' : '#f8fafc';
         CTX.fill();
+        CTX.strokeStyle = button.id === 'btn_collection' ? '#f9a8d4' : '#cbd5e1';
+        CTX.lineWidth = 1.5;
+        CTX.stroke();
         CTX.restore();
 
-        CTX.fillStyle = '#ffffff';
-        CTX.font = 'bold 34px Jua, sans-serif';
-        CTX.textAlign = 'center';
-        CTX.textBaseline = 'middle';
-        CTX.fillText('오늘의 문제 시작', adaptiveBtnX + adaptiveBtnW / 2, adaptiveBtnY + 36);
-        CTX.font = '20px Jua, sans-serif';
-        CTX.fillText('현재 수준 맞춤', adaptiveBtnX + adaptiveBtnW / 2, adaptiveBtnY + 70);
-        STATE.hitboxes.push({ id: 'btn_adaptive_start', x: adaptiveBtnX, y: adaptiveBtnY, w: adaptiveBtnW, h: adaptiveBtnH });
-
-        // 1단계: 학교급 선택 (초등학교, 중학교, 고등학교)
-        const levels = [
-            { id: 'elementary_school', label: '초등학교', color: '#fca5a5' },
-            { id: 'middle_school', label: '중학교', color: '#86efac' },
-            { id: 'high_school', label: '고등학교', color: '#93c5fd' }
-        ];
-
-        const btnW = Math.min(340, W - 60);
-        const btnH = 72;
-        const gap = 20;
-        const totalH = levels.length * btnH + (levels.length - 1) * gap;
-        let startY = adaptiveBtnY + adaptiveBtnH + 76;
-
-        CTX.fillStyle = '#374151';
-        CTX.font = 'bold 24px Jua, sans-serif';
-        CTX.textAlign = 'center';
-        CTX.fillText('학습 지도', W / 2, startY - 28);
-
-        levels.forEach(lvl => {
-            const bx = (W - btnW) / 2;
-            const by = startY;
-
-            CTX.save();
-            roundRect(CTX, bx, by, btnW, btnH, 24);
-            CTX.fillStyle = lvl.color;
-            CTX.shadowColor = 'rgba(0,0,0,0.1)';
-            CTX.shadowBlur = 12;
-            CTX.fill();
-            CTX.restore();
-
-            CTX.fillStyle = '#ffffff';
-            CTX.font = 'bold 30px Jua, sans-serif';
-            CTX.textAlign = 'center';
-            CTX.textBaseline = 'middle';
-            CTX.fillText(lvl.label, bx + btnW / 2, by + btnH / 2);
-
-            STATE.hitboxes.push({ id: `grade_${lvl.id}`, x: bx, y: by, w: btnW, h: btnH });
-            startY += btnH + gap;
+        CTX.fillStyle = button.id === 'btn_collection' ? '#be185d' : '#475569';
+        drawFittedCanvasText(button.label, button.x + secondaryW / 2, secondaryY + Math.round(28 * SCALE), secondaryW - Math.round(18 * SCALE), {
+            initialSize: Math.round(21 * SCALE),
+            minSize: Math.round(14 * SCALE),
+            weight: 'bold'
         });
-
-    } else if (!STATE.mapSelection.subGrade) {
-        // 2단계: 학년군/학년 선택
-        if (!CURRICULUM_DATA) {
-            console.error('커리큘럼 데이터가 로드되지 않았습니다.');
-            return;
-        }
-        const gradeData = CURRICULUM_DATA[STATE.mapSelection.grade];
-        if (!gradeData) {
-            console.error(`해당 학년급(${STATE.mapSelection.grade}) 데이터를 찾을 수 없습니다.`);
-            return;
-        }
-
-        const subGrades = Object.keys(gradeData);
-        const btnW = Math.min(320, W - 60);
-        const btnH = 70;
-        const gap = 25;
-
-        let startY = contentY + 30;
-
-        CTX.fillStyle = '#1f2937';
-        CTX.font = 'bold 32px Jua, sans-serif';
-        CTX.textAlign = 'center';
-        CTX.fillText('학년을 선택해줘!', W / 2, startY);
-        startY += 60;
-
-        subGrades.forEach(sub => {
-            const bx = (W - btnW) / 2;
-            const by = startY;
-
-            CTX.save();
-            roundRect(CTX, bx, by, btnW, btnH, 18);
-            CTX.fillStyle = '#c4b5fd';
-            CTX.fill();
-            CTX.restore();
-
-            CTX.fillStyle = '#ffffff';
-            CTX.font = 'bold 28px Jua, sans-serif';
-            CTX.textAlign = 'center';
-            CTX.textBaseline = 'middle';
-            CTX.fillText(sub, bx + btnW / 2, by + btnH / 2);
-
-            STATE.hitboxes.push({ id: `subgrade_${sub}`, x: bx, y: by, w: btnW, h: btnH });
-            startY += btnH + gap;
+        CTX.fillStyle = '#64748b';
+        drawFittedCanvasText(button.sub, button.x + secondaryW / 2, secondaryY + Math.round(54 * SCALE), secondaryW - Math.round(18 * SCALE), {
+            initialSize: Math.round(15 * SCALE),
+            minSize: Math.round(11 * SCALE),
+            weight: 'bold'
         });
+        STATE.hitboxes.push({ id: button.id, x: button.x, y: secondaryY, w: secondaryW, h: secondaryH });
+    });
 
-    } else {
-        // 3단계: 영역 및 주제 선택
-        if (!CURRICULUM_DATA || !CURRICULUM_DATA[STATE.mapSelection.grade]) return;
-
-        const domainData = CURRICULUM_DATA[STATE.mapSelection.grade][STATE.mapSelection.subGrade];
-        if (!domainData) {
-            console.error(`해당 학년(${STATE.mapSelection.subGrade}) 데이터를 찾을 수 없습니다.`);
-            return;
-        }
-
-        const sections = typeof getCurriculumTopicSections === 'function'
-            ? getCurriculumTopicSections(domainData)
-            : Object.keys(domainData).map(title => ({ title, topics: domainData[title] }));
-        let startY = contentY + 20;
-
-        sections.forEach(section => {
-            const topics = Array.isArray(section.topics) ? section.topics : [];
-            if (!topics.length) return;
-
-            // 영역 제목
-            CTX.fillStyle = '#374151';
-            CTX.font = 'bold 26px Jua, sans-serif';
-            CTX.textAlign = 'left';
-            CTX.fillText(section.title, 30, startY);
-            startY += 40;
-
-            // 주제 버튼들
-            const btnH = 50;
-            const gap = 12;
-            const colCount = Math.max(1, Math.floor((W - 60) / 180)); // 버튼 최소 너비 고려
-            const btnW = (W - 60 - (colCount - 1) * gap) / colCount;
-
-            topics.forEach((topic, idx) => {
-                const row = Math.floor(idx / colCount);
-                const col = idx % colCount;
-                const bx = 30 + col * (btnW + gap);
-                const by = startY + row * (btnH + gap);
-                const supported = isProblemTopicSupported(topic);
-
-                CTX.save();
-                roundRect(CTX, bx, by, btnW, btnH, 12);
-                CTX.fillStyle = supported ? '#f0f9ff' : '#f3f4f6';
-                CTX.fill();
-                CTX.strokeStyle = supported ? '#bae6fd' : '#d1d5db';
-                CTX.lineWidth = 1.5;
-                CTX.stroke();
-                CTX.restore();
-
-                CTX.fillStyle = supported ? '#0369a1' : '#9ca3af';
-                CTX.font = `bold ${supported ? 20 : 18}px Jua, sans-serif`;
-                CTX.textAlign = 'center';
-                CTX.textBaseline = 'middle';
-
-                // 텍스트 길이 조절
-                let displayTopic = topic;
-                if (topic.length > 8) displayTopic = topic.substring(0, 8) + '..';
-
-                CTX.fillText(displayTopic, bx + btnW / 2, by + (supported ? btnH / 2 : btnH / 2 - 7));
-                if (!supported) {
-                    CTX.font = '13px Jua, sans-serif';
-                    CTX.fillText('준비중', bx + btnW / 2, by + btnH / 2 + 15);
-                }
-
-                STATE.hitboxes.push({ id: `topic_${topic}`, x: bx, y: by, w: btnW, h: btnH, disabled: !supported });
-            });
-
-            const rows = Math.ceil(topics.length / colCount);
-            startY += rows * (btnH + gap) + 30;
-        });
-    }
+    CTX.textAlign = 'left';
+    CTX.textBaseline = 'alphabetic';
 }
 
 function drawHome() {

@@ -463,6 +463,49 @@ function testIrtEngineUpdatesLearnerStateAndSelectsItems() {
   assert.ok(updatedWrong.theta < initial.theta);
 }
 
+function testIrtExposurePreventsUnansweredStartupRepeat() {
+  const context = createContext();
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLearningPolicy.js');
+
+  assert.strictEqual(typeof context.window.IrtEngine.registerExposure, 'function');
+
+  const items = [
+    {
+      problem_id: 'diagnostic_first',
+      type_family: 'ADD_JOIN_CHANGE',
+      skill_tags: ['ADDITION'],
+      problem_types: ['ADDITION'],
+      irt: { model: 'rasch', b: 0 }
+    },
+    {
+      problem_id: 'diagnostic_second',
+      type_family: 'ADD_COMPARE',
+      skill_tags: ['ADDITION'],
+      problem_types: ['ADDITION'],
+      irt: { model: 'rasch', b: 0 }
+    },
+    {
+      problem_id: 'diagnostic_third',
+      type_family: 'ADD_PART_PART_WHOLE',
+      skill_tags: ['ADDITION'],
+      problem_types: ['ADDITION'],
+      irt: { model: 'rasch', b: 0 }
+    }
+  ];
+
+  let state = context.window.IrtEngine.createInitialState('relationship_math', {
+    learnerSeed: 'repeat-contract-seed',
+    dailySeed: '2026-05-21'
+  });
+  const first = context.window.IrtLearningPolicy.selectNextItem(items, state);
+  state = context.window.IrtEngine.registerExposure(state, first.item);
+  const second = context.window.IrtLearningPolicy.selectNextItem(items, state);
+
+  assert.notStrictEqual(second.item.problem_id, first.item.problem_id);
+  assert.strictEqual(state.attemptCount, 0, 'presenting a question should not count as an answered attempt');
+}
+
 function testIrtSelectionAvoidsImmediateItemRepeatWhenAlternativesExist() {
   const context = createContext();
   runScript(context, 'js/problems/problemBase.js');
@@ -1020,6 +1063,7 @@ async function runTests() {
   testSupabasePublicConfigContract();
   testSupabaseClientUsesPublicConfig();
   testIrtEngineUpdatesLearnerStateAndSelectsItems();
+  testIrtExposurePreventsUnansweredStartupRepeat();
   testIrtSelectionAvoidsImmediateItemRepeatWhenAlternativesExist();
   testIrtSelectionMaintainsItemDiversityAcrossAdaptiveRun();
   testIrtLearningPolicyPromotesDiagnosisPracticeAndMastery();

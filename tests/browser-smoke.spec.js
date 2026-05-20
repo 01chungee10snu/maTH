@@ -59,12 +59,16 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
     return {
       gradeButtons: STATE.hitboxes.filter(box => box.id.startsWith('grade_')).length,
       hasAdaptiveStartButton: STATE.hitboxes.some(box => box.id === 'btn_adaptive_start'),
+      hasCollectionButton: STATE.hitboxes.some(box => box.id === 'btn_collection'),
+      hasMapHomeButton: STATE.hitboxes.some(box => box.id === 'btn_map_home'),
       hasSeparateRelationCoachButton: STATE.hitboxes.some(box => box.id === 'btn_relation_coach')
     };
   });
 
-  expect(topLevelMap.gradeButtons).toBe(3);
+  expect(topLevelMap.gradeButtons).toBe(0);
   expect(topLevelMap.hasAdaptiveStartButton).toBe(true);
+  expect(topLevelMap.hasCollectionButton).toBe(true);
+  expect(topLevelMap.hasMapHomeButton).toBe(false);
   expect(topLevelMap.hasSeparateRelationCoachButton).toBe(false);
 
   const adaptiveStart = await page.evaluate(() => {
@@ -95,7 +99,36 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
   expect(adaptiveStart.hasIrtState).toBe(true);
   expect(adaptiveStart.mapGrade).toBe(null);
 
-  const highSchoolMap = await page.evaluate(() => {
+  const repeatedStartup = await page.evaluate(() => {
+    localStorage.removeItem('taehee-irt-attempt-log');
+    STATE.irt = IrtEngine.createInitialState('relationship_math', {
+      learnerSeed: 'browser-repeat-seed',
+      dailySeed: '2026-05-21'
+    });
+    STATE.learningEntry = null;
+    STATE.problem = null;
+    STATE.selected = null;
+    STATE.relationCoach = null;
+    startAdaptiveLearning();
+    const firstId = STATE.problem?.problem_id;
+    const attemptsAfterFirstPresentation = STATE.irt?.attemptCount;
+    startAdaptiveLearning();
+    const secondId = STATE.problem?.problem_id;
+    return {
+      firstId,
+      secondId,
+      attemptsAfterFirstPresentation,
+      presented: STATE.irt?.presentedItemIds || []
+    };
+  });
+
+  expect(repeatedStartup.firstId).toBeTruthy();
+  expect(repeatedStartup.secondId).toBeTruthy();
+  expect(repeatedStartup.secondId).not.toBe(repeatedStartup.firstId);
+  expect(repeatedStartup.attemptsAfterFirstPresentation).toBe(0);
+  expect(repeatedStartup.presented).toContain(repeatedStartup.firstId);
+
+  const staleSchoolSelectionMap = await page.evaluate(() => {
     STATE.mode = 'map';
     STATE.mapSelection = { grade: 'high_school', subGrade: '공통과목', domain: null };
     lastCssW = null;
@@ -106,16 +139,20 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
       return {
         ok: true,
         hitboxes: STATE.hitboxes.length,
-        disabledTopics: STATE.hitboxes.filter(box => box.disabled).length
+        gradeButtons: STATE.hitboxes.filter(box => box.id.startsWith('grade_')).length,
+        topicButtons: STATE.hitboxes.filter(box => box.id.startsWith('topic_')).length,
+        hasAdaptiveStartButton: STATE.hitboxes.some(box => box.id === 'btn_adaptive_start')
       };
     } catch (error) {
       return { ok: false, message: error.message };
     }
   });
 
-  expect(highSchoolMap.ok).toBe(true);
-  expect(highSchoolMap.hitboxes).toBeGreaterThan(0);
-  expect(highSchoolMap.disabledTopics).toBeGreaterThan(0);
+  expect(staleSchoolSelectionMap.ok).toBe(true);
+  expect(staleSchoolSelectionMap.hitboxes).toBeGreaterThan(0);
+  expect(staleSchoolSelectionMap.gradeButtons).toBe(0);
+  expect(staleSchoolSelectionMap.topicButtons).toBe(0);
+  expect(staleSchoolSelectionMap.hasAdaptiveStartButton).toBe(true);
 
   const relationCoach = await page.evaluate(() => {
     localStorage.removeItem('taehee-irt-attempt-log');

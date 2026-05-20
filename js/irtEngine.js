@@ -9,20 +9,52 @@
 const IRT_STATE_VERSION = 1;
 const IRT_THETA_MIN = -3;
 const IRT_THETA_MAX = 3;
+const IRT_STORAGE_SEED_KEY = 'taehee-irt-learner-seed';
 
 function clampIrt(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
 
-function createInitialIrtState(topic = 'relationship_math') {
+function getLocalDateKey(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function createRuntimeSeed() {
+    return `learner-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function getStoredLearnerSeed(topic) {
+    try {
+        const storage = window?.localStorage || globalThis?.localStorage;
+        if (!storage) return `anonymous-${topic}`;
+        const existing = storage.getItem(IRT_STORAGE_SEED_KEY);
+        if (existing) return existing;
+        const created = createRuntimeSeed();
+        storage.setItem(IRT_STORAGE_SEED_KEY, created);
+        return created;
+    } catch (error) {
+        return `anonymous-${topic}`;
+    }
+}
+
+function createInitialIrtState(topic = 'relationship_math', options = {}) {
+    const learnerSeed = options.learnerSeed || getStoredLearnerSeed(topic);
+    const dailySeed = options.dailySeed || `${learnerSeed}:${getLocalDateKey()}`;
     return {
         version: IRT_STATE_VERSION,
         topic,
+        learnerSeed,
+        dailySeed,
         theta: 0,
         standardError: 1,
         attemptCount: 0,
         lastItemIds: [],
         lastItemFamilies: [],
+        presentedItemIds: [],
+        presentedItemFamilies: [],
         skillStates: {},
         updatedAt: new Date().toISOString()
     };
@@ -113,7 +145,26 @@ function updateIrtState(previousState, item, result = {}) {
         attemptCount,
         lastItemIds,
         lastItemFamilies,
+        presentedItemIds: state.presentedItemIds || [],
+        presentedItemFamilies: state.presentedItemFamilies || [],
         skillStates,
+        updatedAt: new Date().toISOString()
+    };
+}
+
+function registerIrtExposure(previousState, item) {
+    const state = previousState || createInitialIrtState();
+    const itemId = item?.problem_id || item?.problemKey;
+    if (!itemId) return state;
+    const family = getItemFamily(item);
+    const withoutSameItem = (state.presentedItemIds || []).filter(id => id !== itemId);
+    const withoutSameFamily = (state.presentedItemFamilies || []).filter(value => value !== family);
+
+    return {
+        ...state,
+        presentedItemIds: [itemId, ...withoutSameItem].slice(0, 80),
+        presentedItemFamilies: [family, ...withoutSameFamily].filter(Boolean).slice(0, 80),
+        lastPresentedAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     };
 }
@@ -179,6 +230,7 @@ window.IrtEngine = {
     information: getItemInformation,
     responseScore: getResponseScore,
     getItemFamily,
+    registerExposure: registerIrtExposure,
     updateState: updateIrtState,
     selectNextItem: selectNextIrtItem,
     summarize: summarizeIrtState

@@ -101,7 +101,11 @@ function getTargetProbability(phase) {
 }
 
 function getRecentPenalty(item, state = {}) {
-    const index = (state.lastItemIds || []).indexOf(item.problem_id);
+    const recentIds = [
+        ...(state.lastItemIds || []),
+        ...(state.presentedItemIds || [])
+    ];
+    const index = recentIds.indexOf(item.problem_id);
     if (index < 0) return 0;
     return 2.5 - Math.min(index, 10) * 0.15;
 }
@@ -109,7 +113,11 @@ function getRecentPenalty(item, state = {}) {
 function getRecentFamilyPenalty(item, state = {}) {
     const family = getPolicyFamily(item);
     if (!family) return 0;
-    const index = (state.lastItemFamilies || []).indexOf(family);
+    const recentFamilies = [
+        ...(state.lastItemFamilies || []),
+        ...(state.presentedItemFamilies || [])
+    ];
+    const index = recentFamilies.indexOf(family);
     if (index < 0) return 0;
     return 1.4 - Math.min(index, 8) * 0.12;
 }
@@ -156,8 +164,13 @@ function selectPolicyNextItem(items, state = {}) {
     const phase = getLearningPhase(pool, state);
     const targetSkill = getTargetSkill(pool, state, phase);
     const context = { items: pool, phase, targetSkill };
-    const recent = new Set(state.lastItemIds || []);
-    const notImmediate = pool.filter(item => item.problem_id !== state.lastItemIds?.[0]);
+    const recentIds = [
+        ...(state.lastItemIds || []),
+        ...(state.presentedItemIds || [])
+    ];
+    const recent = new Set(recentIds);
+    const immediateId = state.presentedItemIds?.[0] || state.lastItemIds?.[0];
+    const notImmediate = pool.filter(item => item.problem_id !== immediateId);
     const fresh = notImmediate.filter(item => !recent.has(item.problem_id));
     const candidatePool = fresh.length >= Math.min(30, Math.ceil(pool.length * 0.1))
         ? fresh
