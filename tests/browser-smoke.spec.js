@@ -119,6 +119,27 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
   expect(relationCoach.latestLog.sync_status).toBe('pending');
   expect(relationCoach.latestLog.correct).toBe(true);
 
+  const parentReport = await page.evaluate(() => {
+    STATE.mode = 'collection';
+    STATE.collectionTab = '부모 리포트';
+    lastCssW = null;
+    lastCssH = null;
+    setHiDPI();
+    drawCollection();
+    const report = MathAbilityReport.buildParentReport({ irtState: STATE.irt });
+    return {
+      hasParentReportTab: STATE.hitboxes.some(box => box.id === 'tab_부모 리포트'),
+      totalAttempts: report.summary.totalAttempts,
+      confidenceLabel: report.measurement.confidenceLabel,
+      recommendations: report.recommendations.length
+    };
+  });
+
+  expect(parentReport.hasParentReportTab).toBe(true);
+  expect(parentReport.totalAttempts).toBe(1);
+  expect(parentReport.confidenceLabel).toBe('데이터 부족');
+  expect(parentReport.recommendations).toBeGreaterThan(0);
+
   const visibleError = await page.locator('#err').evaluate(el => ({
     text: el.textContent,
     display: getComputedStyle(el).display

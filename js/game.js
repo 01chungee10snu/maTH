@@ -2273,7 +2273,7 @@ function drawCollectionButton(W, H) {
     CTX.font = 'bold 18px Jua, sans-serif';
     CTX.textAlign = 'center';
     CTX.textBaseline = 'middle';
-    CTX.fillText('📚 컬렉션', bx + bw / 2, by + bh / 2);
+    CTX.fillText('📊 리포트', bx + bw / 2, by + bh / 2);
     CTX.textBaseline = 'alphabetic';
     CTX.textAlign = 'left';
 
@@ -3871,14 +3871,16 @@ function drawCollection() {
 
     const caughtCount = (STATE.caughtIds || []).length;
 
-    CTX.fillStyle = '#ec4899';
+    const isParentReport = STATE.collectionTab === '부모 리포트';
+
+    CTX.fillStyle = isParentReport ? '#0f766e' : '#ec4899';
     CTX.font = `bold ${Math.round(34 * SCALE)}px Jua, sans-serif`;
     CTX.textAlign = 'left';
-    CTX.fillText('태희의 티니핑 컬렉션', Math.round(24 * SCALE), Math.round(50 * SCALE));
+    CTX.fillText(isParentReport ? '수리능력 리포트' : '태희의 티니핑 컬렉션', Math.round(24 * SCALE), Math.round(50 * SCALE));
 
     CTX.fillStyle = '#6b7280';
     CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif`;
-    CTX.fillText(`수집: ${caughtCount} / ${TINIPINGS.length}`, Math.round(24 * SCALE), Math.round(80 * SCALE));
+    CTX.fillText(isParentReport ? 'IRT 기반 추정과 다음 학습 권장' : `수집: ${caughtCount} / ${TINIPINGS.length}`, Math.round(24 * SCALE), Math.round(80 * SCALE));
 
     // 닫기 버튼
     const bw = Math.max(100, Math.round(120 * SCALE));
@@ -3902,7 +3904,7 @@ function drawCollection() {
     STATE.hitboxes.push({ id: 'btn_close_collection', x: bx, y: by, w: bw, h: bh });
 
     // 탭 버튼 영역
-    const tabs = ['전체', '수와 연산', '도형과 측정', '규칙성', '자료와 가능성'];
+    const tabs = ['전체', '수와 연산', '도형과 측정', '규칙성', '자료와 가능성', '부모 리포트'];
     const tabY = Math.round(100 * SCALE);
     const tabH = Math.round(46 * SCALE);
     const tabGap = Math.round(10 * SCALE);
@@ -3933,6 +3935,11 @@ function drawCollection() {
 
         STATE.hitboxes.push({ id: `tab_${tab}`, x: tx, y: tabY, w: tabW, h: tabH });
     });
+
+    if (isParentReport) {
+        drawParentReportPanel(W, H, tabY + tabH + Math.round(25 * SCALE));
+        return;
+    }
 
     // 그리드 영역
     const gridX = Math.round(24 * SCALE);
@@ -3991,6 +3998,115 @@ function drawCollection() {
         CTX.fillStyle = isCaught ? '#1f2937' : '#9ca3af';
         CTX.font = `bold ${Math.round(16 * SCALE)}px Jua, sans-serif`;
         CTX.fillText(tp.name, cx + cellW / 2, cy + cellH - pad * 2.5);
+    });
+}
+
+function drawParentReportPanel(W, H, startY) {
+    const report = window.MathAbilityReport?.buildParentReport
+        ? window.MathAbilityReport.buildParentReport({ irtState: STATE.irt })
+        : null;
+    const cardX = Math.round(24 * SCALE);
+    const cardW = W - Math.round(48 * SCALE);
+    const cardY = startY;
+    const cardH = H - cardY - Math.round(28 * SCALE);
+
+    CTX.save();
+    roundRect(CTX, cardX, cardY, cardW, cardH, Math.round(18 * SCALE));
+    CTX.fillStyle = '#ffffff';
+    CTX.shadowColor = 'rgba(15, 118, 110, 0.12)';
+    CTX.shadowBlur = Math.round(14 * SCALE);
+    CTX.fill();
+    CTX.restore();
+
+    if (!report || report.summary.totalAttempts === 0) {
+        CTX.fillStyle = '#111827';
+        CTX.font = `bold ${Math.round(25 * SCALE)}px Jua, sans-serif`;
+        CTX.textAlign = 'center';
+        CTX.fillText('아직 측정할 풀이 기록이 없어요', W / 2, cardY + Math.round(80 * SCALE));
+        CTX.fillStyle = '#6b7280';
+        CTX.font = `${Math.round(18 * SCALE)}px Jua, sans-serif`;
+        CTX.fillText('관계 사고가 필요한 문장제를 몇 문제 풀면 리포트가 만들어져요.', W / 2, cardY + Math.round(118 * SCALE));
+        return;
+    }
+
+    const m = report.measurement;
+    const s = report.summary;
+    const topY = cardY + Math.round(28 * SCALE);
+    const tileGap = Math.round(12 * SCALE);
+    const tileW = (cardW - Math.round(44 * SCALE) - tileGap * 2) / 3;
+    const tileH = Math.round(104 * SCALE);
+    const tileX = cardX + Math.round(22 * SCALE);
+
+    drawReportMetricTile(tileX, topY, tileW, tileH, '수리능력 지수', `${m.abilityIndex}`, m.band, '#0f766e');
+    drawReportMetricTile(tileX + tileW + tileGap, topY, tileW, tileH, '추정치 theta', `${m.theta}`, `오차 ${m.standardError}`, '#2563eb');
+    drawReportMetricTile(tileX + (tileW + tileGap) * 2, topY, tileW, tileH, '측정 신뢰도', m.confidenceLabel, m.interval, '#7c3aed');
+
+    let y = topY + tileH + Math.round(30 * SCALE);
+    CTX.fillStyle = '#111827';
+    CTX.font = `bold ${Math.round(23 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'left';
+    CTX.fillText('학습 요약', cardX + Math.round(24 * SCALE), y);
+    y += Math.round(28 * SCALE);
+
+    CTX.fillStyle = '#374151';
+    CTX.font = `${Math.round(18 * SCALE)}px Jua, sans-serif`;
+    [
+        `풀이 기록 ${s.totalAttempts}문항 · 정답률 ${s.correctRate}% · 독립 풀이율 ${s.independentSolveRate}%`,
+        `평균 힌트 단계 ${s.averageHintLevel} · 평균 IRT 응답 점수 ${s.averageResponseScore}`,
+        report.parentNarrative
+    ].forEach(line => {
+        getLines(CTX, line, cardW - Math.round(48 * SCALE)).forEach(wrapped => {
+            CTX.fillText(wrapped, cardX + Math.round(24 * SCALE), y);
+            y += Math.round(24 * SCALE);
+        });
+    });
+
+    y += Math.round(12 * SCALE);
+    drawReportListSection(cardX + Math.round(24 * SCALE), y, cardW - Math.round(48 * SCALE), '보완할 사고 단계', report.weakSkills.map(item => (
+        `${item.label}: 응답점수 ${item.averageResponseScore}, 힌트 ${item.averageHintLevel}`
+    )));
+
+    y += Math.round(112 * SCALE);
+    drawReportListSection(cardX + Math.round(24 * SCALE), y, cardW - Math.round(48 * SCALE), '다음 추천 학습', report.recommendations);
+}
+
+function drawReportMetricTile(x, y, w, h, title, value, subtitle, color) {
+    CTX.save();
+    roundRect(CTX, x, y, w, h, Math.round(14 * SCALE));
+    CTX.fillStyle = '#f8fafc';
+    CTX.fill();
+    CTX.strokeStyle = '#e5e7eb';
+    CTX.lineWidth = 1;
+    CTX.stroke();
+    CTX.restore();
+
+    CTX.fillStyle = '#6b7280';
+    CTX.font = `${Math.round(15 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'left';
+    CTX.fillText(title, x + Math.round(14 * SCALE), y + Math.round(24 * SCALE));
+    CTX.fillStyle = color;
+    CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif`;
+    CTX.fillText(value, x + Math.round(14 * SCALE), y + Math.round(58 * SCALE));
+    CTX.fillStyle = '#4b5563';
+    CTX.font = `${Math.round(14 * SCALE)}px Jua, sans-serif`;
+    CTX.fillText(subtitle, x + Math.round(14 * SCALE), y + Math.round(84 * SCALE));
+}
+
+function drawReportListSection(x, y, w, title, items) {
+    CTX.fillStyle = '#111827';
+    CTX.font = `bold ${Math.round(21 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'left';
+    CTX.fillText(title, x, y);
+    y += Math.round(28 * SCALE);
+
+    CTX.fillStyle = '#374151';
+    CTX.font = `${Math.round(17 * SCALE)}px Jua, sans-serif`;
+    const list = items && items.length ? items : ['아직 충분한 기록이 없어 더 관찰이 필요합니다.'];
+    list.slice(0, 4).forEach(item => {
+        getLines(CTX, `- ${item}`, w).forEach(line => {
+            CTX.fillText(line, x, y);
+            y += Math.round(23 * SCALE);
+        });
     });
 }
 

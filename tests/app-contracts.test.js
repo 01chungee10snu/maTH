@@ -463,6 +463,79 @@ async function testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners() {
   assert.strictEqual(context.window.IrtLog.getPendingAttempts().length, 0);
 }
 
+function testMathAbilityReportSummarizesIrtEvidenceForParents() {
+  const context = createStorageContext();
+  runScript(context, 'js/irtLog.js');
+  runScript(context, 'js/mathAbilityReport.js');
+
+  context.window.IrtLog.saveAttempts([
+    {
+      local_id: 'a1',
+      item_id: 'REL_MATH_A',
+      topic: 'relationship_math',
+      skill_tags: ['EQUAL_SHARING'],
+      correct: true,
+      hint_level: 0,
+      response_score: 1,
+      theta_before: 0,
+      theta_after: 0.2,
+      standard_error_after: 0.8,
+      created_at: '2026-05-20T00:00:00.000Z'
+    },
+    {
+      local_id: 'a2',
+      item_id: 'REL_MATH_B',
+      topic: 'relationship_math',
+      skill_tags: ['DIRECTION_CONFUSION'],
+      correct: false,
+      hint_level: 4,
+      response_score: 0.15,
+      theta_before: 0.2,
+      theta_after: 0.05,
+      standard_error_after: 0.7,
+      error_type: 'DIRECTION_CONFUSION',
+      created_at: '2026-05-20T00:01:00.000Z'
+    },
+    {
+      local_id: 'a3',
+      item_id: 'REL_MATH_C',
+      topic: 'relationship_math',
+      skill_tags: ['FRACTION_RELATION'],
+      correct: true,
+      hint_level: 2,
+      response_score: 0.84,
+      theta_before: 0.05,
+      theta_after: 0.18,
+      standard_error_after: 0.65,
+      created_at: '2026-05-20T00:02:00.000Z'
+    }
+  ]);
+
+  const report = context.window.MathAbilityReport.buildParentReport({
+    irtState: {
+      theta: 0.18,
+      standardError: 0.65,
+      attemptCount: 3,
+      skillStates: {
+        EQUAL_SHARING: { attempts: 1, mastery: 1 },
+        DIRECTION_CONFUSION: { attempts: 1, mastery: 0.15 },
+        FRACTION_RELATION: { attempts: 1, mastery: 0.84 }
+      }
+    }
+  });
+
+  assert.strictEqual(report.summary.totalAttempts, 3);
+  assert.strictEqual(report.summary.correctRate, 67);
+  assert.strictEqual(report.summary.independentSolveRate, 33);
+  assert.strictEqual(report.measurement.theta, 0.18);
+  assert.strictEqual(report.measurement.standardError, 0.65);
+  assert.ok(report.measurement.abilityIndex > 50);
+  assert.strictEqual(report.measurement.confidenceLabel, '관찰 중');
+  assert.strictEqual(report.weakSkills[0].skill, 'DIRECTION_CONFUSION');
+  assert.ok(report.parentNarrative.includes('추정'));
+  assert.ok(report.recommendations.length >= 2);
+}
+
 async function runTests() {
   testCurriculumTopicSections();
   testProblemOptionsStayUniqueAndComplete();
@@ -476,6 +549,7 @@ async function runTests() {
   testRelationshipCoachBankHasIrtMetadata();
   testIrtAttemptLogCreatesSupabaseReadyPendingRecords();
   await testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners();
+  testMathAbilityReportSummarizesIrtEvidenceForParents();
 }
 
 runTests()

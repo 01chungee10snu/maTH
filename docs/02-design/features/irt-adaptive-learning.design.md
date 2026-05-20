@@ -104,3 +104,17 @@
 Supabase 동기화는 익명 쓰기 정책을 열지 않는다. 운영 적용 시에는 보호자 동의, 사용자 인증, RLS 정책, 삭제 요청 처리 방식을 먼저 확정한 뒤 `pending` 로그만 서버에 업로드하고 성공한 항목을 `synced`로 표시한다.
 
 클라이언트 동기화 함수는 `IrtSync.syncPendingAttempts()`로 분리한다. 이 함수는 Supabase 인증 사용자가 확인되지 않으면 `auth_required`를 반환하고 업로드하지 않는다. 로그인과 보호자 동의 UI가 붙기 전까지는 자동 호출하지 않으며, 관리자가 검증한 시점에만 명시적으로 호출한다.
+
+## 부모용 수리능력 리포트
+
+IRT 결과는 단정적 진단이 아니라 추정치와 불확실성으로 보여준다. 부모 화면에는 정답률만 표시하지 않고 다음 값을 함께 제공한다.
+
+- `abilityIndex`: theta를 보호자가 읽기 쉬운 1-99 지수로 변환한 값
+- `theta`: IRT 기반 현재 수리능력 추정치
+- `standardError`: 추정 오차
+- `confidenceLabel`: 데이터 부족, 관찰 중, 추정 안정화, 안정적
+- `independentSolveRate`: 힌트 0-1단계에서 정답을 맞힌 비율
+- `weakSkills`: 응답 점수, 힌트 단계, 오답 기록을 종합한 보완 skill
+- `recommendations`: 다음 학습 권장 문장
+
+부모 리포트는 `MathAbilityReport.buildParentReport()`에서 생성한다. 초기 버전은 로컬 IRT 로그를 기반으로 계산하고, Supabase 인증과 보호자 동의가 붙으면 학습자별 누적 리포트로 확장한다.
