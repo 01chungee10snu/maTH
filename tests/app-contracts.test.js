@@ -176,6 +176,27 @@ function testRelationshipCoachProblemContract() {
   assert.strictEqual(result.correct, true);
 }
 
+function testRelationThinkingTopicsAreElementaryIntegrated() {
+  const context = createContext();
+  runScript(context, 'js/relationCurriculum.js');
+
+  assert.strictEqual(typeof context.window.RelationCurriculum.isRelationThinkingTopic, 'function');
+  assert.strictEqual(context.window.RelationCurriculum.isRelationThinkingTopic('자연수의 곱셈과 나눗셈'), true);
+  assert.strictEqual(context.window.RelationCurriculum.isRelationThinkingTopic('분수의 곱셈과 나눗셈'), true);
+  assert.strictEqual(context.window.RelationCurriculum.isRelationThinkingTopic('들이와 무게'), true);
+  assert.strictEqual(context.window.RelationCurriculum.isRelationThinkingTopic('비와 비율'), true);
+  assert.strictEqual(context.window.RelationCurriculum.isRelationThinkingTopic('네 자리 이하의 수'), false);
+  assert.strictEqual(context.window.RelationCurriculum.isRelationThinkingTopic('평면도형의 모양'), false);
+
+  const filtered = context.window.RelationCurriculum.filterItemsForTopic([
+    { problem_id: 'division', skill_tags: ['EQUAL_SHARING'] },
+    { problem_id: 'fraction', skill_tags: ['FRACTION_RELATION'] },
+    { problem_id: 'rank', skill_tags: ['RANKING'] }
+  ], '분수의 곱셈과 나눗셈');
+
+  assert.strictEqual(filtered.map(item => item.problem_id).join('|'), 'fraction');
+}
+
 function testIrtEngineUpdatesLearnerStateAndSelectsItems() {
   const context = createContext();
   runScript(context, 'js/irtEngine.js');
@@ -399,6 +420,7 @@ async function runTests() {
   testCurriculumTopicSections();
   testProblemOptionsStayUniqueAndComplete();
   testRelationshipCoachProblemContract();
+  testRelationThinkingTopicsAreElementaryIntegrated();
   testSupabasePublicConfigContract();
   testSupabaseClientUsesPublicConfig();
   testIrtEngineUpdatesLearnerStateAndSelectsItems();

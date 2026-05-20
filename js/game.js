@@ -300,9 +300,12 @@ function loadState() {
 function genProblem(diff) {
     const topic = STATE.currentCurriculum || 'division';
 
-    if (isRelationshipCoachTopic(topic) && window.IrtEngine && window.RelationshipCoachProblems?.bank) {
+    if (shouldUseRelationThinkingProblem(topic) && window.IrtEngine && window.RelationshipCoachProblems?.bank) {
         ensureIrtState();
-        const selectedItem = window.IrtEngine.selectNextItem(window.RelationshipCoachProblems.bank, STATE.irt);
+        const pool = window.RelationCurriculum?.filterItemsForTopic
+            ? window.RelationCurriculum.filterItemsForTopic(window.RelationshipCoachProblems.bank, topic)
+            : window.RelationshipCoachProblems.bank;
+        const selectedItem = window.IrtEngine.selectNextItem(pool, STATE.irt);
         if (selectedItem && window.RelationshipCoachProblems.generateForItem) {
             return window.RelationshipCoachProblems.generateForItem(selectedItem, diff);
         }
@@ -350,6 +353,10 @@ function isRelationshipCoachTopic(topic) {
         || String(topic || '').includes('관계형')
         || String(topic || '').includes('문장제 코치')
         || topic === 'relationshipCoach';
+}
+
+function shouldUseRelationThinkingProblem(topic) {
+    return Boolean(window.RelationCurriculum?.isRelationThinkingTopic?.(topic));
 }
 
 function ensureIrtState() {
@@ -2390,31 +2397,6 @@ function drawMap() {
             startY += btnH + gap;
         });
 
-        const coachBtnW = Math.min(360, W - 60);
-        const coachBtnH = 72;
-        const coachBtnX = (W - coachBtnW) / 2;
-        const coachBtnY = startY + 10;
-
-        CTX.save();
-        roundRect(CTX, coachBtnX, coachBtnY, coachBtnW, coachBtnH, 20);
-        const coachGradient = CTX.createLinearGradient(coachBtnX, coachBtnY, coachBtnX + coachBtnW, coachBtnY + coachBtnH);
-        coachGradient.addColorStop(0, '#2563eb');
-        coachGradient.addColorStop(1, '#14b8a6');
-        CTX.fillStyle = coachGradient;
-        CTX.shadowColor = 'rgba(37, 99, 235, 0.25)';
-        CTX.shadowBlur = 12;
-        CTX.fill();
-        CTX.restore();
-
-        CTX.fillStyle = '#ffffff';
-        CTX.font = 'bold 25px Jua, sans-serif';
-        CTX.textAlign = 'center';
-        CTX.textBaseline = 'middle';
-        CTX.fillText('관계수학 코치', coachBtnX + coachBtnW / 2, coachBtnY + coachBtnH / 2 - 10);
-        CTX.font = '16px Jua, sans-serif';
-        CTX.fillText('문장 → 관계 → 표 → 연산', coachBtnX + coachBtnW / 2, coachBtnY + coachBtnH / 2 + 17);
-        STATE.hitboxes.push({ id: 'btn_relation_coach', x: coachBtnX, y: coachBtnY, w: coachBtnW, h: coachBtnH });
-
     } else if (!STATE.mapSelection.subGrade) {
         // 2단계: 학년군/학년 선택
         if (!CURRICULUM_DATA) {
@@ -2860,23 +2842,6 @@ function drawKeypad(x, y, w, h) {
     });
 }
 
-function startRelationCoachMode() {
-    STATE.currentCurriculum = '관계수학 코치';
-    STATE.mode = 'quiz';
-    STATE.questionIndex = 0;
-    STATE.totalQuestions = 0;
-    STATE.score = 0;
-    STATE.problem = null;
-    STATE.selected = null;
-    STATE.isCorrect = null;
-    STATE.confirmed = null;
-    STATE.symbolAnswers = { square: null, circle: null, triangle: null };
-    STATE.relationCoach = null;
-    ensureIrtState();
-    ensureProblem();
-    saveState();
-}
-
 function ensureRelationCoachState() {
     if (!STATE.problem || STATE.problem.type !== 'relationshipCoach') return;
     if (!STATE.relationCoach || STATE.relationCoach.problemId !== STATE.problem.problem_id) {
@@ -2986,7 +2951,7 @@ function drawRelationshipCoachQuiz(W, H, cardX, cardY, cardW, cardH) {
     CTX.fillStyle = '#0f766e';
     CTX.font = `bold ${Math.round(27 * SCALE)}px Jua, sans-serif`;
     CTX.textAlign = 'center';
-    CTX.fillText('관계수학 코치', cardX + cardW / 2, cardY + Math.round(38 * SCALE));
+    CTX.fillText('문장제 사고 훈련', cardX + cardW / 2, cardY + Math.round(38 * SCALE));
 
     CTX.fillStyle = '#111827';
     CTX.font = `bold ${Math.round(20 * SCALE)}px Jua, sans-serif`;
@@ -4414,9 +4379,6 @@ function onPointer(evt) {
                 case 'btn_start_game':
                     STATE.mode = 'map';
                     break;
-                case 'btn_relation_coach':
-                    startRelationCoachMode();
-                    break;
                 case 'btn_collection':
                     STATE.mode = 'collection';
                     break;
@@ -4498,7 +4460,7 @@ function onPointer(evt) {
                         STATE.problem = null;
                         STATE.selected = null;
                         STATE.relationCoach = null;
-                        if (isRelationshipCoachTopic(topic)) ensureIrtState();
+                        if (shouldUseRelationThinkingProblem(topic)) ensureIrtState();
                         ensureProblem();
                     } else if (b.id.startsWith('coach_opt_')) {
                         ensureRelationCoachState();

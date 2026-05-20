@@ -56,7 +56,7 @@ let STATE = {
     circle: null,   // ○ 선택값
     triangle: null  // △ 선택값
   },
-  // 관계수학 코치 진행 상태
+  // 문장제 관계 사고 진행 상태
   relationCoach: null,
   // IRT 기반 적응형 학습 상태
   irt: null

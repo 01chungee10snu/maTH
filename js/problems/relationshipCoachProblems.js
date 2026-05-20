@@ -1088,4 +1088,4 @@ window.RelationshipCoachProblems = {
 
 globalThis.RelationshipCoachProblems = window.RelationshipCoachProblems;
 
-console.log('관계수학 코치 문제 모듈이 로드되었습니다.');
+console.log('문장제 관계 사고 문제 모듈이 로드되었습니다.');

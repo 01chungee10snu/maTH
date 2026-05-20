@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-test('map and relationship coach smoke test', async ({ page }) => {
+test('map and elementary relation thinking smoke test', async ({ page }) => {
   test.setTimeout(60000);
   const consoleErrors = [];
   page.on('console', msg => {
@@ -31,6 +31,22 @@ test('map and relationship coach smoke test', async ({ page }) => {
   expect(supabaseConfig.keyPrefix).toBe('sb_publishable_');
   expect(supabaseConfig.hasIrtSync).toBe(true);
 
+  const topLevelMap = await page.evaluate(() => {
+    STATE.mode = 'map';
+    STATE.mapSelection = { grade: null, subGrade: null, domain: null };
+    lastCssW = null;
+    lastCssH = null;
+    setHiDPI();
+    drawMap();
+    return {
+      gradeButtons: STATE.hitboxes.filter(box => box.id.startsWith('grade_')).length,
+      hasSeparateRelationCoachButton: STATE.hitboxes.some(box => box.id === 'btn_relation_coach')
+    };
+  });
+
+  expect(topLevelMap.gradeButtons).toBe(3);
+  expect(topLevelMap.hasSeparateRelationCoachButton).toBe(false);
+
   const highSchoolMap = await page.evaluate(() => {
     STATE.mode = 'map';
     STATE.mapSelection = { grade: 'high_school', subGrade: '공통과목', domain: null };
@@ -55,7 +71,12 @@ test('map and relationship coach smoke test', async ({ page }) => {
 
   const relationCoach = await page.evaluate(() => {
     localStorage.removeItem('taehee-irt-attempt-log');
-    startRelationCoachMode();
+    STATE.currentCurriculum = '자연수의 곱셈과 나눗셈';
+    STATE.mode = 'quiz';
+    STATE.questionIndex = 0;
+    STATE.problem = null;
+    STATE.selected = null;
+    STATE.relationCoach = null;
     ensureProblem();
     const thetaBefore = STATE.irt?.theta ?? 0;
 
@@ -74,6 +95,7 @@ test('map and relationship coach smoke test', async ({ page }) => {
     return {
       ok: true,
       type: STATE.problem.type,
+      topic: STATE.currentCurriculum,
       problemId: STATE.problem.problem_id,
       answerOptions: STATE.problem.options.length,
       optionHitboxes: STATE.hitboxes.filter(box => box.id.startsWith('opt_')).length,
@@ -87,6 +109,7 @@ test('map and relationship coach smoke test', async ({ page }) => {
 
   expect(relationCoach.ok).toBe(true);
   expect(relationCoach.type).toBe('relationshipCoach');
+  expect(relationCoach.topic).toBe('자연수의 곱셈과 나눗셈');
   expect(relationCoach.answerOptions).toBe(4);
   expect(relationCoach.optionHitboxes).toBe(4);
   expect(relationCoach.irtAttempts).toBeGreaterThan(0);
