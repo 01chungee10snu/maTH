@@ -49,7 +49,80 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
   expect(runtimeBank.loadedTinipingImages).toBeGreaterThanOrEqual(140);
   expect(runtimeBank.placeholderTinipingImages).toBeLessThanOrEqual(8);
 
+  const learnerLanding = await page.evaluate(() => {
+    localStorage.clear();
+    loadState();
+    lastCssW = null;
+    lastCssH = null;
+    setHiDPI();
+    drawLearnerSelect();
+    return {
+      mode: STATE.mode,
+      activeLearnerId: STATE.activeLearnerId,
+      learnerButtons: STATE.hitboxes
+        .filter(box => box.id.startsWith('learner_'))
+        .map(box => box.id.replace('learner_', '')),
+      hasAdaptiveStartButton: STATE.hitboxes.some(box => box.id === 'btn_adaptive_start')
+    };
+  });
+
+  expect(learnerLanding.mode).toBe('learnerSelect');
+  expect(learnerLanding.activeLearnerId).toBe(null);
+  expect(learnerLanding.learnerButtons.sort()).toEqual(['bomi', 'chungseok', 'sehee', 'taehee']);
+  expect(learnerLanding.hasAdaptiveStartButton).toBe(false);
+
+  const learnerPersistence = await page.evaluate(() => {
+    localStorage.clear();
+    loadState();
+    selectLearner('taehee');
+    startAdaptiveLearning();
+    const taeheeFirstId = STATE.problem?.problem_id;
+    STATE.selected = STATE.problem.answer;
+    checkAnswer();
+    const taeheeThetaAfter = STATE.irt.theta;
+    const taeheeAttemptsAfter = STATE.irt.attemptCount;
+    const taeheeLogsAfter = IrtLog.loadAttempts().length;
+
+    selectLearner('bomi');
+    const bomiInitial = {
+      activeLearnerId: STATE.activeLearnerId,
+      mode: STATE.mode,
+      theta: STATE.irt.theta,
+      attempts: STATE.irt.attemptCount,
+      logs: IrtLog.loadAttempts().length
+    };
+    startAdaptiveLearning();
+    const bomiFirstId = STATE.problem?.problem_id;
+
+    selectLearner('taehee');
+    return {
+      taeheeFirstId,
+      taeheeThetaAfter,
+      taeheeAttemptsAfter,
+      taeheeLogsAfter,
+      bomiInitial,
+      bomiFirstId,
+      restoredLearnerId: STATE.activeLearnerId,
+      restoredTheta: STATE.irt.theta,
+      restoredAttempts: STATE.irt.attemptCount,
+      restoredLogs: IrtLog.loadAttempts().length
+    };
+  });
+
+  expect(learnerPersistence.taeheeFirstId).toBeTruthy();
+  expect(learnerPersistence.taeheeAttemptsAfter).toBe(1);
+  expect(learnerPersistence.taeheeLogsAfter).toBe(1);
+  expect(learnerPersistence.bomiInitial.activeLearnerId).toBe('bomi');
+  expect(learnerPersistence.bomiInitial.attempts).toBe(0);
+  expect(learnerPersistence.bomiInitial.logs).toBe(0);
+  expect(learnerPersistence.bomiFirstId).toBeTruthy();
+  expect(learnerPersistence.restoredLearnerId).toBe('taehee');
+  expect(learnerPersistence.restoredAttempts).toBe(1);
+  expect(learnerPersistence.restoredLogs).toBe(1);
+  expect(learnerPersistence.restoredTheta).toBe(learnerPersistence.taeheeThetaAfter);
+
   const topLevelMap = await page.evaluate(() => {
+    selectLearner('taehee');
     STATE.mode = 'map';
     STATE.mapSelection = { grade: null, subGrade: null, domain: null };
     lastCssW = null;
@@ -72,7 +145,7 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
   expect(topLevelMap.hasSeparateRelationCoachButton).toBe(false);
 
   const adaptiveStart = await page.evaluate(() => {
-    localStorage.removeItem('taehee-irt-attempt-log');
+    localStorage.removeItem(IrtLog.getStorageKey());
     STATE.mode = 'map';
     STATE.mapSelection = { grade: null, subGrade: null, domain: null };
     STATE.currentCurriculum = 'division';
@@ -100,7 +173,7 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
   expect(adaptiveStart.mapGrade).toBe(null);
 
   const repeatedStartup = await page.evaluate(() => {
-    localStorage.removeItem('taehee-irt-attempt-log');
+    localStorage.removeItem(IrtLog.getStorageKey());
     STATE.irt = IrtEngine.createInitialState('relationship_math', {
       learnerSeed: 'browser-repeat-seed',
       dailySeed: '2026-05-21'
@@ -155,7 +228,7 @@ test('map and elementary relation thinking smoke test', async ({ page }) => {
   expect(staleSchoolSelectionMap.hasAdaptiveStartButton).toBe(true);
 
   const relationCoach = await page.evaluate(() => {
-    localStorage.removeItem('taehee-irt-attempt-log');
+    localStorage.removeItem(IrtLog.getStorageKey());
     STATE.currentCurriculum = '자연수의 곱셈과 나눗셈';
     STATE.mode = 'quiz';
     STATE.questionIndex = 0;

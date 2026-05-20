@@ -8,6 +8,18 @@
 const IRT_ATTEMPT_LOG_KEY = 'taehee-irt-attempt-log';
 const IRT_ATTEMPT_LOG_LIMIT = 500;
 
+function getIrtAttemptLogKey() {
+    return window.LearnerProfiles?.getAttemptLogKey?.()
+        || globalThis.LearnerProfiles?.getAttemptLogKey?.()
+        || IRT_ATTEMPT_LOG_KEY;
+}
+
+function getActiveIrtLearnerId() {
+    return window.LearnerProfiles?.getActiveId?.()
+        || globalThis.LearnerProfiles?.getActiveId?.()
+        || 'local-child';
+}
+
 function safeJsonParseIrtLog(raw, fallback) {
     if (!raw) return fallback;
     try {
@@ -24,12 +36,12 @@ function normalizeIrtLogNumber(value, fallback = null) {
 }
 
 function loadIrtAttempts() {
-    return safeJsonParseIrtLog(localStorage.getItem(IRT_ATTEMPT_LOG_KEY), []);
+    return safeJsonParseIrtLog(localStorage.getItem(getIrtAttemptLogKey()), []);
 }
 
 function saveIrtAttempts(attempts) {
     const compact = (Array.isArray(attempts) ? attempts : []).slice(-IRT_ATTEMPT_LOG_LIMIT);
-    localStorage.setItem(IRT_ATTEMPT_LOG_KEY, JSON.stringify(compact));
+    localStorage.setItem(getIrtAttemptLogKey(), JSON.stringify(compact));
     return compact;
 }
 
@@ -48,7 +60,7 @@ function createIrtAttemptRecord(input = {}) {
 
     return {
         local_id: `irt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        learner_id: input.learnerId || 'local-child',
+        learner_id: input.learnerId || getActiveIrtLearnerId(),
         item_id: problem.problem_id || problem.problemKey || 'unknown',
         topic: stateAfter.topic || stateBefore.topic || 'relationship_math',
         problem_types: problem.problem_types || [],
@@ -116,6 +128,7 @@ window.IrtLog = {
     appendAttempt: appendIrtAttempt,
     loadAttempts: loadIrtAttempts,
     saveAttempts: saveIrtAttempts,
+    getStorageKey: getIrtAttemptLogKey,
     getPendingAttempts: getPendingIrtAttempts,
     markAttemptsSynced: markIrtAttemptsSynced,
     summarize: summarizeIrtAttempts

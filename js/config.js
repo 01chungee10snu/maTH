@@ -21,7 +21,10 @@ const LS_KEY = 'taehee-math-division-canvas';
 
 // 전역 상태 객체
 let STATE = {
-  mode: 'map', // home | map | quiz | explain | catch | collection | complete
+  mode: 'learnerSelect', // learnerSelect | home | map | quiz | explain | catch | collection | complete
+  activeLearnerId: null,
+  activeLearnerName: null,
+  activeLearnerProfile: null,
   questionIndex: 0,
   totalQuestions: 0,
   score: 0,

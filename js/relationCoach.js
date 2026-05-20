@@ -4,6 +4,12 @@
 
 const RELATION_COACH_LOG_KEY = 'taehee-relation-coach-log';
 
+function getRelationCoachLogKey() {
+    return window.LearnerProfiles?.getRelationLogKey?.()
+        || globalThis.LearnerProfiles?.getRelationLogKey?.()
+        || RELATION_COACH_LOG_KEY;
+}
+
 function createRelationCoachState(problem) {
     return {
         problemId: problem.problem_id,
@@ -72,7 +78,7 @@ function inferRelationCoachError(problem, step) {
 function loadRelationCoachLog() {
     if (typeof localStorage === 'undefined') return [];
     try {
-        const raw = localStorage.getItem(RELATION_COACH_LOG_KEY);
+        const raw = localStorage.getItem(getRelationCoachLogKey());
         return raw ? JSON.parse(raw) : [];
     } catch (_) {
         return [];
@@ -82,7 +88,7 @@ function loadRelationCoachLog() {
 function saveRelationCoachLog(log) {
     if (typeof localStorage === 'undefined') return;
     try {
-        localStorage.setItem(RELATION_COACH_LOG_KEY, JSON.stringify(log.slice(-200)));
+        localStorage.setItem(getRelationCoachLogKey(), JSON.stringify(log.slice(-200)));
     } catch (_) {
         // 로컬 저장소가 막힌 환경에서는 게임 진행을 우선합니다.
     }
@@ -110,6 +116,9 @@ function appendRelationCoachAttempt(problem, state, selectedAnswer, answerCorrec
     const log = loadRelationCoachLog();
 
     log.push({
+        learner_id: window.LearnerProfiles?.getActiveId?.()
+            || globalThis.LearnerProfiles?.getActiveId?.()
+            || 'local-child',
         problem_id: problem.problem_id,
         problem_types: problem.problem_types || [],
         attempt: log.filter(item => item.problem_id === problem.problem_id).length + 1,
@@ -154,6 +163,7 @@ window.RelationCoach = {
     appendAttempt: appendRelationCoachAttempt,
     summarize: summarizeRelationCoachLog,
     getSuccessStreak: getRelationCoachSuccessStreak,
+    getLogKey: getRelationCoachLogKey,
     logKey: RELATION_COACH_LOG_KEY
 };
 

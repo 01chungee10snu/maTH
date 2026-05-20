@@ -245,6 +245,53 @@ function testAdaptiveLearningFlowStartsWithoutManualSchoolSelection() {
   assert.strictEqual(patch.learningEntry, 'adaptive');
 }
 
+function testLearnerProfilesSeparateStateAndAttemptLogs() {
+  const context = createStorageContext();
+  runScript(context, 'js/learnerProfiles.js');
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLog.js');
+
+  assert.strictEqual(typeof context.window.LearnerProfiles.select, 'function');
+  assert.deepStrictEqual(
+    Array.from(context.window.LearnerProfiles.list().map(profile => profile.name)),
+    ['태희', '세희', '보미', '충석']
+  );
+
+  const taehee = context.window.LearnerProfiles.select('taehee');
+  assert.strictEqual(taehee.name, '태희');
+  assert.strictEqual(context.window.LearnerProfiles.getStateKey(), 'math-learner-state:taehee');
+  assert.strictEqual(context.window.LearnerProfiles.getAttemptLogKey(), 'math-irt-attempt-log:taehee');
+
+  const taeheeState = context.window.IrtEngine.createInitialState('relationship_math');
+  assert.strictEqual(taeheeState.learnerSeed, 'learner-taehee');
+  context.window.IrtLog.appendAttempt(context.window.IrtLog.createAttemptRecord({
+    learnerId: context.window.LearnerProfiles.getActiveId(),
+    problem: { problem_id: 'TAEHEE_ITEM', skill_tags: ['ADDITION'] },
+    result: { correct: true, hintLevel: 0, stepSuccessRate: 1 },
+    stateBefore: { theta: 0, standardError: 1 },
+    stateAfter: { theta: 0.2, standardError: 0.8 }
+  }));
+
+  context.window.LearnerProfiles.select('bomi');
+  const bomiState = context.window.IrtEngine.createInitialState('relationship_math');
+  assert.strictEqual(bomiState.learnerSeed, 'learner-bomi');
+  assert.strictEqual(context.window.IrtLog.loadAttempts().length, 0);
+  context.window.IrtLog.appendAttempt(context.window.IrtLog.createAttemptRecord({
+    learnerId: context.window.LearnerProfiles.getActiveId(),
+    problem: { problem_id: 'BOMI_ITEM', skill_tags: ['FRACTION_RELATION'] },
+    result: { correct: false, hintLevel: 2, stepSuccessRate: 0.4 },
+    stateBefore: { theta: 0, standardError: 1 },
+    stateAfter: { theta: -0.1, standardError: 0.9 }
+  }));
+  assert.strictEqual(context.window.IrtLog.loadAttempts()[0].learner_id, 'bomi');
+
+  context.window.LearnerProfiles.select('taehee');
+  const taeheeLogs = context.window.IrtLog.loadAttempts();
+  assert.strictEqual(taeheeLogs.length, 1);
+  assert.strictEqual(taeheeLogs[0].learner_id, 'taehee');
+  assert.strictEqual(taeheeLogs[0].item_id, 'TAEHEE_ITEM');
+}
+
 function testElementaryWordProblemSeedBankContract() {
   const bankPath = path.join(root, 'data/elementary_word_problem_seed_bank.json');
   assert.ok(fs.existsSync(bankPath), 'elementary word problem seed bank must exist');
@@ -1055,6 +1102,7 @@ async function runTests() {
   testRelationshipCoachProblemContract();
   testRelationThinkingTopicsAreElementaryIntegrated();
   testAdaptiveLearningFlowStartsWithoutManualSchoolSelection();
+  testLearnerProfilesSeparateStateAndAttemptLogs();
   testElementaryWordProblemSeedBankContract();
   testExpandedSeedBankConvertsIntoIrtRuntimeItems();
   testTinipingAssetPolicyDoesNotUseWrongCharacterFallbacks();

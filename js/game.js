@@ -313,8 +313,9 @@ function shuffleArray(array) {
 }
 
 function buildExplanation(dividend, divisor, quotient, answer) {
+    const learnerName = getActiveLearnerName('친구');
     const patterns = [
-        [`🎯 태희야, 같이 생각해볼까?`, `${dividend}개를 ${divisor}명에게 똑같이 나누면...`, `한 명당 ${quotient}개씩 받을 수 있어!`, `✨ 검산: ${quotient} × ${divisor} = ${dividend} (딱 맞네!)`],
+        [`🎯 ${learnerName}야, 같이 생각해볼까?`, `${dividend}개를 ${divisor}명에게 똑같이 나누면...`, `한 명당 ${quotient}개씩 받을 수 있어!`, `✨ 검산: ${quotient} × ${divisor} = ${dividend} (딱 맞네!)`],
         [`💡 거꾸로 생각해보자!`, `${divisor} × ${quotient} = ${dividend}이니까`, `반대로 ${dividend} ÷ ${divisor} = ${quotient}이지!`, `곱셈과 나눗셈은 친구야! 잘했어! 👍`],
         [`🍰 케이크로 생각해보자!`, `케이크 ${dividend}조각을 ${divisor}명이 나눠 먹으면`, `한 명이 ${quotient}조각씩 먹을 수 있어!`, `간단하지? 멋지게 풀었어! 🎉`]
     ];
@@ -326,8 +327,95 @@ function buildSimpleExplanation(a, b, op, ans) {
     return `정답은 ${ans}이야!\n${a} ${op} ${b} = ${ans}`;
 }
 
+function getDefaultMapSelection() {
+    return { grade: null, subGrade: null, domain: null };
+}
+
+function getActiveLearnerProfileFromState() {
+    if (STATE.activeLearnerId && window.LearnerProfiles?.find) {
+        return window.LearnerProfiles.find(STATE.activeLearnerId);
+    }
+    return window.LearnerProfiles?.getActiveProfile?.() || null;
+}
+
+function getActiveLearnerId() {
+    return STATE.activeLearnerId || window.LearnerProfiles?.getActiveId?.() || null;
+}
+
+function getActiveLearnerName(fallback = '학습자') {
+    return STATE.activeLearnerName || getActiveLearnerProfileFromState()?.name || fallback;
+}
+
+function createBaseStateForLearner(profile) {
+    const activeProfile = profile ? { ...profile, colors: [...(profile.colors || [])] } : null;
+    return {
+        mode: activeProfile ? 'map' : 'learnerSelect',
+        activeLearnerId: activeProfile?.id || null,
+        activeLearnerName: activeProfile?.name || null,
+        activeLearnerProfile: activeProfile,
+        questionIndex: 0,
+        totalQuestions: 0,
+        score: 0,
+        difficulty: 2,
+        consecutiveCorrect: 0,
+        caughtIds: [],
+        usedProblems: [],
+        problem: null,
+        selected: null,
+        isCorrect: null,
+        confirmed: null,
+        catchStart: 0,
+        newTiniping: null,
+        hitboxes: [],
+        currentCurriculum: 'division',
+        mapSelection: getDefaultMapSelection(),
+        collectionTab: '전체',
+        symbolAnswers: { square: null, circle: null, triangle: null },
+        relationCoach: null,
+        irt: activeProfile && window.IrtEngine ? window.IrtEngine.createInitialState('relationship_math') : null,
+        learningEntry: null
+    };
+}
+
+function getLearnerStateStorageKey(profileId = getActiveLearnerId()) {
+    return window.LearnerProfiles?.getStateKey?.(profileId) || (profileId ? `${LS_KEY}:${profileId}` : null);
+}
+
+function applySavedLearnerState(saved, profile) {
+    const base = createBaseStateForLearner(profile);
+    const safe = saved && typeof saved === 'object' ? saved : {};
+    const savedMode = safe.mode && !['home', 'learnerSelect'].includes(safe.mode) ? safe.mode : base.mode;
+
+    STATE = {
+        ...base,
+        mode: savedMode,
+        questionIndex: safe.questionIndex || 0,
+        totalQuestions: safe.totalQuestions || 0,
+        score: safe.score || 0,
+        difficulty: safe.difficulty || 2,
+        consecutiveCorrect: safe.consecutiveCorrect || 0,
+        caughtIds: Array.isArray(safe.caughtIds) ? safe.caughtIds : [],
+        usedProblems: Array.isArray(safe.usedProblems) ? safe.usedProblems : [],
+        currentCurriculum: safe.currentCurriculum || 'division',
+        mapSelection: safe.mapSelection || getDefaultMapSelection(),
+        collectionTab: safe.collectionTab || '전체',
+        relationCoach: safe.relationCoach || null,
+        irt: safe.irt || base.irt,
+        learningEntry: safe.learningEntry || null
+    };
+
+    if (!STATE.activeLearnerId) {
+        STATE.mode = 'learnerSelect';
+    }
+}
+
 function saveState() {
+    const key = getLearnerStateStorageKey();
+    if (!key) return;
     const s = {
+        mode: STATE.mode,
+        activeLearnerId: STATE.activeLearnerId,
+        activeLearnerName: STATE.activeLearnerName,
         questionIndex: STATE.questionIndex,
         totalQuestions: STATE.totalQuestions,
         score: STATE.score,
@@ -342,33 +430,56 @@ function saveState() {
         irt: STATE.irt,
         learningEntry: STATE.learningEntry
     };
-    localStorage.setItem(LS_KEY, JSON.stringify(s));
+    localStorage.setItem(key, JSON.stringify(s));
 }
 
 function loadState() {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return;
+    const profile = window.LearnerProfiles?.getActiveProfile?.() || null;
+    if (!profile) {
+        STATE = createBaseStateForLearner(null);
+        return;
+    }
+
+    const raw = localStorage.getItem(getLearnerStateStorageKey(profile.id));
+    if (!raw) {
+        STATE = createBaseStateForLearner(profile);
+        saveState();
+        return;
+    }
     try {
         const s = JSON.parse(raw);
-        STATE.questionIndex = s.questionIndex || 0;
-        STATE.totalQuestions = s.totalQuestions || 0;
-        STATE.score = s.score || 0;
-        STATE.difficulty = s.difficulty || 2;
-        STATE.caughtIds = s.caughtIds || [];
-        STATE.consecutiveCorrect = s.consecutiveCorrect || 0;
-        STATE.usedProblems = s.usedProblems || [];
-        STATE.currentCurriculum = s.currentCurriculum || 'division';
-        STATE.mapSelection = s.mapSelection || { grade: null, subGrade: null, domain: null };
-        STATE.collectionTab = s.collectionTab || '전체';
-        STATE.relationCoach = s.relationCoach || null;
-        STATE.irt = s.irt || null;
-        STATE.learningEntry = s.learningEntry || null;
+        applySavedLearnerState(s, profile);
+    } catch (e) {
+        STATE = createBaseStateForLearner(profile);
+        saveState();
+    }
+}
 
-        // 홈 모드인 경우 맵 모드로 강제 전환 (메인 페이지 변경)
-        if (STATE.mode === 'home') {
-            STATE.mode = 'map';
+function selectLearner(id) {
+    if (STATE.activeLearnerId) saveState();
+    const profile = window.LearnerProfiles?.select?.(id);
+    if (!profile) return null;
+
+    const raw = localStorage.getItem(getLearnerStateStorageKey(profile.id));
+    if (raw) {
+        try {
+            applySavedLearnerState(JSON.parse(raw), profile);
+        } catch (_) {
+            STATE = createBaseStateForLearner(profile);
         }
-    } catch (e) { }
+    } else {
+        STATE = createBaseStateForLearner(profile);
+    }
+
+    STATE.mode = STATE.mode === 'learnerSelect' || STATE.mode === 'home' ? 'map' : STATE.mode;
+    saveState();
+    return profile;
+}
+
+function switchToLearnerSelect() {
+    if (STATE.activeLearnerId) saveState();
+    window.LearnerProfiles?.clearActive?.();
+    STATE = createBaseStateForLearner(null);
 }
 
 function genProblem(diff) {
@@ -450,7 +561,13 @@ function shouldUseRelationThinkingProblem(topic) {
 
 function ensureIrtState() {
     if (!window.IrtEngine) return null;
-    if (!STATE.irt || STATE.irt.version !== 1 || STATE.irt.topic !== 'relationship_math') {
+    const expectedSeed = getActiveLearnerProfileFromState()?.seed || null;
+    if (
+        !STATE.irt
+        || STATE.irt.version !== 1
+        || STATE.irt.topic !== 'relationship_math'
+        || (expectedSeed && STATE.irt.learnerSeed !== expectedSeed)
+    ) {
         STATE.irt = window.IrtEngine.createInitialState('relationship_math');
     }
     return STATE.irt;
@@ -483,7 +600,7 @@ function updateIrtAfterAnswer(correct) {
             ? null
             : (STATE.relationCoach?.errors?.slice(-1)[0] || window.RelationCoach?.inferError?.(STATE.problem, null) || null);
         const record = window.IrtLog.createAttemptRecord({
-            learnerId: 'local-child',
+            learnerId: getActiveLearnerId() || 'local-child',
             problem: STATE.problem,
             result,
             stateBefore,
@@ -2307,6 +2424,7 @@ function clear() {
 }
 
 function drawHeader(W, H) {
+    const learnerName = getActiveLearnerName('나');
     CTX.save();
     // Soft White Card Background
     roundRect(CTX, 16, 12, W - 32, 80, 24);
@@ -2319,7 +2437,7 @@ function drawHeader(W, H) {
 
     // Title
     CTX.fillStyle = '#EC4899'; // Accent Pink
-    const title = STATE.currentCurriculum === 'division' ? '태희의 도전! 수학꾸러기' : `태희의 ${STATE.currentCurriculum} 도전!`;
+    const title = STATE.currentCurriculum === 'division' ? `${learnerName}의 도전! 수학꾸러기` : `${learnerName}의 ${STATE.currentCurriculum} 도전!`;
     drawFittedCanvasText(title, W / 2, 48, W - 180, {
         initialSize: 32,
         minSize: 20,
@@ -2492,9 +2610,116 @@ function drawBackgroundTiles(W, H, opacity = 0.15) {
     CTX.globalAlpha = 1.0;
 }
 
+function drawLearnerSelect() {
+    const { W, H } = clear();
+    drawBackgroundTiles(W, H, 0.08);
+
+    CTX.fillStyle = '#111827';
+    drawFittedCanvasText('누가 풀까요?', W / 2, Math.round(88 * SCALE), W - Math.round(48 * SCALE), {
+        initialSize: Math.round(44 * SCALE),
+        minSize: Math.round(28 * SCALE),
+        weight: 'bold'
+    });
+
+    CTX.fillStyle = '#64748b';
+    drawFittedCanvasText('이름을 고르면 오늘의 맞춤 문제가 시작돼요', W / 2, Math.round(128 * SCALE), W - Math.round(56 * SCALE), {
+        initialSize: Math.round(21 * SCALE),
+        minSize: Math.round(15 * SCALE),
+        weight: 'bold'
+    });
+
+    const profiles = window.LearnerProfiles?.list?.() || [];
+    const gap = Math.round(16 * SCALE);
+    const columns = W < 430 ? 1 : 2;
+    const cardW = columns === 1
+        ? W - Math.round(48 * SCALE)
+        : (W - Math.round(64 * SCALE) - gap) / 2;
+    const cardH = Math.round((columns === 1 ? 118 : 150) * SCALE);
+    const startX = columns === 1 ? Math.round(24 * SCALE) : Math.round(32 * SCALE);
+    const startY = Math.round(184 * SCALE);
+
+    profiles.forEach((profile, index) => {
+        const col = index % columns;
+        const row = Math.floor(index / columns);
+        const x = startX + col * (cardW + gap);
+        const y = startY + row * (cardH + gap);
+        const colors = profile.colors || ['#f8fafc', '#e2e8f0', '#334155'];
+        const stateKey = window.LearnerProfiles?.getStateKey?.(profile.id);
+        let progressText = '첫 문제부터 시작';
+
+        try {
+            const saved = stateKey ? JSON.parse(localStorage.getItem(stateKey) || 'null') : null;
+            const attempts = saved?.irt?.attemptCount || 0;
+            const theta = Number(saved?.irt?.theta);
+            progressText = attempts
+                ? `풀이 ${attempts}문항 · 수준 ${Number.isFinite(theta) ? theta.toFixed(2) : '갱신중'}`
+                : progressText;
+        } catch (_) {
+            progressText = '첫 문제부터 시작';
+        }
+
+        CTX.save();
+        roundRect(CTX, x, y, cardW, cardH, Math.round(20 * SCALE));
+        const cardG = CTX.createLinearGradient(x, y, x + cardW, y + cardH);
+        cardG.addColorStop(0, colors[0]);
+        cardG.addColorStop(1, '#ffffff');
+        CTX.fillStyle = cardG;
+        CTX.shadowColor = 'rgba(15, 23, 42, 0.10)';
+        CTX.shadowBlur = Math.round(14 * SCALE);
+        CTX.fill();
+        CTX.strokeStyle = colors[1];
+        CTX.lineWidth = Math.max(1, Math.round(1.5 * SCALE));
+        CTX.stroke();
+        CTX.restore();
+
+        const badgeR = Math.round((columns === 1 ? 29 : 34) * SCALE);
+        const badgeX = x + Math.round(44 * SCALE);
+        const badgeY = y + cardH / 2;
+        CTX.save();
+        CTX.beginPath();
+        CTX.arc(badgeX, badgeY, badgeR, 0, Math.PI * 2);
+        CTX.fillStyle = colors[1];
+        CTX.fill();
+        CTX.restore();
+
+        CTX.fillStyle = colors[2];
+        CTX.textAlign = 'center';
+        CTX.textBaseline = 'middle';
+        CTX.font = `bold ${Math.round((columns === 1 ? 28 : 32) * SCALE)}px Jua, sans-serif`;
+        CTX.fillText(profile.badge || profile.name.slice(0, 1), badgeX, badgeY + Math.round(1 * SCALE));
+
+        const textX = columns === 1 ? x + Math.round(92 * SCALE) : x + cardW / 2;
+        const textW = columns === 1 ? cardW - Math.round(116 * SCALE) : cardW - Math.round(36 * SCALE);
+        const nameY = columns === 1 ? y + Math.round(43 * SCALE) : y + Math.round(88 * SCALE);
+        const progressY = columns === 1 ? y + Math.round(75 * SCALE) : y + Math.round(116 * SCALE);
+
+        CTX.fillStyle = '#111827';
+        drawFittedCanvasText(profile.name, textX, nameY, textW, {
+            initialSize: Math.round(30 * SCALE),
+            minSize: Math.round(20 * SCALE),
+            weight: 'bold',
+            align: columns === 1 ? 'left' : 'center'
+        });
+
+        CTX.fillStyle = '#64748b';
+        drawFittedCanvasText(progressText, textX, progressY, textW, {
+            initialSize: Math.round(17 * SCALE),
+            minSize: Math.round(12 * SCALE),
+            weight: 'bold',
+            align: columns === 1 ? 'left' : 'center'
+        });
+
+        STATE.hitboxes.push({ id: `learner_${profile.id}`, x, y, w: cardW, h: cardH });
+    });
+
+    CTX.textAlign = 'left';
+    CTX.textBaseline = 'alphabetic';
+}
+
 function drawMap() {
     const { W, H } = clear();
     drawBackgroundTiles(W, H, 0.1);
+    const learnerName = getActiveLearnerName('오늘');
 
     // 상단 헤더 (홈 버튼 포함)
     CTX.save();
@@ -2509,7 +2734,7 @@ function drawMap() {
     CTX.font = 'bold 32px Jua, sans-serif';
     CTX.textAlign = 'center';
     CTX.textBaseline = 'middle';
-    CTX.fillText('오늘의 맞춤 수학', W / 2, 47);
+    CTX.fillText(`${learnerName}의 맞춤 수학`, W / 2, 47);
 
     CTX.textAlign = 'left';
     CTX.textBaseline = 'alphabetic';
@@ -2585,7 +2810,7 @@ function drawMap() {
     const secondaryH = Math.round(76 * SCALE);
     const secondaryButtons = [
         { id: 'btn_collection', label: '리포트 보기', sub: '부모 리포트 · 티니핑', x: cardX },
-        { id: 'btn_reset', label: '처음부터', sub: '기록 초기화', x: cardX + secondaryW + gap }
+        { id: 'btn_switch_learner', label: '사용자 변경', sub: '다른 이름으로 풀기', x: cardX + secondaryW + gap }
     ];
 
     secondaryButtons.forEach(button => {
@@ -2620,9 +2845,10 @@ function drawMap() {
 function drawHome() {
     const { W } = clear();
     const layout = getHomeLayout(W);
+    const learnerName = getActiveLearnerName('나');
 
     CTX.fillStyle = '#ec4899';
-    drawFittedCanvasText('태희의 도전! 수학꾸러기', W / 2, layout.titleY, W - Math.round(44 * SCALE), {
+    drawFittedCanvasText(`${learnerName}의 도전! 수학꾸러기`, W / 2, layout.titleY, W - Math.round(44 * SCALE), {
         initialSize: Math.round(42 * SCALE),
         minSize: Math.round(26 * SCALE),
         weight: 'bold'
@@ -3379,6 +3605,7 @@ function drawExplain() {
     drawBackgroundTiles(W, H, 0.12);
     drawHeader(W, H);
     drawCollectionButton(W, H);
+    const learnerName = getActiveLearnerName('친구');
 
     const cardX = 20, cardY = 100, cardW = W - 40, cardH = H - 140;
     CTX.save();
@@ -3390,7 +3617,7 @@ function drawExplain() {
     CTX.textAlign = 'left';
     CTX.fillStyle = STATE.isCorrect ? '#065f46' : '#7f1d1d';
     CTX.font = `bold ${Math.round(34 * SCALE)}px Jua, sans-serif`;
-    CTX.fillText(STATE.isCorrect ? '태희야, 정답이야!' : '태희야, 다시 생각해봐!', cardX + 24, cardY + 50);
+    CTX.fillText(STATE.isCorrect ? `${learnerName}야, 정답이야!` : `${learnerName}야, 다시 생각해봐!`, cardX + 24, cardY + 50);
 
     CTX.fillStyle = '#111827';
     CTX.font = `bold ${Math.round(28 * SCALE)}px Jua, sans-serif`;
@@ -3472,7 +3699,7 @@ function drawExplain() {
     CTX.font = `bold ${Math.round(28 * SCALE)}px Jua, sans-serif`;
     CTX.textAlign = 'center';
     CTX.textBaseline = 'middle';
-    CTX.fillText('태희야, 다음 문제로!', nxX + nxW / 2, nxY + nxH / 2);
+    CTX.fillText(`${learnerName}야, 다음 문제로!`, nxX + nxW / 2, nxY + nxH / 2);
     CTX.textBaseline = 'alphabetic';
 
     STATE.hitboxes.push({ id: 'btn_next', x: nxX, y: nxY, w: nxW, h: nxH, disabled: !canNext });
@@ -3848,6 +4075,7 @@ function drawTinipingImage(tgt, cx, cy, imageSize) {
 function drawCatch(ts) {
     const { W, H } = clear();
     drawBackgroundTiles(W, H, 0.1);
+    const learnerName = getActiveLearnerName('친구');
     const t0 = STATE.catchStart || (STATE.catchStart = ts);
     const totalElapsed = ts - t0;
 
@@ -3899,7 +4127,7 @@ function drawCatch(ts) {
         CTX.font = `bold ${Math.round(36 * SCALE)}px Jua, sans-serif`;
         CTX.textAlign = 'center';
         CTX.globalAlpha = stageProgress;
-        CTX.fillText('태희가 캐치 성공!', cx, H - Math.round(120 * SCALE));
+        CTX.fillText(`${learnerName}가 캐치 성공!`, cx, H - Math.round(120 * SCALE));
         CTX.globalAlpha = 1;
 
     } else if (stage === 2) {
@@ -3969,6 +4197,7 @@ function drawCatch(ts) {
 function drawCollection() {
     const { W, H } = clear();
     drawBackgroundTiles(W, H, 0.1);
+    const learnerName = getActiveLearnerName('나');
 
     if (!TINIPINGS || TINIPINGS.length === 0) {
         CTX.fillStyle = '#111827';
@@ -3985,7 +4214,7 @@ function drawCollection() {
     CTX.fillStyle = isParentReport ? '#0f766e' : '#ec4899';
     CTX.font = `bold ${Math.round(34 * SCALE)}px Jua, sans-serif`;
     CTX.textAlign = 'left';
-    CTX.fillText(isParentReport ? '수리능력 리포트' : '태희의 티니핑 컬렉션', Math.round(24 * SCALE), Math.round(50 * SCALE));
+    CTX.fillText(isParentReport ? `${learnerName}의 수리능력 리포트` : `${learnerName}의 티니핑 컬렉션`, Math.round(24 * SCALE), Math.round(50 * SCALE));
 
     CTX.fillStyle = '#6b7280';
     CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif`;
@@ -4227,6 +4456,7 @@ function drawReportListSection(x, y, w, title, items) {
 function drawComplete() {
     const { W, H } = clear();
     drawBackgroundTiles(W, H, 0.1);
+    const learnerName = getActiveLearnerName('친구');
 
     const cw = Math.min(Math.round(600 * SCALE), W - Math.round(48 * SCALE));
     const ch = Math.max(280, Math.round(320 * SCALE));
@@ -4244,12 +4474,12 @@ function drawComplete() {
     CTX.fillStyle = '#10b981';
     CTX.font = `bold ${Math.round(32 * SCALE)}px Jua, sans-serif`;
     CTX.textAlign = 'center';
-    CTX.fillText('축하해 태희야! 100문제 완료!', cx + cw / 2, cy + Math.round(60 * SCALE));
+    CTX.fillText(`축하해 ${learnerName}야! 100문제 완료!`, cx + cw / 2, cy + Math.round(60 * SCALE));
 
     CTX.fillStyle = '#111827';
     CTX.font = `${Math.round(20 * SCALE)}px Jua, sans-serif`;
-    CTX.fillText(`태희의 최종 점수: ${STATE.score}점`, cx + cw / 2, cy + Math.round(110 * SCALE));
-    CTX.fillText(`태희가 획득한 티니핑: ${STATE.caughtIds.length}개`, cx + cw / 2, cy + Math.round(146 * SCALE));
+    CTX.fillText(`${learnerName}의 최종 점수: ${STATE.score}점`, cx + cw / 2, cy + Math.round(110 * SCALE));
+    CTX.fillText(`${learnerName}가 획득한 티니핑: ${STATE.caughtIds.length}개`, cx + cw / 2, cy + Math.round(146 * SCALE));
 
     const bw = Math.max(200, Math.min(Math.round(280 * SCALE), cw * 0.8));
     const bh = Math.max(50, Math.round(56 * SCALE));
@@ -4267,7 +4497,7 @@ function drawComplete() {
     CTX.fillStyle = '#ffffff';
     CTX.font = `bold ${Math.round(22 * SCALE)}px Jua, sans-serif`;
     CTX.textBaseline = 'middle';
-    CTX.fillText('태희야, 처음부터 다시 도전!', bx + bw / 2, by + bh / 2);
+    CTX.fillText(`${learnerName}야, 처음부터 다시 도전!`, bx + bw / 2, by + bh / 2);
     CTX.textBaseline = 'alphabetic';
 
     STATE.hitboxes.push({ id: 'btn_reset', x: bx, y: by, w: bw, h: bh });
@@ -4285,6 +4515,10 @@ function ensureProblem() {
 }
 
 function startAdaptiveLearning() {
+    if (!getActiveLearnerId()) {
+        STATE.mode = 'learnerSelect';
+        return;
+    }
     ensureIrtState();
     const patch = window.AdaptiveLearningFlow?.createStartPatch
         ? window.AdaptiveLearningFlow.createStartPatch(STATE)
@@ -4577,31 +4811,20 @@ function drawKeypad(x, y, w, h) {
 }
 
 function resetAll() {
-    localStorage.removeItem(LS_KEY);
-    STATE = {
-        mode: 'map',
-        questionIndex: 0,
-        totalQuestions: 0,
-        score: 0,
-        difficulty: 2,
-        consecutiveCorrect: 0,
-        caughtIds: [],
-        usedProblems: [],
-        problem: null,
-        selected: null,
-        isCorrect: null,
-        confirmed: null,
-        catchStart: 0,
-        newTiniping: null,
-        hitboxes: [],
-        currentCurriculum: 'division',
-        mapSelection: { grade: null, subGrade: null, domain: null },
-        collectionTab: '전체',
-        symbolAnswers: { square: null, circle: null, triangle: null },
-        relationCoach: null,
-        irt: window.IrtEngine ? window.IrtEngine.createInitialState('relationship_math') : null,
-        learningEntry: null
-    };
+    const profile = getActiveLearnerProfileFromState();
+    if (!profile) {
+        switchToLearnerSelect();
+        return;
+    }
+
+    const stateKey = getLearnerStateStorageKey(profile.id);
+    if (stateKey) localStorage.removeItem(stateKey);
+    const attemptKey = window.LearnerProfiles?.getAttemptLogKey?.(profile.id);
+    if (attemptKey) localStorage.removeItem(attemptKey);
+    const relationKey = window.LearnerProfiles?.getRelationLogKey?.(profile.id);
+    if (relationKey) localStorage.removeItem(relationKey);
+
+    STATE = createBaseStateForLearner(profile);
     saveState();
 }
 
@@ -4635,6 +4858,9 @@ function onPointer(evt) {
                     break;
                 case 'btn_adaptive_start':
                     startAdaptiveLearning();
+                    break;
+                case 'btn_switch_learner':
+                    switchToLearnerSelect();
                     break;
                 case 'btn_collection':
                     STATE.mode = 'collection';
@@ -4687,7 +4913,9 @@ function onPointer(evt) {
                     saveState();
                     break;
                 default:
-                    if (b.id.startsWith('key_')) {
+                    if (b.id.startsWith('learner_')) {
+                        selectLearner(b.id.replace('learner_', ''));
+                    } else if (b.id.startsWith('key_')) {
                         const val = b.value;
                         if (val === 'C') {
                             STATE.quizInput = '';
@@ -4773,7 +5001,8 @@ function frame(ts) {
 
     if (!STATE.problem && STATE.mode === 'quiz') ensureProblem();
 
-    if (STATE.mode === 'home') drawHome();
+    if (STATE.mode === 'learnerSelect') drawLearnerSelect();
+    else if (STATE.mode === 'home') drawHome();
     else if (STATE.mode === 'map') drawMap();
     else if (STATE.mode === 'quiz') drawQuiz();
     else if (STATE.mode === 'explain') drawExplain();
@@ -4787,6 +5016,11 @@ function frame(ts) {
 /* =========================================================================
    초기화
    ========================================================================= */
+window.selectLearner = selectLearner;
+window.switchToLearnerSelect = switchToLearnerSelect;
+globalThis.selectLearner = selectLearner;
+globalThis.switchToLearnerSelect = switchToLearnerSelect;
+
 loadState();
 
 Promise.all([

@@ -28,6 +28,10 @@ function createRuntimeSeed() {
 
 function getStoredLearnerSeed(topic) {
     try {
+        const activeProfile = window?.LearnerProfiles?.getActiveProfile?.()
+            || globalThis?.LearnerProfiles?.getActiveProfile?.();
+        if (activeProfile?.seed) return activeProfile.seed;
+
         const storage = window?.localStorage || globalThis?.localStorage;
         if (!storage) return `anonymous-${topic}`;
         const existing = storage.getItem(IRT_STORAGE_SEED_KEY);
