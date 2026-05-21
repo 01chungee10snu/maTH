@@ -58,6 +58,10 @@ function getPolicySkills(item) {
     return Array.from(new Set(problemTypes));
 }
 
+function hasPolicySkill(item, skill) {
+    return Boolean(skill && getPolicySkills(item).includes(skill));
+}
+
 function getPolicyFamily(item) {
     if (window.IrtEngine?.getItemFamily) return window.IrtEngine.getItemFamily(item);
     if (item?.type_family) return item.type_family;
@@ -228,10 +232,25 @@ function selectPolicyNextItem(items, state = {}) {
     const broadCandidatePool = fresh.length >= Math.min(30, Math.ceil(pool.length * 0.1))
         ? fresh
         : notImmediate;
-    const complexCandidatePool = broadCandidatePool.filter(isPolicyComplexWordProblem);
-    const candidatePool = complexCandidatePool.length >= Math.min(20, Math.ceil(broadCandidatePool.length * 0.15))
-        ? complexCandidatePool
-        : broadCandidatePool;
+    const freshTargetPool = targetSkill
+        ? broadCandidatePool.filter(item => hasPolicySkill(item, targetSkill))
+        : [];
+    const fallbackTargetPool = targetSkill
+        ? notImmediate.filter(item => hasPolicySkill(item, targetSkill))
+        : [];
+    const targetPool = freshTargetPool.length ? freshTargetPool : fallbackTargetPool;
+    let candidatePool;
+    if (phase === 'targeted_practice' && targetPool.length) {
+        const targetComplexPool = targetPool.filter(isPolicyComplexWordProblem);
+        candidatePool = targetComplexPool.length >= Math.min(4, Math.ceil(targetPool.length * 0.3))
+            ? targetComplexPool
+            : targetPool;
+    } else {
+        const complexCandidatePool = broadCandidatePool.filter(isPolicyComplexWordProblem);
+        candidatePool = complexCandidatePool.length >= Math.min(20, Math.ceil(broadCandidatePool.length * 0.15))
+            ? complexCandidatePool
+            : broadCandidatePool;
+    }
     const candidates = candidatePool
         .map(item => ({
             item,

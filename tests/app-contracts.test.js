@@ -932,6 +932,71 @@ function testIrtPolicyDiversifiesFamiliesWithinTargetSkill() {
   assert.strictEqual(second.item.problem_id, 'fraction_compare_1');
 }
 
+function testTargetedPracticeKeepsSelectingTheWeakSkillUntilItCanRecover() {
+  const context = createContext();
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLearningPolicy.js');
+  runScript(context, 'js/problems/problemBase.js');
+  runScript(context, 'js/problems/relationshipCoachProblems.js');
+  runScript(context, 'js/expandedWordProblemBank.js');
+
+  const rawBank = JSON.parse(fs.readFileSync(path.join(root, 'data/elementary_word_problem_seed_bank.json'), 'utf8'));
+  context.window.ExpandedWordProblemBank.merge(rawBank);
+  const bank = context.window.RelationshipCoachProblems.bank;
+  let state = {
+    ...context.window.IrtEngine.createInitialState('relationship_math'),
+    theta: 0.4,
+    standardError: 0.5,
+    attemptCount: 14,
+    lastItemIds: [],
+    lastItemFamilies: [],
+    presentedItemIds: [],
+    presentedItemFamilies: [],
+    skillStates: {
+      DIRECTION_REASONING: { attempts: 5, mastery: 0.2 },
+      BASE_UNIT_IDENTIFICATION: { attempts: 4, mastery: 0.8 },
+      UNIT_COMPARE: { attempts: 4, mastery: 0.75 }
+    }
+  };
+
+  const selected = [];
+  for (let index = 0; index < 8; index += 1) {
+    const selection = context.window.IrtLearningPolicy.selectNextItem(bank, state);
+    if (selection.phase !== 'targeted_practice') {
+      assert.ok(
+        state.skillStates.DIRECTION_REASONING.mastery >= 0.65,
+        `left targeted practice before weak skill recovered: ${state.skillStates.DIRECTION_REASONING.mastery}`
+      );
+      break;
+    }
+    selected.push(selection.item.problem_id);
+    assert.strictEqual(selection.targetSkill, 'DIRECTION_REASONING');
+    assert.ok(
+      [
+        ...(selection.item.skill_tags || []),
+        ...(selection.item.problem_types || [])
+      ].includes('DIRECTION_REASONING'),
+      `targeted practice drifted away from weak skill: ${selected.join(',')}`
+    );
+
+    state = context.window.IrtEngine.registerExposure(state, selection.item);
+    state = context.window.IrtEngine.updateState(state, selection.item, {
+      correct: true,
+      hintLevel: 0,
+      stepSuccessRate: 1
+    });
+  }
+
+  assert.ok(
+    selected.length >= 5,
+    `not enough targeted recovery items selected: ${selected.join(',')}`
+  );
+  assert.ok(
+    state.skillStates.DIRECTION_REASONING.mastery >= 0.65,
+    `weak skill did not recover enough: ${state.skillStates.DIRECTION_REASONING.mastery}`
+  );
+}
+
 function testExpandedIrtPolicyKeepsLongRunVarietyAndPhaseProgression() {
   const context = createContext();
   runScript(context, 'js/irtEngine.js');
@@ -1593,6 +1658,7 @@ async function runTests() {
   testIrtLearningPolicyPrefersComplexReasoningWhenFitIsComparable();
   testIrtDiagnosticUsesBroadSkillsInsteadOfRepeatingGranularTypes();
   testIrtPolicyDiversifiesFamiliesWithinTargetSkill();
+  testTargetedPracticeKeepsSelectingTheWeakSkillUntilItCanRecover();
   testExpandedIrtPolicyKeepsLongRunVarietyAndPhaseProgression();
   testAdaptiveIrtProgressIsVisibleAndLocallyAccumulated();
   testLearnerHeaderHidesIrtTechnicalDetails();
