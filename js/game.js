@@ -373,7 +373,8 @@ function createBaseStateForLearner(profile) {
         symbolAnswers: { square: null, circle: null, triangle: null },
         relationCoach: null,
         irt: activeProfile && window.IrtEngine ? window.IrtEngine.createInitialState('relationship_math') : null,
-        learningEntry: null
+        learningEntry: null,
+        lastIrtUpdate: null
     };
 }
 
@@ -401,7 +402,8 @@ function applySavedLearnerState(saved, profile) {
         collectionTab: safe.collectionTab || '전체',
         relationCoach: safe.relationCoach || null,
         irt: safe.irt || base.irt,
-        learningEntry: safe.learningEntry || null
+        learningEntry: safe.learningEntry || null,
+        lastIrtUpdate: safe.lastIrtUpdate || null
     };
 
     if (!STATE.activeLearnerId) {
@@ -431,7 +433,8 @@ function saveState() {
         collectionTab: STATE.collectionTab,
         relationCoach: STATE.relationCoach,
         irt: STATE.irt,
-        learningEntry: STATE.learningEntry
+        learningEntry: STATE.learningEntry,
+        lastIrtUpdate: STATE.lastIrtUpdate
     };
     localStorage.setItem(key, JSON.stringify(s));
 }
@@ -596,6 +599,23 @@ function updateIrtAfterAnswer(correct) {
         stepSuccessRate: getRelationCoachStepSuccessRate()
     };
     STATE.irt = window.IrtEngine.updateState(STATE.irt, STATE.problem, result);
+    STATE.lastIrtUpdate = window.IrtProgressView?.createUpdate
+        ? window.IrtProgressView.createUpdate({
+            problem: STATE.problem,
+            stateBefore,
+            stateAfter: STATE.irt,
+            result
+        })
+        : {
+            thetaBefore: stateBefore.theta || 0,
+            thetaAfter: STATE.irt.theta || 0,
+            standardErrorAfter: STATE.irt.standardError || 0,
+            attemptCount: STATE.irt.attemptCount || 0,
+            itemLevel: STATE.problem.level || null,
+            itemDifficulty: STATE.problem.irt?.b ?? null,
+            responseScore: window.IrtEngine.responseScore ? window.IrtEngine.responseScore(result) : (correct ? 1 : 0),
+            learningPhase: STATE.problem.selection_policy?.phase || null
+        };
 
     if (window.IrtLog) {
         const elapsedSeconds = Math.max(0, Math.round((Date.now() - (STATE.relationCoach?.startedAt || Date.now())) / 1000));
@@ -2428,6 +2448,11 @@ function clear() {
 
 function drawHeader(W, H) {
     const learnerName = getActiveLearnerName('나');
+    const irtHeader = window.IrtProgressView?.buildHeaderStatus?.({
+        problem: STATE.problem,
+        irtState: STATE.irt,
+        fallbackDifficulty: STATE.difficulty
+    });
     CTX.save();
     // Soft White Card Background
     roundRect(CTX, 16, 12, W - 32, 80, 24);
@@ -2440,12 +2465,22 @@ function drawHeader(W, H) {
 
     // Title
     CTX.fillStyle = '#EC4899'; // Accent Pink
-    const title = STATE.currentCurriculum === 'division' ? `${learnerName}의 도전! 수학꾸러기` : `${learnerName}의 ${STATE.currentCurriculum} 도전!`;
-    drawFittedCanvasText(title, W / 2, 48, W - 180, {
-        initialSize: 32,
-        minSize: 20,
+    const title = irtHeader
+        ? `${learnerName}의 ${irtHeader.title}`
+        : (STATE.currentCurriculum === 'division' ? `${learnerName}의 도전! 수학꾸러기` : `${learnerName}의 ${STATE.currentCurriculum} 도전!`);
+    drawFittedCanvasText(title, W / 2, irtHeader ? 38 : 48, W - 190, {
+        initialSize: irtHeader ? 27 : 32,
+        minSize: irtHeader ? 18 : 20,
         weight: 'bold'
     });
+    if (irtHeader) {
+        CTX.fillStyle = '#4f46e5';
+        drawFittedCanvasText(irtHeader.detail, W / 2, 64, W - 205, {
+            initialSize: 17,
+            minSize: 12,
+            weight: 'bold'
+        });
+    }
     CTX.textAlign = 'left';
 
     // Subtitle / Info
@@ -2454,7 +2489,7 @@ function drawHeader(W, H) {
     CTX.fillText(`문제 ${STATE.totalQuestions + 1}/100`, 36, 76);
 
     const scoreTxt = `💎 ${STATE.score}`;
-    const diffTxt = `${STATE.difficulty}단`;
+    const diffTxt = irtHeader ? irtHeader.badge : `${STATE.difficulty}단`;
     CTX.textAlign = 'right';
     
     // Difficulty Badge
@@ -2748,7 +2783,9 @@ function drawMap() {
     const summaryH = Math.round(148 * SCALE);
     const summaryY = contentY;
     const irtSummary = window.IrtEngine?.summarize ? window.IrtEngine.summarize(STATE.irt) : null;
+    const logSummary = window.IrtLog?.summarize ? window.IrtLog.summarize() : null;
     const attempts = irtSummary?.attemptCount || 0;
+    const logCount = logSummary?.total || attempts;
     const thetaLabel = irtSummary ? `수준 추정 ${irtSummary.theta}` : '수준 추정 준비중';
     const confidence = irtSummary ? `오차 ${irtSummary.standardError}` : '문제 풀이 후 갱신';
 
@@ -2770,7 +2807,7 @@ function drawMap() {
         weight: 'bold'
     });
     CTX.fillStyle = '#4b5563';
-    drawFittedCanvasText(`풀이 ${attempts}문항 · ${thetaLabel} · ${confidence}`, W / 2, summaryY + Math.round(72 * SCALE), cardW - Math.round(36 * SCALE), {
+    drawFittedCanvasText(`풀이 ${attempts}문항 · 로컬기록 ${logCount}개 · ${thetaLabel} · ${confidence}`, W / 2, summaryY + Math.round(72 * SCALE), cardW - Math.round(36 * SCALE), {
         initialSize: Math.round(20 * SCALE),
         minSize: Math.round(14 * SCALE),
         weight: 'bold'
@@ -3671,15 +3708,45 @@ function drawExplain() {
     CTX.font = `bold ${Math.round(28 * SCALE)}px Jua, sans-serif`;
     CTX.fillText(`정답: ${STATE.problem.answer}`, cardX + 24, cardY + 90);
 
-    const exX = cardX + 24, exY = cardY + 115;
+    const progressStatus = window.IrtProgressView?.buildUpdateStatus?.(STATE.lastIrtUpdate);
+    if (progressStatus) {
+        const progressX = cardX + 24;
+        const progressY = cardY + 108;
+        const progressW = cardW - 48;
+        const progressH = Math.max(46, Math.round(52 * SCALE));
+        CTX.save();
+        roundRect(CTX, progressX, progressY, progressW, progressH, Math.round(16 * SCALE));
+        CTX.fillStyle = '#eef2ff';
+        CTX.fill();
+        CTX.strokeStyle = '#c7d2fe';
+        CTX.lineWidth = Math.max(1, Math.round(2 * SCALE));
+        CTX.stroke();
+        CTX.restore();
+
+        CTX.fillStyle = '#3730a3';
+        drawFittedCanvasText(progressStatus.summary, progressX + progressW / 2, progressY + Math.round(18 * SCALE), progressW - Math.round(28 * SCALE), {
+            initialSize: Math.round(19 * SCALE),
+            minSize: Math.round(12 * SCALE),
+            weight: 'bold'
+        });
+        CTX.fillStyle = '#4f46e5';
+        drawFittedCanvasText(progressStatus.detail, progressX + progressW / 2, progressY + Math.round(38 * SCALE), progressW - Math.round(28 * SCALE), {
+            initialSize: Math.round(16 * SCALE),
+            minSize: Math.round(11 * SCALE),
+            weight: 'bold'
+        });
+    }
+
+    const exX = cardX + 24, exY = cardY + (progressStatus ? Math.max(168, Math.round(174 * SCALE)) : 115);
     const exW = cardW - 48;
-    const exH = Math.max(160, Math.round(180 * SCALE));
+    const exH = Math.max(150, Math.round((progressStatus ? 165 : 180) * SCALE));
     roundRect(CTX, exX, exY, exW, exH, Math.round(18 * SCALE));
     CTX.fillStyle = '#eff6ff';
     CTX.fill();
 
     CTX.fillStyle = '#1f2937';
     CTX.font = `${Math.round(24 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'left';
     fillTextWrap(CTX, STATE.problem.explanation, exX + 20, exY + 40, exW - 40, Math.round(34 * SCALE));
 
     const confirmY = exY + exH + Math.round(45 * SCALE);
@@ -4580,7 +4647,8 @@ function startAdaptiveLearning() {
             confirmed: null,
             relationCoach: null,
             symbolAnswers: { square: null, circle: null, triangle: null },
-            learningEntry: 'adaptive'
+            learningEntry: 'adaptive',
+            lastIrtUpdate: null
         };
 
     Object.assign(STATE, patch);
@@ -4713,6 +4781,7 @@ function afterExplainNext() {
         STATE.selected = null;
         STATE.isCorrect = null;
         STATE.confirmed = null;
+        STATE.lastIrtUpdate = null;
         STATE.mode = 'quiz';
         saveState();
         return;
@@ -4745,6 +4814,7 @@ function gotoNextQuestion() {
     STATE.selected = null;
     STATE.isCorrect = null;
     STATE.confirmed = null;
+    STATE.lastIrtUpdate = null;
     // 미지수 상태 초기화
     STATE.symbolAnswers = { square: null, circle: null, triangle: null };
     STATE.relationCoach = null;

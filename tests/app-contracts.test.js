@@ -963,6 +963,78 @@ function testExpandedIrtPolicyKeepsLongRunVarietyAndPhaseProgression() {
   assert.ok(phases.has('targeted_practice') || phases.has('adaptive_practice'));
 }
 
+function testAdaptiveIrtProgressIsVisibleAndLocallyAccumulated() {
+  const context = createStorageContext();
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLearningPolicy.js');
+  runScript(context, 'js/irtLog.js');
+  runScript(context, 'js/irtProgressView.js');
+  runScript(context, 'js/relationCurriculum.js');
+  runScript(context, 'js/problems/problemBase.js');
+  runScript(context, 'js/problems/relationshipCoachProblems.js');
+  runScript(context, 'js/expandedWordProblemBank.js');
+  runScript(context, 'js/adaptiveLearningFlow.js');
+
+  const rawBank = JSON.parse(fs.readFileSync(path.join(root, 'data/elementary_word_problem_seed_bank.json'), 'utf8'));
+  context.window.ExpandedWordProblemBank.merge(rawBank);
+
+  let state = context.window.IrtEngine.createInitialState('relationship_math', {
+    learnerSeed: 'adaptive-visible-contract',
+    dailySeed: 'adaptive-visible-contract:2026-05-21'
+  });
+  const selectedDifficulties = [];
+  let currentItem = null;
+
+  for (let index = 0; index < 20; index += 1) {
+    const pool = context.window.AdaptiveLearningFlow.getCandidateItems(
+      context.window.RelationshipCoachProblems.bank,
+      { learningEntry: 'adaptive' }
+    );
+    const selection = context.window.IrtLearningPolicy.selectNextItem(pool, state);
+    currentItem = {
+      ...selection.item,
+      selection_policy: {
+        phase: selection.phase,
+        targetSkill: selection.targetSkill,
+        utility: selection.utility,
+        probability: selection.probability
+      }
+    };
+    selectedDifficulties.push(context.window.IrtEngine.getDifficulty(currentItem));
+    state = context.window.IrtEngine.registerExposure(state, currentItem);
+    const stateBefore = { ...state };
+    const result = { correct: true, hintLevel: 0, stepSuccessRate: 1 };
+    state = context.window.IrtEngine.updateState(state, currentItem, result);
+    context.window.IrtLog.appendAttempt(context.window.IrtLog.createAttemptRecord({
+      problem: currentItem,
+      result,
+      stateBefore,
+      stateAfter: state,
+      selectedAnswer: currentItem.answer,
+      elapsedSeconds: 30
+    }));
+  }
+
+  const firstFiveMax = Math.max(...selectedDifficulties.slice(0, 5));
+  const lastFiveMax = Math.max(...selectedDifficulties.slice(-5));
+  assert.strictEqual(state.attemptCount, 20);
+  assert.ok(state.theta > 1.5, `theta did not increase enough: ${state.theta}`);
+  assert.ok(lastFiveMax > firstFiveMax, `difficulty did not ramp: ${selectedDifficulties.join(',')}`);
+  assert.strictEqual(context.window.IrtLog.loadAttempts().length, 20);
+  assert.strictEqual(context.window.IrtLog.getPendingAttempts().length, 20);
+
+  const header = context.window.IrtProgressView.buildHeaderStatus({
+    problem: currentItem,
+    irtState: state,
+    fallbackDifficulty: 2
+  });
+  assert.ok(header);
+  assert.notStrictEqual(header.badge, '2단');
+  assert.ok(header.badge.includes('L'));
+  assert.ok(header.detail.includes('IRT 20문항'));
+  assert.ok(header.detail.includes('θ'));
+}
+
 function testRelationshipCoachBankHasIrtMetadata() {
   const context = createContext();
   runScript(context, 'js/problems/problemBase.js');
@@ -1277,6 +1349,7 @@ async function runTests() {
   testIrtDiagnosticUsesBroadSkillsInsteadOfRepeatingGranularTypes();
   testIrtPolicyDiversifiesFamiliesWithinTargetSkill();
   testExpandedIrtPolicyKeepsLongRunVarietyAndPhaseProgression();
+  testAdaptiveIrtProgressIsVisibleAndLocallyAccumulated();
   testRelationshipCoachBankHasIrtMetadata();
   testIrtAttemptLogCreatesSupabaseReadyPendingRecords();
   await testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners();

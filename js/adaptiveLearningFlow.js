@@ -58,7 +58,8 @@ function createStartPatch(state = {}) {
         confirmed: null,
         relationCoach: null,
         symbolAnswers: { square: null, circle: null, triangle: null },
-        learningEntry: 'adaptive'
+        learningEntry: 'adaptive',
+        lastIrtUpdate: null
     };
 }
 
