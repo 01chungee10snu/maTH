@@ -997,7 +997,9 @@ function testRelationshipCoachBankHasIrtMetadata() {
     'PROPORTION',
     'RANKING',
     'COMPOSITE_RELATION',
-    'DIRECTION_CONFUSION'
+    'BASE_UNIT_IDENTIFICATION',
+    'DIRECTION_REASONING',
+    'TRANSFER'
   ].forEach(skill => assert.ok((skillCounts.get(skill) || 0) >= 3, `${skill} needs at least 3 seed items`));
 
   const problem = context.window.RelationshipCoachProblems.generateForItem(bank[0]);
@@ -1086,7 +1088,7 @@ async function testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners() {
     problem: {
       problem_id: 'REL_MATH_SYNC',
       problem_types: ['UNIT_COMPARE'],
-      skill_tags: ['UNIT_COMPARE', 'DIRECTION_CONFUSION']
+      skill_tags: ['UNIT_COMPARE', 'DIRECTION_REASONING']
     },
     result: { correct: true, hintLevel: 1, stepSuccessRate: 1 },
     stateBefore: { topic: 'relationship_math', theta: 0, standardError: 1 },
@@ -1105,7 +1107,7 @@ async function testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners() {
   assert.strictEqual(inserted[0].rows[0].learner_id, '00000000-0000-4000-8000-000000000001');
   assert.strictEqual(inserted[0].rows[0].local_attempt_id, record.local_id);
   assert.strictEqual(inserted[0].rows[0].item_id, 'REL_MATH_SYNC');
-  assert.strictEqual(inserted[0].rows[0].skill_tags.join('|'), 'UNIT_COMPARE|DIRECTION_CONFUSION');
+  assert.strictEqual(inserted[0].rows[0].skill_tags.join('|'), 'UNIT_COMPARE|DIRECTION_REASONING');
   assert.strictEqual(inserted[0].rows[0].standard_error_after, 0.9);
   assert.strictEqual(context.window.IrtLog.getPendingAttempts().length, 0);
 }
@@ -1125,7 +1127,9 @@ function testMeasurementQualityRatesReliabilityAndValidityConservatively() {
     'PROPORTION',
     'RANKING',
     'COMPOSITE_RELATION',
-    'DIRECTION_CONFUSION'
+    'BASE_UNIT_IDENTIFICATION',
+    'DIRECTION_REASONING',
+    'TRANSFER'
   ];
   const itemBank = skills.flatMap((skill, index) => [0, 1, 2].map(offset => ({
     problem_id: `ITEM_${index}_${offset}`,
@@ -1196,7 +1200,7 @@ function testMathAbilityReportSummarizesIrtEvidenceForParents() {
       local_id: 'a2',
       item_id: 'REL_MATH_B',
       topic: 'relationship_math',
-      skill_tags: ['DIRECTION_CONFUSION'],
+      skill_tags: ['DIRECTION_REASONING'],
       correct: false,
       hint_level: 4,
       response_score: 0.15,
@@ -1228,7 +1232,7 @@ function testMathAbilityReportSummarizesIrtEvidenceForParents() {
       attemptCount: 3,
       skillStates: {
         EQUAL_SHARING: { attempts: 1, mastery: 1 },
-        DIRECTION_CONFUSION: { attempts: 1, mastery: 0.15 },
+        DIRECTION_REASONING: { attempts: 1, mastery: 0.15 },
         FRACTION_RELATION: { attempts: 1, mastery: 0.84 }
       }
     }
@@ -1241,7 +1245,7 @@ function testMathAbilityReportSummarizesIrtEvidenceForParents() {
   assert.strictEqual(report.measurement.standardError, 0.65);
   assert.ok(report.measurement.abilityIndex > 50);
   assert.strictEqual(report.measurement.confidenceLabel, '관찰 중');
-  assert.strictEqual(report.weakSkills[0].skill, 'DIRECTION_CONFUSION');
+  assert.strictEqual(report.weakSkills[0].skill, 'DIRECTION_REASONING');
   assert.ok(report.parentNarrative.includes('추정'));
   assert.ok(report.recommendations.length >= 2);
   assert.strictEqual(report.quality.reliability.level, '관찰 단계');

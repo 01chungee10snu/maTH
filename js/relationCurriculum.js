@@ -9,7 +9,7 @@ const ELEMENTARY_RELATION_TOPIC_PROFILES = [
     {
         key: 'division_word',
         matches: ['자연수의 곱셈과 나눗셈', '나눗셈', '곱셈의 의미'],
-        skills: ['EQUAL_SHARING', 'QUOTATIVE_DIVISION', 'UNIT_COMPARE', 'INVERSE_RELATION', 'DIRECTION_CONFUSION']
+        skills: ['EQUAL_SHARING', 'QUOTATIVE_DIVISION', 'UNIT_COMPARE', 'INVERSE_RELATION', 'DIRECTION_REASONING', 'BASE_UNIT_IDENTIFICATION']
     },
     {
         key: 'fraction_relation',
@@ -19,7 +19,7 @@ const ELEMENTARY_RELATION_TOPIC_PROFILES = [
     {
         key: 'measurement_relation',
         matches: ['길이, 시각, 시간', '들이와 무게', '시간과 길이'],
-        skills: ['DIRECT_COMPARE', 'UNIT_COMPARE', 'INVERSE_RELATION', 'RANKING', 'DIRECTION_CONFUSION']
+        skills: ['DIRECT_COMPARE', 'UNIT_COMPARE', 'INVERSE_RELATION', 'RANKING', 'DIRECTION_REASONING']
     },
     {
         key: 'multiple_relation',
@@ -29,7 +29,7 @@ const ELEMENTARY_RELATION_TOPIC_PROFILES = [
     {
         key: 'ratio_relation',
         matches: ['비와 비율', '비례식과 비례배분', '규칙과 대응'],
-        skills: ['PROPORTION', 'MULTIPLICATIVE_COMPARE', 'COMPOSITE_RELATION', 'UNIT_COMPARE']
+        skills: ['PROPORTION', 'MULTIPLICATIVE_COMPARE', 'COMPOSITE_RELATION', 'UNIT_COMPARE', 'TRANSFER']
     },
     {
         key: 'data_relation',

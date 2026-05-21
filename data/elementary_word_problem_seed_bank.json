@@ -9351,7 +9351,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 태희는 1/3, 민지는 1/5을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "태희",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/3이 1/5보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/3이 1/5보다 큽니다. 따라서 더 많이 먹은 사람은 태희입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_002",
@@ -9375,7 +9375,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 민지는 1/4, 하준은 1/7을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "민지",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/4이 1/7보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/4이 1/7보다 큽니다. 따라서 더 많이 먹은 사람은 민지입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_003",
@@ -9399,7 +9399,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 하준은 1/5, 서아는 1/9을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "하준",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/5이 1/9보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/5이 1/9보다 큽니다. 따라서 더 많이 먹은 사람은 하준입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_004",
@@ -9423,7 +9423,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 서아는 1/6, 지우는 1/8을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "서아",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/6이 1/8보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/6이 1/8보다 큽니다. 따라서 더 많이 먹은 사람은 서아입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_005",
@@ -9447,7 +9447,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 지우는 1/3, 도윤은 1/6을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "지우",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/3이 1/6보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/3이 1/6보다 큽니다. 따라서 더 많이 먹은 사람은 지우입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_006",
@@ -9471,7 +9471,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 도윤은 1/4, 수빈은 1/8을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "도윤",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/4이 1/8보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/4이 1/8보다 큽니다. 따라서 더 많이 먹은 사람은 도윤입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_007",
@@ -9495,7 +9495,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 수빈은 1/5, 연우는 1/7을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "수빈",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/5이 1/7보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/5이 1/7보다 큽니다. 따라서 더 많이 먹은 사람은 수빈입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_008",
@@ -9519,7 +9519,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 연우는 1/6, 지민은 1/9을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "연우",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/6이 1/9보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/6이 1/9보다 큽니다. 따라서 더 많이 먹은 사람은 연우입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_009",
@@ -9543,7 +9543,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 지민은 1/3, 유나는 1/7을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "지민",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/3이 1/7보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/3이 1/7보다 큽니다. 따라서 더 많이 먹은 사람은 지민입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_010",
@@ -9567,7 +9567,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 유나는 1/4, 태희는 1/6을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "유나",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/4이 1/6보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/4이 1/6보다 큽니다. 따라서 더 많이 먹은 사람은 유나입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_011",
@@ -9591,7 +9591,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 태희는 1/5, 민지는 1/8을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "태희",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/5이 1/8보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/5이 1/8보다 큽니다. 따라서 더 많이 먹은 사람은 태희입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_012",
@@ -9615,7 +9615,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 민지는 1/6, 하준은 1/10을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "민지",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/6이 1/10보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/6이 1/10보다 큽니다. 따라서 더 많이 먹은 사람은 민지입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_013",
@@ -9639,7 +9639,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 하준은 1/3, 서아는 1/5을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "하준",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/3이 1/5보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/3이 1/5보다 큽니다. 따라서 더 많이 먹은 사람은 하준입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_014",
@@ -9663,7 +9663,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 서아는 1/4, 지우는 1/7을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "서아",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/4이 1/7보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/4이 1/7보다 큽니다. 따라서 더 많이 먹은 사람은 서아입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_015",
@@ -9687,7 +9687,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 지우는 1/5, 도윤은 1/9을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "지우",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/5이 1/9보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/5이 1/9보다 큽니다. 따라서 더 많이 먹은 사람은 지우입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_016",
@@ -9711,7 +9711,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 도윤은 1/6, 수빈은 1/8을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "도윤",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/6이 1/8보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/6이 1/8보다 큽니다. 따라서 더 많이 먹은 사람은 도윤입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_017",
@@ -9735,7 +9735,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 수빈은 1/3, 연우는 1/6을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "수빈",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/3이 1/6보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/3이 1/6보다 큽니다. 따라서 더 많이 먹은 사람은 수빈입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_018",
@@ -9759,7 +9759,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 연우는 1/4, 지민은 1/8을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "연우",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/4이 1/8보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/4이 1/8보다 큽니다. 따라서 더 많이 먹은 사람은 연우입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_019",
@@ -9783,7 +9783,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 지민은 1/5, 유나는 1/7을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "지민",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/5이 1/7보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/5이 1/7보다 큽니다. 따라서 더 많이 먹은 사람은 지민입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_COMPARE_SAME_NUMERATOR_020",
@@ -9807,7 +9807,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 케이크에서 유나는 1/6, 태희는 1/9을 먹었어요. 누가 더 많이 먹었을까요?",
       "answer": "유나",
-      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/6이 1/9보다 큽니다."
+      "solution": "분자가 같을 때 분모가 작을수록 크므로 1/6이 1/9보다 큽니다. 따라서 더 많이 먹은 사람은 유나입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_001",
@@ -9830,7 +9830,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/2, 다른 조각은 2/4이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "2/4은 약분하면 1/2이므로 같습니다."
+      "solution": "2/4은 약분하면 1/2이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_002",
@@ -9853,7 +9853,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/3, 다른 조각은 3/9이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "3/9은 약분하면 1/3이므로 같습니다."
+      "solution": "3/9은 약분하면 1/3이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_003",
@@ -9876,7 +9876,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/4, 다른 조각은 4/16이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "4/16은 약분하면 1/4이므로 같습니다."
+      "solution": "4/16은 약분하면 1/4이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_004",
@@ -9899,7 +9899,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/5, 다른 조각은 5/25이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "5/25은 약분하면 1/5이므로 같습니다."
+      "solution": "5/25은 약분하면 1/5이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_005",
@@ -9922,7 +9922,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/6, 다른 조각은 2/12이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "2/12은 약분하면 1/6이므로 같습니다."
+      "solution": "2/12은 약분하면 1/6이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_006",
@@ -9945,7 +9945,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/2, 다른 조각은 3/6이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "3/6은 약분하면 1/2이므로 같습니다."
+      "solution": "3/6은 약분하면 1/2이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_007",
@@ -9968,7 +9968,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/3, 다른 조각은 4/12이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "4/12은 약분하면 1/3이므로 같습니다."
+      "solution": "4/12은 약분하면 1/3이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_008",
@@ -9991,7 +9991,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/4, 다른 조각은 5/20이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "5/20은 약분하면 1/4이므로 같습니다."
+      "solution": "5/20은 약분하면 1/4이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_009",
@@ -10014,7 +10014,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/5, 다른 조각은 2/10이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "2/10은 약분하면 1/5이므로 같습니다."
+      "solution": "2/10은 약분하면 1/5이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_010",
@@ -10037,7 +10037,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/6, 다른 조각은 3/18이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "3/18은 약분하면 1/6이므로 같습니다."
+      "solution": "3/18은 약분하면 1/6이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_011",
@@ -10060,7 +10060,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/2, 다른 조각은 4/8이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "4/8은 약분하면 1/2이므로 같습니다."
+      "solution": "4/8은 약분하면 1/2이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_012",
@@ -10083,7 +10083,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/3, 다른 조각은 5/15이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "5/15은 약분하면 1/3이므로 같습니다."
+      "solution": "5/15은 약분하면 1/3이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_013",
@@ -10106,7 +10106,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/4, 다른 조각은 2/8이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "2/8은 약분하면 1/4이므로 같습니다."
+      "solution": "2/8은 약분하면 1/4이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_014",
@@ -10129,7 +10129,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/5, 다른 조각은 3/15이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "3/15은 약분하면 1/5이므로 같습니다."
+      "solution": "3/15은 약분하면 1/5이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_015",
@@ -10152,7 +10152,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/6, 다른 조각은 4/24이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "4/24은 약분하면 1/6이므로 같습니다."
+      "solution": "4/24은 약분하면 1/6이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_016",
@@ -10175,7 +10175,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/2, 다른 조각은 5/10이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "5/10은 약분하면 1/2이므로 같습니다."
+      "solution": "5/10은 약분하면 1/2이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_017",
@@ -10198,7 +10198,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/3, 다른 조각은 2/6이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "2/6은 약분하면 1/3이므로 같습니다."
+      "solution": "2/6은 약분하면 1/3이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_018",
@@ -10221,7 +10221,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/4, 다른 조각은 3/12이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "3/12은 약분하면 1/4이므로 같습니다."
+      "solution": "3/12은 약분하면 1/4이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_019",
@@ -10244,7 +10244,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/5, 다른 조각은 4/20이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "4/20은 약분하면 1/5이므로 같습니다."
+      "solution": "4/20은 약분하면 1/5이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_FRAC_EQUIVALENCE_020",
@@ -10267,7 +10267,7 @@
       "representation_hint": "bar_model",
       "problem": "같은 크기의 초콜릿에서 한 조각은 1/6, 다른 조각은 5/30이라고 표시했어요. 두 양은 같을까요?",
       "answer": "같다",
-      "solution": "5/30은 약분하면 1/6이므로 같습니다."
+      "solution": "5/30은 약분하면 1/6이므로 두 양은 같습니다. 따라서 답은 '같다'입니다."
     },
     {
       "id": "EWP_G3G4_DECIMAL_COMPARE_001",
@@ -10751,7 +10751,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 650mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 B",
-      "solution": "1L는 1000mL이므로 650mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 650mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 B입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_002",
@@ -10775,7 +10775,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 680mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 B",
-      "solution": "1L는 1000mL이므로 680mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 680mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 B입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_003",
@@ -10799,7 +10799,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 710mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 B",
-      "solution": "1L는 1000mL이므로 710mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 710mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 B입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_004",
@@ -10823,7 +10823,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 740mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 B",
-      "solution": "1L는 1000mL이므로 740mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 740mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 B입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_005",
@@ -10847,7 +10847,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 770mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 B",
-      "solution": "1L는 1000mL이므로 770mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 770mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 B입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_006",
@@ -10871,7 +10871,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 800mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 B",
-      "solution": "1L는 1000mL이므로 800mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 800mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 B입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_007",
@@ -10895,7 +10895,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 830mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 B",
-      "solution": "1L는 1000mL이므로 830mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 830mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 B입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_008",
@@ -10919,7 +10919,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 860mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 B",
-      "solution": "1L는 1000mL이므로 860mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 860mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 B입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_009",
@@ -10943,7 +10943,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 890mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 B",
-      "solution": "1L는 1000mL이므로 890mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 890mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 B입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_010",
@@ -10967,7 +10967,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 920mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 B",
-      "solution": "1L는 1000mL이므로 920mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 920mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 B입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_011",
@@ -10991,7 +10991,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 950mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 B",
-      "solution": "1L는 1000mL이므로 950mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 950mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 B입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_012",
@@ -11015,7 +11015,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 980mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 B",
-      "solution": "1L는 1000mL이므로 980mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 980mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 B입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_013",
@@ -11039,7 +11039,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 1010mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 A",
-      "solution": "1L는 1000mL이므로 1010mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 1010mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 A입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_014",
@@ -11063,7 +11063,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 1040mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 A",
-      "solution": "1L는 1000mL이므로 1040mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 1040mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 A입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_015",
@@ -11087,7 +11087,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 1070mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 A",
-      "solution": "1L는 1000mL이므로 1070mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 1070mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 A입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_016",
@@ -11111,7 +11111,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 1100mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 A",
-      "solution": "1L는 1000mL이므로 1100mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 1100mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 A입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_017",
@@ -11135,7 +11135,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 1130mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 A",
-      "solution": "1L는 1000mL이므로 1130mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 1130mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 A입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_018",
@@ -11159,7 +11159,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 1160mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 A",
-      "solution": "1L는 1000mL이므로 1160mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 1160mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 A입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_019",
@@ -11183,7 +11183,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 1190mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 A",
-      "solution": "1L는 1000mL이므로 1190mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 1190mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 A입니다."
     },
     {
       "id": "EWP_G3G4_CAPACITY_CONVERSION_COMPARE_020",
@@ -11207,7 +11207,7 @@
       "representation_hint": "table",
       "problem": "물병 A에는 1220mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?",
       "answer": "물병 A",
-      "solution": "1L는 1000mL이므로 1220mL와 1000mL를 비교합니다."
+      "solution": "1L는 1000mL이므로 1220mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 물병 A입니다."
     },
     {
       "id": "EWP_G3G4_WEIGHT_DIFFERENCE_001",
@@ -12150,7 +12150,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 12개, 화요일 18개, 수요일 15개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "6개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 6개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_002",
@@ -12173,7 +12173,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 13개, 화요일 19개, 수요일 16개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "6개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 6개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_003",
@@ -12196,7 +12196,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 14개, 화요일 20개, 수요일 17개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "6개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 6개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_004",
@@ -12220,7 +12220,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 15개, 화요일 21개, 수요일 18개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "6개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 6개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_005",
@@ -12243,7 +12243,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 16개, 화요일 22개, 수요일 15개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "7개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 7개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_006",
@@ -12266,7 +12266,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 17개, 화요일 23개, 수요일 16개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "7개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 7개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_007",
@@ -12289,7 +12289,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 18개, 화요일 24개, 수요일 17개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "7개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 7개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_008",
@@ -12312,7 +12312,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 19개, 화요일 25개, 수요일 18개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "7개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 7개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_009",
@@ -12335,7 +12335,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 20개, 화요일 26개, 수요일 15개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "11개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 11개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_010",
@@ -12359,7 +12359,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 21개, 화요일 27개, 수요일 16개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "11개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 11개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_011",
@@ -12382,7 +12382,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 22개, 화요일 28개, 수요일 17개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "11개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 11개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_012",
@@ -12405,7 +12405,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 23개, 화요일 29개, 수요일 18개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "11개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 11개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_013",
@@ -12428,7 +12428,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 24개, 화요일 30개, 수요일 15개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "15개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 15개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_014",
@@ -12452,7 +12452,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 25개, 화요일 31개, 수요일 16개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "15개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 15개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_015",
@@ -12475,7 +12475,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 26개, 화요일 32개, 수요일 17개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "15개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 15개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_016",
@@ -12498,7 +12498,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 27개, 화요일 33개, 수요일 18개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "15개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 15개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_017",
@@ -12521,7 +12521,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 28개, 화요일 34개, 수요일 15개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "19개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 19개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_018",
@@ -12544,7 +12544,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 29개, 화요일 35개, 수요일 16개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "19개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 19개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_019",
@@ -12567,7 +12567,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 30개, 화요일 36개, 수요일 17개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "19개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 19개입니다."
     },
     {
       "id": "EWP_G3G4_DATA_BAR_COMPARE_020",
@@ -12591,7 +12591,7 @@
       "representation_hint": "table",
       "problem": "병뚜껑을 월요일 31개, 화요일 37개, 수요일 18개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?",
       "answer": "19개",
-      "solution": "가장 큰 수와 가장 작은 수의 차이를 구합니다."
+      "solution": "가장 큰 수와 가장 작은 수의 차이를 구하면 19개입니다."
     },
     {
       "id": "EWP_G3G4_PATTERN_GROWING_ADD_001",

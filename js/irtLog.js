@@ -7,6 +7,16 @@
 
 const IRT_ATTEMPT_LOG_KEY = 'taehee-irt-attempt-log';
 const IRT_ATTEMPT_LOG_LIMIT = 500;
+const IRT_LOG_ERROR_TAGS = new Set([
+    'NUMBER_SIZE_BIAS',
+    'DIRECTION_CONFUSION',
+    'BASE_UNIT_CONFUSION',
+    'FRACTION_SIZE_CONFUSION',
+    'OPERATION_SELECTION_ERROR',
+    'RANKING_MISREAD',
+    'EXPLANATION_GAP',
+    'TRANSFER_FAILURE'
+]);
 
 function getIrtAttemptLogKey() {
     return window.LearnerProfiles?.getAttemptLogKey?.()
@@ -53,7 +63,7 @@ function createIrtAttemptRecord(input = {}) {
     const skillTags = Array.from(new Set([
         ...(problem.skill_tags || []),
         ...(problem.problem_types || [])
-    ].filter(Boolean)));
+    ].filter(skill => skill && !IRT_LOG_ERROR_TAGS.has(skill))));
     const responseScore = window.IrtEngine?.responseScore
         ? window.IrtEngine.responseScore(result)
         : (result.correct ? 1 : 0);

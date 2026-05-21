@@ -7,6 +7,16 @@
 
 const IRT_POLICY_MIN_DIAGNOSTIC_ATTEMPTS = 12;
 const IRT_POLICY_WEAK_MASTERY = 0.65;
+const IRT_POLICY_ERROR_TAGS = new Set([
+    'NUMBER_SIZE_BIAS',
+    'DIRECTION_CONFUSION',
+    'BASE_UNIT_CONFUSION',
+    'FRACTION_SIZE_CONFUSION',
+    'OPERATION_SELECTION_ERROR',
+    'RANKING_MISREAD',
+    'EXPLANATION_GAP',
+    'TRANSFER_FAILURE'
+]);
 
 function clampPolicy(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -37,10 +47,14 @@ function getPolicyInformation(theta, item) {
 }
 
 function getPolicySkills(item) {
-    const skillTags = Array.isArray(item?.skill_tags) ? item.skill_tags.filter(Boolean) : [];
+    const skillTags = Array.isArray(item?.skill_tags)
+        ? item.skill_tags.filter(skill => skill && !IRT_POLICY_ERROR_TAGS.has(skill))
+        : [];
     if (skillTags.length) return Array.from(new Set(skillTags));
 
-    const problemTypes = Array.isArray(item?.problem_types) ? item.problem_types.filter(Boolean) : [];
+    const problemTypes = Array.isArray(item?.problem_types)
+        ? item.problem_types.filter(skill => skill && !IRT_POLICY_ERROR_TAGS.has(skill))
+        : [];
     return Array.from(new Set(problemTypes));
 }
 

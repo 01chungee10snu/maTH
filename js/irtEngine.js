@@ -10,6 +10,16 @@ const IRT_STATE_VERSION = 1;
 const IRT_THETA_MIN = -3;
 const IRT_THETA_MAX = 3;
 const IRT_STORAGE_SEED_KEY = 'taehee-irt-learner-seed';
+const IRT_ERROR_TAGS = new Set([
+    'NUMBER_SIZE_BIAS',
+    'DIRECTION_CONFUSION',
+    'BASE_UNIT_CONFUSION',
+    'FRACTION_SIZE_CONFUSION',
+    'OPERATION_SELECTION_ERROR',
+    'RANKING_MISREAD',
+    'EXPLANATION_GAP',
+    'TRANSFER_FAILURE'
+]);
 
 function clampIrt(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -99,7 +109,7 @@ function getResponseScore(result = {}) {
 
 function getItemSkills(item) {
     const skills = item?.skill_tags || item?.problem_types || [];
-    return Array.from(new Set(skills.filter(Boolean)));
+    return Array.from(new Set(skills.filter(skill => skill && !IRT_ERROR_TAGS.has(skill))));
 }
 
 function getItemFamily(item) {

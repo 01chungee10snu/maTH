@@ -29,9 +29,9 @@ const RELATION_COACH_ERROR_CODES = {
 const RELATION_COACH_PROBLEM_BANK = [
     {
         problem_id: 'REL_MATH_001',
-        grade_band: 'G1_G2',
+        grade_band: 'G3_G4',
         level: 4,
-        skill_tags: ['UNIT_COMPARE', 'INVERSE_RELATION', 'RANKING'],
+        skill_tags: ['UNIT_COMPARE', 'INVERSE_RELATION', 'RANKING', 'BASE_UNIT_IDENTIFICATION', 'DIRECTION_REASONING'],
         irt: { model: 'rasch', b: -0.2 },
         problem_types: ['UNIT_COMPARE', 'INVERSE_RELATION', 'RANKING'],
         question: '빨간 그릇을 가득 채우려면 ㉮ 그릇으로는 5번, ㉯ 그릇으로는 3번 부어야 해요. 또 빨간 그릇 물을 ㉰ 그릇에는 3번, ㉱ 그릇에는 5번 나누어 담을 수 있어요. 두 번째로 큰 그릇은 무엇일까요?',
@@ -49,7 +49,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_002',
-        grade_band: 'G1_G2',
+        grade_band: 'G3_G4',
         level: 2,
         skill_tags: ['QUOTATIVE_DIVISION'],
         irt: { model: 'rasch', b: -1.1 },
@@ -67,7 +67,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_003',
-        grade_band: 'G1_G2',
+        grade_band: 'G3_G4',
         level: 3,
         skill_tags: ['EQUAL_SHARING'],
         irt: { model: 'rasch', b: -0.8 },
@@ -104,11 +104,11 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_005',
-        grade_band: 'G3_G4',
+        grade_band: 'G5_G6',
         level: 10,
-        skill_tags: ['PROPORTION', 'TRANSFER_FAILURE'],
+        skill_tags: ['PROPORTION', 'TRANSFER'],
         irt: { model: 'rasch', b: 1.4 },
-        problem_types: ['PROPORTION', 'TRANSFER_FAILURE'],
+        problem_types: ['PROPORTION', 'TRANSFER'],
         question: '연필 2자루의 값이 300원이에요. 같은 연필 6자루의 값은 얼마일까요?',
         base_unit: '연필 2자루',
         entities: [
@@ -140,9 +140,9 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_007',
-        grade_band: 'G1_G2',
+        grade_band: 'G3_G4',
         level: 4,
-        skill_tags: ['UNIT_COMPARE', 'BASE_UNIT_CONFUSION'],
+        skill_tags: ['UNIT_COMPARE', 'BASE_UNIT_IDENTIFICATION'],
         irt: { model: 'rasch', b: -0.4 },
         problem_types: ['UNIT_COMPARE'],
         question: '작은 컵 4컵을 부으면 큰 병 1개가 가득 차요. 작은 컵 8컵은 큰 병 몇 개와 같을까요?',
@@ -158,9 +158,9 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_008',
-        grade_band: 'G1_G2',
+        grade_band: 'G3_G4',
         level: 5,
-        skill_tags: ['INVERSE_RELATION', 'DIRECTION_CONFUSION'],
+        skill_tags: ['INVERSE_RELATION', 'DIRECTION_REASONING'],
         irt: { model: 'rasch', b: 0.2 },
         problem_types: ['UNIT_COMPARE', 'INVERSE_RELATION'],
         question: '노란 병을 가득 채우려면 작은 컵으로는 6번, 큰 컵으로는 3번 부어야 해요. 더 큰 컵은 무엇일까요?',
@@ -195,11 +195,11 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_010',
-        grade_band: 'G3_G4',
+        grade_band: 'G5_G6',
         level: 11,
-        skill_tags: ['FRACTION_RELATION', 'PROPORTION', 'TRANSFER_FAILURE'],
+        skill_tags: ['FRACTION_RELATION', 'PROPORTION', 'TRANSFER'],
         irt: { model: 'rasch', b: 1.8 },
-        problem_types: ['FRACTION_RELATION', 'PROPORTION', 'TRANSFER_FAILURE'],
+        problem_types: ['FRACTION_RELATION', 'PROPORTION', 'TRANSFER'],
         question: '물 3컵으로 주스 2병을 만들 수 있어요. 같은 비율로 주스 6병을 만들려면 물은 몇 컵 필요할까요?',
         base_unit: '주스 2병',
         entities: [
@@ -231,7 +231,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_012',
-        grade_band: 'G1_G2',
+        grade_band: 'G3_G4',
         level: 2,
         skill_tags: ['EQUAL_SHARING'],
         irt: { model: 'rasch', b: -1.0 },
@@ -249,7 +249,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_013',
-        grade_band: 'G1_G2',
+        grade_band: 'G3_G4',
         level: 2,
         skill_tags: ['QUOTATIVE_DIVISION'],
         irt: { model: 'rasch', b: -0.9 },
@@ -267,7 +267,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_014',
-        grade_band: 'G1_G2',
+        grade_band: 'G3_G4',
         level: 4,
         skill_tags: ['UNIT_COMPARE'],
         irt: { model: 'rasch', b: -0.6 },
@@ -285,7 +285,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_015',
-        grade_band: 'G2_G3',
+        grade_band: 'G3_G4',
         level: 5,
         skill_tags: ['INVERSE_RELATION'],
         irt: { model: 'rasch', b: 0.0 },
@@ -303,7 +303,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_016',
-        grade_band: 'G2_G3',
+        grade_band: 'G3_G4',
         level: 6,
         skill_tags: ['MULTIPLICATIVE_COMPARE'],
         irt: { model: 'rasch', b: 0.3 },
@@ -339,7 +339,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_018',
-        grade_band: 'G2_G3',
+        grade_band: 'G3_G4',
         level: 6,
         skill_tags: ['RANKING'],
         irt: { model: 'rasch', b: 0.5 },
@@ -376,7 +376,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_020',
-        grade_band: 'G3_G4',
+        grade_band: 'G5_G6',
         level: 9,
         skill_tags: ['PROPORTION'],
         irt: { model: 'rasch', b: 1.1 },
@@ -394,7 +394,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_021',
-        grade_band: 'G1_G2',
+        grade_band: 'G3_G4',
         level: 3,
         skill_tags: ['QUOTATIVE_DIVISION'],
         irt: { model: 'rasch', b: -0.8 },
@@ -412,7 +412,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_022',
-        grade_band: 'G1_G2',
+        grade_band: 'G3_G4',
         level: 3,
         skill_tags: ['EQUAL_SHARING'],
         irt: { model: 'rasch', b: -0.6 },
@@ -430,9 +430,9 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_023',
-        grade_band: 'G2_G3',
+        grade_band: 'G3_G4',
         level: 5,
-        skill_tags: ['UNIT_COMPARE', 'BASE_UNIT_CONFUSION'],
+        skill_tags: ['UNIT_COMPARE', 'BASE_UNIT_IDENTIFICATION'],
         irt: { model: 'rasch', b: 0.1 },
         problem_types: ['UNIT_COMPARE'],
         question: '연필 5자루가 한 묶음이에요. 연필 15자루는 몇 묶음일까요?',
@@ -448,7 +448,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_024',
-        grade_band: 'G2_G3',
+        grade_band: 'G3_G4',
         level: 6,
         skill_tags: ['INVERSE_RELATION', 'RANKING'],
         irt: { model: 'rasch', b: 0.4 },
@@ -504,11 +504,11 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_027',
-        grade_band: 'G3_G4',
+        grade_band: 'G5_G6',
         level: 9,
-        skill_tags: ['PROPORTION', 'TRANSFER_FAILURE'],
+        skill_tags: ['PROPORTION', 'TRANSFER'],
         irt: { model: 'rasch', b: 1.3 },
-        problem_types: ['PROPORTION', 'TRANSFER_FAILURE'],
+        problem_types: ['PROPORTION', 'TRANSFER'],
         question: '자동차가 2시간에 80km를 갔어요. 같은 빠르기로 5시간 동안 가면 몇 km를 갈까요?',
         base_unit: '2시간',
         entities: [
@@ -543,7 +543,7 @@ const RELATION_COACH_PROBLEM_BANK = [
         problem_id: 'REL_MATH_029',
         grade_band: 'G3_G4',
         level: 11,
-        skill_tags: ['INVERSE_RELATION', 'DIRECTION_CONFUSION', 'COMPOSITE_RELATION', 'RANKING'],
+        skill_tags: ['INVERSE_RELATION', 'DIRECTION_REASONING', 'COMPOSITE_RELATION', 'RANKING'],
         irt: { model: 'rasch', b: 1.7 },
         problem_types: ['INVERSE_RELATION', 'COMPOSITE_RELATION', 'RANKING'],
         question: '같은 통을 채우는 데 A컵은 3번, B컵은 6번 필요해요. 또 통의 물은 C컵에 2번 나누어 담을 수 있어요. 가장 큰 컵은 무엇일까요?',
@@ -560,11 +560,11 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_030',
-        grade_band: 'G3_G4',
+        grade_band: 'G5_G6',
         level: 12,
-        skill_tags: ['PROPORTION', 'FRACTION_RELATION', 'TRANSFER_FAILURE'],
+        skill_tags: ['PROPORTION', 'FRACTION_RELATION', 'TRANSFER'],
         irt: { model: 'rasch', b: 2.0 },
-        problem_types: ['PROPORTION', 'FRACTION_RELATION', 'TRANSFER_FAILURE'],
+        problem_types: ['PROPORTION', 'FRACTION_RELATION', 'TRANSFER'],
         question: '밀가루 3컵으로 빵 4개를 만들 수 있어요. 같은 비율로 빵 10개를 만들려면 밀가루는 몇 컵 필요할까요?',
         base_unit: '빵 4개',
         entities: [
@@ -596,7 +596,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_032',
-        grade_band: 'G1_G2',
+        grade_band: 'G3_G4',
         level: 2,
         skill_tags: ['EQUAL_SHARING'],
         irt: { model: 'rasch', b: -1.2 },
@@ -614,7 +614,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_033',
-        grade_band: 'G1_G2',
+        grade_band: 'G3_G4',
         level: 2,
         skill_tags: ['QUOTATIVE_DIVISION'],
         irt: { model: 'rasch', b: -1.0 },
@@ -632,7 +632,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_034',
-        grade_band: 'G2_G3',
+        grade_band: 'G3_G4',
         level: 4,
         skill_tags: ['UNIT_COMPARE'],
         irt: { model: 'rasch', b: -0.7 },
@@ -650,9 +650,9 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_035',
-        grade_band: 'G2_G3',
+        grade_band: 'G3_G4',
         level: 5,
-        skill_tags: ['INVERSE_RELATION', 'DIRECTION_CONFUSION'],
+        skill_tags: ['INVERSE_RELATION', 'DIRECTION_REASONING'],
         irt: { model: 'rasch', b: -0.2 },
         problem_types: ['UNIT_COMPARE', 'INVERSE_RELATION'],
         question: '한 병을 채우려면 작은 컵은 10번, 큰 컵은 5번 부어야 해요. 더 작은 컵은 무엇일까요?',
@@ -668,7 +668,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_036',
-        grade_band: 'G2_G3',
+        grade_band: 'G3_G4',
         level: 5,
         skill_tags: ['MULTIPLICATIVE_COMPARE'],
         irt: { model: 'rasch', b: 0.0 },
@@ -704,7 +704,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_038',
-        grade_band: 'G2_G3',
+        grade_band: 'G3_G4',
         level: 5,
         skill_tags: ['RANKING'],
         irt: { model: 'rasch', b: 0.2 },
@@ -742,7 +742,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_040',
-        grade_band: 'G3_G4',
+        grade_band: 'G5_G6',
         level: 8,
         skill_tags: ['PROPORTION'],
         irt: { model: 'rasch', b: 0.8 },
@@ -760,7 +760,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_041',
-        grade_band: 'G2_G3',
+        grade_band: 'G3_G4',
         level: 6,
         skill_tags: ['DIRECT_COMPARE', 'RANKING'],
         irt: { model: 'rasch', b: -0.1 },
@@ -779,9 +779,9 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_042',
-        grade_band: 'G2_G3',
+        grade_band: 'G3_G4',
         level: 6,
-        skill_tags: ['INVERSE_RELATION', 'DIRECTION_CONFUSION'],
+        skill_tags: ['INVERSE_RELATION', 'DIRECTION_REASONING'],
         irt: { model: 'rasch', b: 0.4 },
         problem_types: ['INVERSE_RELATION'],
         question: '같은 양의 모래를 옮길 때 빨간 삽은 4번, 파란 삽은 7번 퍼야 해요. 더 큰 삽은 무엇일까요?',
@@ -816,11 +816,11 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_044',
-        grade_band: 'G3_G4',
+        grade_band: 'G5_G6',
         level: 10,
-        skill_tags: ['PROPORTION', 'TRANSFER_FAILURE'],
+        skill_tags: ['PROPORTION', 'TRANSFER'],
         irt: { model: 'rasch', b: 1.3 },
-        problem_types: ['PROPORTION', 'TRANSFER_FAILURE'],
+        problem_types: ['PROPORTION', 'TRANSFER'],
         question: '물감 2통으로 포스터 5장을 칠할 수 있어요. 같은 비율로 포스터 15장을 칠하려면 물감은 몇 통 필요할까요?',
         base_unit: '포스터 5장',
         entities: [
@@ -909,11 +909,11 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_049',
-        grade_band: 'G3_G4',
+        grade_band: 'G5_G6',
         level: 12,
-        skill_tags: ['PROPORTION', 'MULTIPLICATIVE_COMPARE', 'TRANSFER_FAILURE'],
+        skill_tags: ['PROPORTION', 'MULTIPLICATIVE_COMPARE', 'TRANSFER'],
         irt: { model: 'rasch', b: 1.9 },
-        problem_types: ['PROPORTION', 'MULTIPLICATIVE_COMPARE', 'TRANSFER_FAILURE'],
+        problem_types: ['PROPORTION', 'MULTIPLICATIVE_COMPARE', 'TRANSFER'],
         question: '기계 3대가 2시간에 부품 24개를 만들어요. 같은 속도로 기계 6대가 2시간 일하면 부품은 몇 개 만들까요?',
         base_unit: '기계 3대',
         entities: [
@@ -927,7 +927,7 @@ const RELATION_COACH_PROBLEM_BANK = [
     },
     {
         problem_id: 'REL_MATH_050',
-        grade_band: 'G3_G4',
+        grade_band: 'G5_G6',
         level: 12,
         skill_tags: ['FRACTION_RELATION', 'PROPORTION', 'COMPOSITE_RELATION'],
         irt: { model: 'rasch', b: 2.1 },

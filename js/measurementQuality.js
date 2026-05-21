@@ -16,7 +16,9 @@ const MEASUREMENT_EXPECTED_SKILLS = [
     'PROPORTION',
     'RANKING',
     'COMPOSITE_RELATION',
-    'DIRECTION_CONFUSION'
+    'BASE_UNIT_IDENTIFICATION',
+    'DIRECTION_REASONING',
+    'TRANSFER'
 ];
 
 function clampQuality(value, min, max) {

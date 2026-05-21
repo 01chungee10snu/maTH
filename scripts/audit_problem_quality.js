@@ -48,6 +48,17 @@ const ADVANCED_G1G2_PATTERNS = [
   /비례/
 ];
 
+const ERROR_TAGS = new Set([
+  'NUMBER_SIZE_BIAS',
+  'DIRECTION_CONFUSION',
+  'BASE_UNIT_CONFUSION',
+  'FRACTION_SIZE_CONFUSION',
+  'OPERATION_SELECTION_ERROR',
+  'RANKING_MISREAD',
+  'EXPLANATION_GAP',
+  'TRANSFER_FAILURE'
+]);
+
 function runScript(context, relativePath) {
   const source = fs.readFileSync(path.join(root, relativePath), 'utf8');
   vm.runInNewContext(source, context, { filename: relativePath });
@@ -251,6 +262,15 @@ function auditProblem(problem, label) {
   return issue ? [issue] : [];
 }
 
+function answerAppearsInSolution(answer, solution) {
+  const normalizedAnswer = normalizeText(answer);
+  const normalizedSolution = normalizeText(solution);
+  const numericParts = normalizedAnswer.match(/-?\d+(?:\.\d+)?(?:\/\d+)?/g) || [];
+
+  if (numericParts.length) return numericParts.some(part => normalizedSolution.includes(part));
+  return normalizedSolution.replace(/\s/g, '').includes(normalizedAnswer.replace(/\s/g, ''));
+}
+
 function auditSeedItem(item) {
   const issues = [];
   const text = normalizeText(item.problem);
@@ -273,12 +293,16 @@ function auditSeedItem(item) {
   if (!text) issues.push('seed_missing_problem');
   if (!answer) issues.push('seed_missing_answer');
   if (!solution) issues.push('seed_missing_solution');
+  if (answer && solution && !answerAppearsInSolution(answer, solution)) issues.push('seed_answer_not_reflected_in_solution');
   if (!Number.isFinite(Number(item.difficulty)) || Number(item.difficulty) < 1 || Number(item.difficulty) > 12) {
     issues.push('seed_invalid_difficulty');
   }
   if (!['G1_G2', 'G3_G4', 'G5_G6'].includes(item.grade_band)) issues.push('seed_invalid_grade_band');
   if (!Array.isArray(item.skill_tags) || item.skill_tags.length === 0) issues.push('seed_missing_skill_tags');
   if (!Array.isArray(item.reasoning_tags) || item.reasoning_tags.length === 0) issues.push('seed_missing_reasoning_tags');
+  if ([...(item.skill_tags || []), ...(item.reasoning_tags || []), ...(item.problem_types || [])].some(tag => ERROR_TAGS.has(tag))) {
+    issues.push('seed_error_tag_used_as_skill');
+  }
 
   TEXT_BAD_PATTERNS.forEach(({ id, pattern }) => {
     if (pattern.test(combined)) issues.push(`seed_${id}`);
@@ -299,6 +323,65 @@ function auditSeedItem(item) {
         issues: Array.from(new Set(issues))
       }
     : null;
+}
+
+function auditBankItemMetadata(item, labelPrefix) {
+  const issues = [];
+  const combined = [
+    item?.grade_band,
+    item?.operation,
+    item?.question,
+    item?.problem,
+    ...(item?.skill_tags || []),
+    ...(item?.reasoning_tags || []),
+    ...(item?.problem_types || [])
+  ].map(normalizeText).join(' ');
+
+  if (!['G1_G2', 'G3_G4', 'G5_G6'].includes(item?.grade_band)) issues.push('bank_invalid_grade_band');
+  if (item?.grade_band === 'G1_G2' && ADVANCED_G1G2_PATTERNS.some(pattern => pattern.test(combined))) {
+    issues.push('bank_g1g2_advanced_leak');
+  }
+  if ([...(item?.skill_tags || []), ...(item?.reasoning_tags || []), ...(item?.problem_types || [])].some(tag => ERROR_TAGS.has(tag))) {
+    issues.push('bank_error_tag_used_as_skill');
+  }
+
+  return issues.length
+    ? {
+        label: `${labelPrefix}:${item?.problem_id || item?.id || 'missing_id'}`,
+        id: item?.problem_id || item?.id,
+        question: normalizeText(item?.question || item?.problem),
+        answer: normalizeText(item?.answer),
+        issues: Array.from(new Set(issues))
+      }
+    : null;
+}
+
+function getRankedEntityLabels(item) {
+  return [...(item?.entities || [])]
+    .filter(entity => Number.isFinite(Number(entity.relative_value)))
+    .sort((a, b) => Number(b.relative_value) - Number(a.relative_value))
+    .map(entity => normalizeText(entity.label));
+}
+
+function auditStaticRelationAnswer(item) {
+  const labels = getRankedEntityLabels(item);
+  const answer = normalizeText(item?.answer);
+  let expected = null;
+
+  if (item?.question_type === 'LARGEST') expected = labels[0];
+  if (item?.question_type === 'SMALLEST') expected = labels[labels.length - 1];
+  if (item?.question_type === 'SECOND_LARGEST') expected = labels[1];
+  if (item?.question_type === 'RANK_ORDER') expected = labels.join(', ');
+
+  if (!expected || expected === answer) return null;
+  return {
+    label: `static-answer:${item?.problem_id || 'missing_id'}`,
+    id: item?.problem_id,
+    question: normalizeText(item?.question),
+    answer,
+    options: labels,
+    issues: ['static_relation_answer_mismatch']
+  };
 }
 
 function summarizeCounts(failures) {
@@ -334,6 +417,13 @@ function runAudit() {
   const rawBank = JSON.parse(fs.readFileSync(path.join(root, 'data', 'elementary_word_problem_seed_bank.json'), 'utf8'));
   const seedItems = Array.isArray(rawBank.items) ? rawBank.items : [];
 
+  (context.window.RelationshipCoachProblems?.bank || []).forEach(item => {
+    const metadataFailure = auditBankItemMetadata(item, 'static');
+    if (metadataFailure) failures.push(metadataFailure);
+    const answerFailure = auditStaticRelationAnswer(item);
+    if (answerFailure) failures.push(answerFailure);
+  });
+
   const seedIds = new Set();
   const seedQuestions = new Map();
   seedItems.forEach(item => {
@@ -364,6 +454,8 @@ function runAudit() {
 
   const converted = context.window.ExpandedWordProblemBank.convert(rawBank);
   converted.forEach(item => {
+    const metadataFailure = auditBankItemMetadata(item, 'expanded-metadata');
+    if (metadataFailure) failures.push(metadataFailure);
     const problem = context.window.RelationshipCoachProblems.generateForItem(item);
     failures.push(...auditProblem(problem, `expanded:${item.problem_id}`));
   });

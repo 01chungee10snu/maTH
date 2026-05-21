@@ -16,6 +16,9 @@ const MATH_ABILITY_SKILL_LABELS = {
     PROPORTION: '비례 추론',
     RANKING: '순위 판단',
     COMPOSITE_RELATION: '복합 관계',
+    BASE_UNIT_IDENTIFICATION: '기준량 찾기',
+    DIRECTION_REASONING: '관계 방향',
+    TRANSFER: '전이 적용',
     DIRECTION_CONFUSION: '관계 방향',
     BASE_UNIT_CONFUSION: '기준량 찾기',
     OPERATION_SELECTION_ERROR: '연산 선택',
@@ -23,6 +26,9 @@ const MATH_ABILITY_SKILL_LABELS = {
 };
 
 const MATH_ABILITY_RECOMMENDATIONS = {
+    DIRECTION_REASONING: '화살표로 누가 누구에게 작용하는지 먼저 표시하는 문제를 풀어보세요.',
+    BASE_UNIT_IDENTIFICATION: '문제에서 기준이 되는 양을 고르는 연습을 먼저 하세요.',
+    TRANSFER: '같은 수학 관계를 거리, 시간, 가격처럼 다른 소재로 바꾸어 적용해 보세요.',
     DIRECTION_CONFUSION: '화살표로 누가 누구에게 작용하는지 먼저 표시하는 문제를 풀어보세요.',
     BASE_UNIT_CONFUSION: '문제에서 기준이 되는 양을 고르는 연습을 먼저 하세요.',
     EQUAL_SHARING: '전체를 같은 크기로 나누는 등분 나눗셈 문장제를 보강하세요.',

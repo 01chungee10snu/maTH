@@ -539,10 +539,12 @@ const baseFamilies = [
     build(i) {
       const a = 3 + (i % 4);
       const b = a + 2 + (i % 3);
+      const first = pick(names, i);
+      const second = pick(names, i + 1);
       return [
-        `같은 크기의 케이크에서 ${pick(names, i)}는 1/${a}, ${pick(names, i + 1)}는 1/${b}을 먹었어요. 누가 더 많이 먹었을까요?`,
-        `${pick(names, i)}`,
-        `분자가 같을 때 분모가 작을수록 크므로 1/${a}이 1/${b}보다 큽니다.`
+        `같은 크기의 케이크에서 ${first}는 1/${a}, ${second}는 1/${b}을 먹었어요. 누가 더 많이 먹었을까요?`,
+        `${first}`,
+        `분자가 같을 때 분모가 작을수록 크므로 1/${a}이 1/${b}보다 큽니다. 따라서 더 많이 먹은 사람은 ${first}입니다.`
       ];
     }
   },
@@ -558,7 +560,7 @@ const baseFamilies = [
       return [
         `같은 크기의 초콜릿에서 한 조각은 1/${den}, 다른 조각은 ${k}/${den * k}이라고 표시했어요. 두 양은 같을까요?`,
         `같다`,
-        `${k}/${den * k}은 약분하면 1/${den}이므로 같습니다.`
+        `${k}/${den * k}은 약분하면 1/${den}이므로 두 양은 같습니다. 따라서 답은 '같다'입니다.`
       ];
     }
   },
@@ -586,10 +588,11 @@ const baseFamilies = [
     skillTags: ['MEASUREMENT', 'UNIT_CONVERSION'],
     build(i) {
       const ml = 650 + i * 30;
+      const answer = ml > 1000 ? '물병 A' : '물병 B';
       return [
         `물병 A에는 ${ml}mL, 물병 B에는 1L가 들어 있어요. 어느 물병에 물이 더 많이 들어 있을까요?`,
-        ml > 1000 ? '물병 A' : '물병 B',
-        `1L는 1000mL이므로 ${ml}mL와 1000mL를 비교합니다.`
+        answer,
+        `1L는 1000mL이므로 ${ml}mL와 1000mL를 비교합니다. 따라서 물이 더 많이 들어 있는 것은 ${answer}입니다.`
       ];
     }
   },
@@ -639,10 +642,11 @@ const baseFamilies = [
       const a = 12 + i;
       const b = 18 + i;
       const c = 15 + (i % 4);
+      const diff = Math.max(a, b, c) - Math.min(a, b, c);
       return [
         `병뚜껑을 월요일 ${a}개, 화요일 ${b}개, 수요일 ${c}개 모았어요. 가장 많이 모은 날과 가장 적게 모은 날의 차이는 몇 개일까요?`,
-        `${Math.max(a, b, c) - Math.min(a, b, c)}개`,
-        `가장 큰 수와 가장 작은 수의 차이를 구합니다.`
+        `${diff}개`,
+        `가장 큰 수와 가장 작은 수의 차이를 구하면 ${diff}개입니다.`
       ];
     }
   },
