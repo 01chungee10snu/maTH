@@ -89,6 +89,10 @@ function createInitialIrtState(topic = 'relationship_math', options = {}) {
 }
 
 function getIrtDifficulty(item) {
+    const calibrated = Number(item?.irt?.calibrated_b);
+    const confidence = item?.irt?.calibration?.confidence;
+    if (Number.isFinite(calibrated) && confidence !== 'insufficient') return calibrated;
+
     const b = Number(item?.irt?.b);
     if (Number.isFinite(b)) return b;
     const level = Number(item?.level || 5);

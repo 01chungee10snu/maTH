@@ -448,6 +448,30 @@ function buildStatusCards(summary) {
     ];
 }
 
+function buildCalibrationSummary(itemBank = []) {
+    if (window.ItemCalibration?.summarize) {
+        return window.ItemCalibration.summarize(itemBank);
+    }
+
+    const bank = Array.isArray(itemBank) ? itemBank : [];
+    const calibratedCount = bank.filter(item => (
+        Number.isFinite(Number(item?.irt?.calibrated_b))
+        && item?.irt?.calibration?.confidence !== 'insufficient'
+    )).length;
+    const insufficientCount = bank.filter(item => item?.irt?.calibration?.confidence === 'insufficient').length;
+    return {
+        itemCount: bank.length,
+        observedItemCount: 0,
+        calibratedCount,
+        usableCount: calibratedCount,
+        insufficientCount,
+        stableCount: 0,
+        parentText: calibratedCount
+            ? `응답 기록이 충분한 ${calibratedCount}개 문항은 실제 풀이 결과를 반영해 문항 난이도를 보정했습니다.`
+            : '아직 문항별 응답 기록이 부족해 설계 난이도를 중심으로 맞춤 출제를 진행합니다.'
+    };
+}
+
 function buildSkillRowComment(item, mode) {
     if (!item || !item.attempts) return '아직 판단할 기록이 부족합니다.';
     if (mode === 'strength') {
@@ -512,7 +536,7 @@ function buildParentComments(measurement, summary, strengthRows, weaknessRows, c
     return comments.map(simplifyParentFacingText).slice(0, 4);
 }
 
-function buildParentSummary(measurement, summary, weakSkills, strengths, recommendations, quality) {
+function buildParentSummary(measurement, summary, weakSkills, strengths, recommendations, quality, calibrationSummary) {
     const topWeak = weakSkills[0];
     const topStrength = strengths[0];
     const headline = `${measurement.band} 단계`;
@@ -527,10 +551,11 @@ function buildParentSummary(measurement, summary, weakSkills, strengths, recomme
         ? `${topStrength.label} 유형은 비교적 잘 처리하고 있습니다.`
         : '강점은 기록이 조금 더 쌓인 뒤 안정적으로 볼 수 있습니다.';
     const cautionItems = [
+        calibrationSummary?.parentText,
         quality?.reliability?.level ? getPlainQualityLevel(quality.reliability.level) : null,
         ...(quality?.reliability?.warnings || []),
         ...(quality?.validity?.gaps || [])
-    ].filter(Boolean).map(simplifyParentFacingText).slice(0, 3);
+    ].filter(Boolean).map(simplifyParentFacingText).slice(0, 4);
     const strengthRows = buildSkillVisualRows(strengths, 'strength', 3);
     const weaknessRows = buildSkillVisualRows(weakSkills, 'weakness', 4);
     const normPosition = buildNormPosition(measurement, summary);
@@ -623,6 +648,7 @@ function buildParentReport(options = {}) {
     const learningPolicy = window.IrtLearningPolicy?.summarize
         ? window.IrtLearningPolicy.summarize(irtState)
         : null;
+    const calibrationSummary = buildCalibrationSummary(itemBank);
     const recommendations = [
         ...buildRecommendations(weakSkills, summary),
         ...buildQualityRecommendations(quality)
@@ -638,8 +664,9 @@ function buildParentReport(options = {}) {
         strengths,
         quality,
         learningPolicy,
+        calibrationSummary,
         recommendations: uniqueRecommendations,
-        parentSummary: buildParentSummary(measurement, summary, weakSkills, strengths, uniqueRecommendations, quality),
+        parentSummary: buildParentSummary(measurement, summary, weakSkills, strengths, uniqueRecommendations, quality, calibrationSummary),
         parentNarrative: buildParentNarrative(measurement, summary, weakSkills, quality)
     };
 }

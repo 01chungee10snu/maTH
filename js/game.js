@@ -480,6 +480,7 @@ function selectLearner(id) {
     }
 
     STATE.mode = STATE.mode === 'learnerSelect' || STATE.mode === 'home' ? 'map' : STATE.mode;
+    refreshItemCalibration();
     saveState();
     return profile;
 }
@@ -585,6 +586,17 @@ function ensureIrtState() {
     return STATE.irt;
 }
 
+function refreshItemCalibration() {
+    if (!window.ItemCalibration?.applyToBank || !window.RelationshipCoachProblems?.bank || !window.IrtLog?.loadAttempts) {
+        return null;
+    }
+
+    return window.ItemCalibration.applyToBank(
+        window.RelationshipCoachProblems.bank,
+        window.IrtLog.loadAttempts()
+    );
+}
+
 function getRelationCoachStepSuccessRate() {
     if (!STATE.problem?.coachSteps?.length || !STATE.relationCoach) return undefined;
     const steps = window.RelationCoach?.getSteps?.(STATE.problem) || STATE.problem.coachSteps;
@@ -639,6 +651,7 @@ function updateIrtAfterAnswer(correct) {
             elapsedSeconds
         });
         window.IrtLog.appendAttempt(record);
+        refreshItemCalibration();
         if (window.IrtSync?.requestSync) {
             window.IrtSync.requestSync('attempt_saved');
         }
@@ -4979,6 +4992,7 @@ function startAdaptiveLearning() {
 
     Object.assign(STATE, patch);
     ensureIrtState();
+    refreshItemCalibration();
     ensureProblem();
     saveState();
 }
@@ -5483,6 +5497,7 @@ Promise.all([
     window.ExpandedWordProblemBank?.load?.() || Promise.resolve({ ok: false, reason: 'expanded_bank_unavailable' })
 ]).then(() => {
     console.log('모든 리소스 로드 완료');
+    refreshItemCalibration();
     loadEncyclopedia();
     window.scrollTo(0, 0);
     requestAnimationFrame(frame);

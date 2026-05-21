@@ -187,6 +187,15 @@ function testSupabaseClientUsesPublicConfig() {
   assert.strictEqual(context.__supabaseClientForTest.options.auth.persistSession, true);
 }
 
+function testItemCalibrationLoadsBeforeGameRuntime() {
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const calibrationIndex = html.indexOf('js/itemCalibration.js');
+  const gameIndex = html.indexOf('js/game.js');
+
+  assert.ok(calibrationIndex > 0, 'index.html must load js/itemCalibration.js');
+  assert.ok(gameIndex > calibrationIndex, 'item calibration must load before game runtime');
+}
+
 function testCurriculumTopicSections() {
   const context = createContext();
   runScript(context, 'js/curriculum.js');
@@ -372,6 +381,80 @@ function testLearnerProfilesSeparateStateAndAttemptLogs() {
   assert.strictEqual(taeheeLogs.length, 1);
   assert.strictEqual(taeheeLogs[0].learner_id, 'taehee');
   assert.strictEqual(taeheeLogs[0].item_id, 'TAEHEE_ITEM');
+}
+
+function makeCalibrationAttempts(itemId, count, overrides = {}) {
+  return Array.from({ length: count }, (_, index) => ({
+    local_id: `${itemId}-${index}`,
+    item_id: itemId,
+    correct: overrides.correct ?? true,
+    response_score: overrides.responseScore ?? (overrides.correct === false ? 0.1 : 0.95),
+    theta_before: overrides.thetaBefore ?? 0,
+    theta_after: overrides.thetaAfter ?? overrides.thetaBefore ?? 0,
+    hint_level: overrides.hintLevel ?? 0,
+    step_success_rate: overrides.stepSuccessRate ?? (overrides.correct === false ? 0.2 : 1),
+    created_at: `2026-05-22T00:${String(index).padStart(2, '0')}:00.000Z`
+  }));
+}
+
+function testItemCalibrationAdjustsDifficultyFromAccumulatedResponses() {
+  const context = createContext();
+  runScript(context, 'js/itemCalibration.js');
+
+  const bank = [
+    { problem_id: 'easy_observed', irt: { model: 'rasch', b: 0.5 } },
+    { problem_id: 'hard_observed', irt: { model: 'rasch', b: -0.5 } },
+    { problem_id: 'thin_observed', irt: { model: 'rasch', b: 0.2 } }
+  ];
+  const attempts = [
+    ...makeCalibrationAttempts('easy_observed', 24, { correct: true, responseScore: 0.95, thetaBefore: 0 }),
+    ...makeCalibrationAttempts('hard_observed', 24, { correct: false, responseScore: 0.1, thetaBefore: 0.1 }),
+    ...makeCalibrationAttempts('thin_observed', 3, { correct: true, responseScore: 0.95, thetaBefore: 0 })
+  ];
+
+  const summary = context.window.ItemCalibration.applyToBank(bank, attempts, {
+    minAttempts: 5,
+    fullWeightAttempts: 20,
+    maxWeight: 0.8
+  });
+
+  assert.strictEqual(bank[0].irt.design_b, 0.5);
+  assert.ok(bank[0].irt.calibrated_b < 0, `easy item should calibrate easier than design b: ${bank[0].irt.calibrated_b}`);
+  assert.ok(bank[1].irt.calibrated_b > 0, `hard item should calibrate harder than design b: ${bank[1].irt.calibrated_b}`);
+  assert.strictEqual(bank[2].irt.calibration.confidence, 'insufficient');
+  assert.strictEqual(bank[2].irt.calibrated_b, undefined);
+  assert.strictEqual(summary.usableCount, 2);
+  assert.strictEqual(summary.insufficientCount, 1);
+}
+
+function testIrtEngineUsesCalibratedDifficultyWhenUsable() {
+  const context = createContext();
+  runScript(context, 'js/irtEngine.js');
+
+  assert.strictEqual(
+    context.window.IrtEngine.getDifficulty({
+      problem_id: 'calibrated_item',
+      irt: {
+        model: 'rasch',
+        b: 1.2,
+        calibrated_b: -0.4,
+        calibration: { confidence: 'observing', attemptCount: 6 }
+      }
+    }),
+    -0.4
+  );
+  assert.strictEqual(
+    context.window.IrtEngine.getDifficulty({
+      problem_id: 'insufficient_item',
+      irt: {
+        model: 'rasch',
+        b: 1.2,
+        calibrated_b: -0.4,
+        calibration: { confidence: 'insufficient', attemptCount: 2 }
+      }
+    }),
+    1.2
+  );
 }
 
 function testElementaryWordProblemSeedBankContract() {
@@ -1843,6 +1926,82 @@ function testParentReportUsesKoreanLabelsForAllProblemTags() {
   assert.ok(!/[A-Z_]{2,}/.test(reportText), reportText);
 }
 
+function testParentReportIncludesReadableCalibrationSummary() {
+  const context = createStorageContext();
+  runScript(context, 'js/measurementQuality.js');
+  runScript(context, 'js/itemCalibration.js');
+  runScript(context, 'js/mathAbilityReport.js');
+
+  const attempts = [
+    ...makeCalibrationAttempts('report_calibrated_1', 10, { correct: true, responseScore: 0.85, thetaBefore: -0.2 }),
+    ...makeCalibrationAttempts('report_calibrated_2', 10, { correct: false, responseScore: 0.2, thetaBefore: 0.3 })
+  ].map((record, index) => ({
+    ...record,
+    skill_tags: index % 2 === 0 ? ['ADDITION'] : ['COMPARE_RELATION'],
+    problem_types: index % 2 === 0 ? ['ADDITION'] : ['COMPARE_RELATION']
+  }));
+  const itemBank = [
+    {
+      problem_id: 'report_calibrated_1',
+      irt: {
+        model: 'rasch',
+        b: -0.7,
+        design_b: 0.1,
+        calibrated_b: -0.7,
+        calibration: { confidence: 'provisional', attemptCount: 18 }
+      },
+      skill_tags: ['ADDITION'],
+      problem_types: ['ADDITION'],
+      grade_band: 'G1_G2'
+    },
+    {
+      problem_id: 'report_calibrated_2',
+      irt: {
+        model: 'rasch',
+        b: 0.8,
+        design_b: 0.2,
+        calibrated_b: 0.8,
+        calibration: { confidence: 'observing', attemptCount: 8 }
+      },
+      skill_tags: ['COMPARE_RELATION'],
+      problem_types: ['COMPARE_RELATION'],
+      grade_band: 'G3_G4'
+    },
+    {
+      problem_id: 'report_insufficient',
+      irt: {
+        model: 'rasch',
+        b: 0.4,
+        design_b: 0.4,
+        calibration: { confidence: 'insufficient', attemptCount: 2 }
+      },
+      skill_tags: ['FRACTION_RELATION'],
+      problem_types: ['FRACTION_RELATION'],
+      grade_band: 'G5_G6'
+    }
+  ];
+
+  const report = context.window.MathAbilityReport.buildParentReport({
+    attempts,
+    itemBank,
+    irtState: {
+      theta: 0.15,
+      standardError: 0.42,
+      attemptCount: attempts.length,
+      skillStates: {
+        ADDITION: { attempts: 10, mastery: 0.85 },
+        COMPARE_RELATION: { attempts: 10, mastery: 0.2 }
+      }
+    }
+  });
+
+  assert.strictEqual(report.calibrationSummary.calibratedCount, 2);
+  assert.strictEqual(report.calibrationSummary.insufficientCount, 1);
+  assert.ok(report.calibrationSummary.parentText.includes('응답 기록'));
+  assert.ok(report.parentSummary.cautionItems.some(item => item.includes('문항 난이도')));
+  assert.ok(!/theta|IRT|Rasch| b /.test(report.calibrationSummary.parentText));
+}
+
 function testWordProblemBankHasRealTemplateDiversity() {
   const bank = JSON.parse(fs.readFileSync(path.join(root, 'data/elementary_word_problem_seed_bank.json'), 'utf8'));
   const items = bank.items || [];
@@ -1961,6 +2120,8 @@ async function runTests() {
   testRelationThinkingTopicsAreElementaryIntegrated();
   testAdaptiveLearningFlowStartsWithoutManualSchoolSelection();
   testLearnerProfilesSeparateStateAndAttemptLogs();
+  testItemCalibrationAdjustsDifficultyFromAccumulatedResponses();
+  testItemCalibrationLoadsBeforeGameRuntime();
   testElementaryWordProblemSeedBankContract();
   testExpandedSeedBankConvertsIntoIrtRuntimeItems();
   testK12MathProblemSeedBankContract();
@@ -1972,6 +2133,7 @@ async function runTests() {
   testSupabasePublicConfigContract();
   testSupabaseClientUsesPublicConfig();
   testIrtEngineUpdatesLearnerStateAndSelectsItems();
+  testIrtEngineUsesCalibratedDifficultyWhenUsable();
   testIrtExposurePreventsUnansweredStartupRepeat();
   testIrtSelectionAvoidsImmediateItemRepeatWhenAlternativesExist();
   testIrtSelectionMaintainsItemDiversityAcrossAdaptiveRun();
@@ -1991,6 +2153,7 @@ async function runTests() {
   testMeasurementQualityRatesReliabilityAndValidityConservatively();
   testMathAbilityReportSummarizesIrtEvidenceForParents();
   testParentReportUsesKoreanLabelsForAllProblemTags();
+  testParentReportIncludesReadableCalibrationSummary();
   testWordProblemBankHasRealTemplateDiversity();
   testIrtPolicyAvoidsRecentlyRepeatedTemplateSignatures();
   testIrtPolicyAvoidsRecentlyRepeatedStructureSignatures();
