@@ -161,7 +161,7 @@ function getCollectionGridMetrics(width, gridY) {
 function getCollectionRequiredHeight(width) {
     const tabLayout = getCollectionTabLayout(width);
     if ((STATE.collectionTab || '전체') === '부모 리포트') {
-        return tabLayout.y + tabLayout.height + Math.round(980 * SCALE);
+        return tabLayout.y + tabLayout.height + Math.round(1320 * SCALE);
     }
 
     const targetTab = STATE.collectionTab || '전체';
@@ -4502,6 +4502,10 @@ function drawParentReportPanel(W, H, startY) {
 
     y = drawReportOverviewGauge(innerX, y, innerW, plain.overview);
     y += Math.round(14 * SCALE);
+    y = drawReportNormPosition(innerX, y, innerW, plain.normPosition);
+    y += Math.round(12 * SCALE);
+    drawReportScrollHint(innerX, y, innerW);
+    y += Math.round(42 * SCALE);
     y = drawReportStatusCards(innerX, y, innerW, plain.statusCards || []);
     y += Math.round(16 * SCALE);
 
@@ -4530,6 +4534,76 @@ function drawParentReportPanel(W, H, startY) {
     drawReportListSection(innerX, y, innerW, '다음 추천 학습', report.recommendations.map(item => (
         item.replace(/^측정 품질:\s*/, '').replace(/^기록 해석:\s*/, '')
     )));
+}
+
+function drawReportNormPosition(x, y, w, norm = {}) {
+    const h = Math.round(76 * SCALE);
+    CTX.save();
+    roundRect(CTX, x, y, w, h, Math.round(16 * SCALE));
+    CTX.fillStyle = '#f8fafc';
+    CTX.fill();
+    CTX.strokeStyle = '#e2e8f0';
+    CTX.stroke();
+    CTX.restore();
+
+    CTX.fillStyle = '#475569';
+    drawFittedCanvasText(norm.title || '앱 내부 위치', x + Math.round(18 * SCALE), y + Math.round(23 * SCALE), w * 0.34, {
+        initialSize: Math.round(18 * SCALE),
+        minSize: Math.round(12 * SCALE),
+        weight: 'bold',
+        align: 'left',
+        baseline: 'middle'
+    });
+    CTX.fillStyle = '#7c3aed';
+    drawFittedCanvasText(norm.value || '참고 위치', x + Math.round(18 * SCALE), y + Math.round(51 * SCALE), w * 0.34, {
+        initialSize: Math.round(24 * SCALE),
+        minSize: Math.round(15 * SCALE),
+        weight: 'bold',
+        align: 'left',
+        baseline: 'middle'
+    });
+
+    const barX = x + Math.round(w * 0.42);
+    const barY = y + Math.round(23 * SCALE);
+    const barW = w - Math.round(w * 0.42) - Math.round(18 * SCALE);
+    const barH = Math.round(13 * SCALE);
+    const percentile = Math.max(1, Math.min(99, Number(norm.percentile || 50)));
+    roundRect(CTX, barX, barY, barW, barH, Math.round(7 * SCALE));
+    CTX.fillStyle = '#e9d5ff';
+    CTX.fill();
+    roundRect(CTX, barX, barY, barW * percentile / 100, barH, Math.round(7 * SCALE));
+    CTX.fillStyle = '#8b5cf6';
+    CTX.fill();
+
+    CTX.fillStyle = '#475569';
+    drawFittedCanvasText(`${norm.referenceText || '앱 내부 기준'} · ${norm.band || '위치 확인 중'}`, barX, y + Math.round(54 * SCALE), barW, {
+        initialSize: Math.round(16 * SCALE),
+        minSize: Math.round(10 * SCALE),
+        weight: 'bold',
+        align: 'left',
+        baseline: 'middle'
+    });
+
+    return y + h;
+}
+
+function drawReportScrollHint(x, y, w) {
+    CTX.save();
+    roundRect(CTX, x, y, w, Math.round(30 * SCALE), Math.round(12 * SCALE));
+    CTX.fillStyle = '#fefce8';
+    CTX.fill();
+    CTX.strokeStyle = '#fde68a';
+    CTX.stroke();
+    CTX.restore();
+
+    CTX.fillStyle = '#854d0e';
+    drawFittedCanvasText('아래로 스크롤하면 부모 코멘트와 다음 추천 학습을 볼 수 있어요', x + Math.round(14 * SCALE), y + Math.round(15 * SCALE), w - Math.round(28 * SCALE), {
+        initialSize: Math.round(16 * SCALE),
+        minSize: Math.round(10 * SCALE),
+        weight: 'bold',
+        align: 'left',
+        baseline: 'middle'
+    });
 }
 
 function drawReportOverviewGauge(x, y, w, overview = {}) {

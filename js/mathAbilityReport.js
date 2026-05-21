@@ -6,6 +6,40 @@
    ========================================================================= */
 
 const MATH_ABILITY_SKILL_LABELS = {
+    ADDITION: '덧셈 관계',
+    SUBTRACTION: '뺄셈 관계',
+    MULTIPLICATION: '곱셈 관계',
+    DIVISION: '나눗셈 관계',
+    DECIMAL: '소수 관계',
+    RATIO: '비와 비율',
+    PERCENT: '백분율',
+    AVERAGE: '평균',
+    PROBABILITY: '가능성',
+    PLACE_VALUE: '자릿값',
+    NUMBER_SENSE: '수 감각',
+    PATTERN: '규칙 찾기',
+    STRUCTURE: '수 구조',
+    COMPARE: '비교',
+    CHANGE_RELATION: '변화 관계',
+    COMPARE_RELATION: '비교 관계',
+    PART_WHOLE: '전체와 부분',
+    PART_PART_WHOLE_TOTAL: '부분-전체 관계',
+    UNKNOWN_CHANGE: '변화량 찾기',
+    UNKNOWN_START: '처음 값 찾기',
+    UNKNOWN_FACTOR: '곱셈 요소 찾기',
+    UNKNOWN_VALUE: '미지수 찾기',
+    UNIT_AMOUNT: '단위량',
+    UNIT_RATE: '단위비율',
+    UNIT_PRICE_FIND: '단위 가격',
+    UNIT_RATE_PRICE: '단위 가격',
+    UNIT_CONVERSION: '단위 환산',
+    MEASUREMENT: '측정',
+    TIME: '시간',
+    VOLUME: '부피',
+    CAPACITY_CONVERSION_COMPARE: '들이 환산 비교',
+    WEIGHT_DIFFERENCE: '무게 차이',
+    DATA_READING: '자료 읽기',
+    DATA_REASONING: '자료 추론',
     DIRECT_COMPARE: '직접 비교',
     EQUAL_SHARING: '등분 나눗셈',
     QUOTATIVE_DIVISION: '포함 나눗셈',
@@ -49,8 +83,52 @@ function roundAbility(value, digits = 2) {
     return Math.round(Number(value || 0) * factor) / factor;
 }
 
+function normalCdfApprox(value) {
+    const x = Number(value || 0);
+    const t = 1 / (1 + 0.2316419 * Math.abs(x));
+    const d = 0.3989423 * Math.exp(-x * x / 2);
+    const probability = d * t * (
+        0.3193815
+        + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))
+    );
+    return x >= 0 ? 1 - probability : probability;
+}
+
 function getSkillLabel(skill) {
-    return MATH_ABILITY_SKILL_LABELS[skill] || skill;
+    const raw = String(skill || '').trim();
+    if (!raw) return '기타 수학 사고';
+    if (MATH_ABILITY_SKILL_LABELS[raw]) return MATH_ABILITY_SKILL_LABELS[raw];
+
+    const code = raw.toUpperCase()
+        .replace(/^COMPLEX_D\d+_/, '')
+        .replace(/_V\d+$/, '');
+    if (MATH_ABILITY_SKILL_LABELS[code]) return MATH_ABILITY_SKILL_LABELS[code];
+
+    if (code.includes('BASE_UNIT')) return '기준량 찾기';
+    if (code.includes('DIRECTION')) return '관계 방향';
+    if (code.includes('RANK')) return '순위 판단';
+    if (code.includes('COMPARE')) return '비교 관계';
+    if (code.includes('UNKNOWN')) return '미지수 찾기';
+    if (code.includes('CHANGE')) return '변화 관계';
+    if (code.includes('PART_WHOLE') || code.includes('PART_PART')) return '전체와 부분';
+    if (code.includes('ADD') || code.includes('ADDITION')) return '덧셈 관계';
+    if (code.includes('SUB') || code.includes('TAKE') || code.includes('SUBTRACTION')) return '뺄셈 관계';
+    if (code.includes('MUL') || code.includes('MULTIPLICATION') || code.includes('ARRAY')) return '곱셈 관계';
+    if (code.includes('DIV') || code.includes('SHARING') || code.includes('GROUP_COUNT')) return '나눗셈 관계';
+    if (code.includes('FRACTION') || code.includes('FRAC') || code.includes('DENOMINATOR')) return '분수 관계';
+    if (code.includes('DECIMAL')) return '소수 관계';
+    if (code.includes('RATIO') || code.includes('PROPORTION') || code.includes('PERCENT') || code.includes('SCALE') || code.includes('RATE')) return '비율과 단위량';
+    if (code.includes('UNIT')) return '단위량';
+    if (code.includes('AVERAGE')) return '평균';
+    if (code.includes('DATA') || code.includes('GRAPH') || code.includes('PICTOGRAPH') || code.includes('PROBABILITY')) return '자료와 가능성';
+    if (code.includes('TIME')) return '시간';
+    if (code.includes('MEAS') || code.includes('LENGTH') || code.includes('CAPACITY') || code.includes('WEIGHT') || code.includes('VOLUME') || code.includes('MAP')) return '측정';
+    if (code.includes('GCF') || code.includes('LCM') || code.includes('FACTOR') || code.includes('MULTIPLE')) return '약수와 배수';
+    if (code.includes('PATTERN') || code.includes('STRUCTURE') || code.includes('EQUIVALENCE') || code.includes('PLACE_VALUE') || code.includes('NUMBER')) return '수 구조와 규칙';
+    if (code.includes('TRANSFER')) return '전이 적용';
+    if (code.includes('COMPOSITE') || code.includes('MULTI') || code.includes('MIXED') || code.includes('COMPLEX')) return '복합 문장제';
+    if (code.includes('REMAINDER')) return '나머지 해석';
+    return '기타 수학 사고';
 }
 
 function getConfidenceLabel(attempts, standardError) {
@@ -65,6 +143,14 @@ function getAbilityBand(theta) {
     if (theta < 0.25) return '성장 중';
     if (theta < 1) return '안정적 적용';
     return '확장 도전';
+}
+
+function getNormBand(percentile) {
+    if (percentile < 20) return '기초 보강 구간';
+    if (percentile < 40) return '성장 하위 구간';
+    if (percentile <= 60) return '중간 구간';
+    if (percentile <= 80) return '성장 상위 구간';
+    return '확장 도전 구간';
 }
 
 function getAttempts(inputAttempts) {
@@ -254,6 +340,29 @@ function buildOverview(measurement, summary, confidenceText, quality) {
     };
 }
 
+function buildNormPosition(measurement, summary) {
+    const percentile = Math.max(1, Math.min(99, Number(measurement.percentile || 50)));
+    const upperPercent = Math.max(1, Math.min(99, 101 - percentile));
+    const lowerPercent = Math.max(1, Math.min(99, percentile));
+    const value = percentile >= 45 && percentile <= 55
+        ? '중간 구간'
+        : percentile > 55
+            ? `상위 ${upperPercent}%권`
+            : `하위 ${lowerPercent}%권`;
+    const comment = summary.totalAttempts < 8
+        ? '누적 기록이 적어 참고 위치로만 보세요. 전국 표준화 검사 규준이 아니라 앱 내부 문항과 응답 기록 기준입니다.'
+        : '전국 표준화 검사 규준이 아니라 앱 내부 문항과 누적 응답 기록으로 계산한 위치입니다.';
+
+    return {
+        title: '앱 내부 위치',
+        value,
+        percentile,
+        band: getNormBand(percentile),
+        referenceText: '앱 내부 누적 기준',
+        comment
+    };
+}
+
 function buildStatusCards(summary) {
     return [
         {
@@ -287,24 +396,24 @@ function buildSkillRowComment(item, mode) {
     if (!item || !item.attempts) return '아직 판단할 기록이 부족합니다.';
     if (mode === 'strength') {
         if (item.correctRate >= 80 && item.averageHintLevel <= 1) {
-            return `${item.label}은 스스로 해결한 비율이 높아 안정적인 강점으로 볼 수 있습니다.`;
+            return `${item.label} 영역은 스스로 해결한 비율이 높아 안정적인 강점으로 볼 수 있습니다.`;
         }
         if (item.correctRate >= 60) {
-            return `${item.label}은 대체로 맞히지만, 힌트를 줄이며 유지 연습을 하면 좋습니다.`;
+            return `${item.label} 영역은 대체로 맞히지만, 힌트를 줄이며 유지 연습을 하면 좋습니다.`;
         }
-        return `${item.label}은 상대적으로 나은 편이지만 기록이 더 필요합니다.`;
+        return `${item.label} 영역은 상대적으로 나은 편이지만 기록이 더 필요합니다.`;
     }
 
     if (item.correctRate < 50 && item.averageHintLevel >= 2) {
-        return `${item.label}은 오답과 힌트 사용이 함께 나타나 먼저 보완할 약점입니다.`;
+        return `${item.label} 영역은 오답과 힌트 사용이 함께 나타나 먼저 보완할 약점입니다.`;
     }
     if (item.correctRate < 50) {
-        return `${item.label}은 오답이 반복되어 문제 조건을 천천히 확인하는 연습이 필요합니다.`;
+        return `${item.label} 영역은 오답이 반복되어 문제 조건을 천천히 확인하는 연습이 필요합니다.`;
     }
     if (item.averageHintLevel >= 2) {
-        return `${item.label}은 맞히더라도 힌트 의존이 있어 스스로 설명하는 연습이 필요합니다.`;
+        return `${item.label} 영역은 맞히더라도 힌트 의존이 있어 스스로 설명하는 연습이 필요합니다.`;
     }
-    return `${item.label}은 정답률보다 관계를 설명하는 과정 확인이 더 필요합니다.`;
+    return `${item.label} 영역은 정답률보다 관계를 설명하는 과정 확인이 더 필요합니다.`;
 }
 
 function buildSkillVisualRows(items, mode, limit) {
@@ -319,10 +428,14 @@ function buildSkillVisualRows(items, mode, limit) {
     }));
 }
 
-function buildParentComments(measurement, summary, strengthRows, weaknessRows, confidenceText) {
+function buildParentComments(measurement, summary, strengthRows, weaknessRows, confidenceText, normPosition) {
     const comments = [
         `전체 수준은 ${measurement.band} 단계입니다. ${confidenceText}.`
     ];
+
+    if (normPosition?.value) {
+        comments.push(`현재 위치는 ${normPosition.referenceText}으로 ${normPosition.value}입니다. ${normPosition.comment}`);
+    }
 
     if (strengthRows.length) {
         comments.push(`강점은 ${strengthRows[0].label}입니다. ${strengthRows[0].comment}`);
@@ -364,6 +477,7 @@ function buildParentSummary(measurement, summary, weakSkills, strengths, recomme
     ].filter(Boolean).map(simplifyParentFacingText).slice(0, 3);
     const strengthRows = buildSkillVisualRows(strengths, 'strength', 3);
     const weaknessRows = buildSkillVisualRows(weakSkills, 'weakness', 4);
+    const normPosition = buildNormPosition(measurement, summary);
 
     return {
         headline,
@@ -373,10 +487,11 @@ function buildParentSummary(measurement, summary, weakSkills, strengths, recomme
         nextAction: recommendations[0] || '오늘은 관계형 문장제 5문항을 천천히 풀어보세요.',
         cautionItems,
         overview: buildOverview(measurement, summary, confidenceText, quality),
+        normPosition,
         statusCards: buildStatusCards(summary),
         strengthRows,
         weaknessRows,
-        parentComments: buildParentComments(measurement, summary, strengthRows, weaknessRows, confidenceText),
+        parentComments: buildParentComments(measurement, summary, strengthRows, weaknessRows, confidenceText, normPosition),
         metricCards: [
             {
                 title: '현재 단계',
@@ -442,6 +557,7 @@ function buildParentReport(options = {}) {
         standardError,
         interval: `${lower} ~ ${upper}`,
         abilityIndex,
+        percentile: Math.max(1, Math.min(99, Math.round(normalCdfApprox(theta) * 100))),
         band: getAbilityBand(theta),
         confidenceLabel: getConfidenceLabel(summary.totalAttempts || irtState.attemptCount || 0, standardError)
     };

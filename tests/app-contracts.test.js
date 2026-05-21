@@ -1476,6 +1476,7 @@ function testMathAbilityReportSummarizesIrtEvidenceForParents() {
   assert.strictEqual(report.measurement.standardError, 0.65);
   assert.ok(report.measurement.abilityIndex > 50);
   assert.strictEqual(report.measurement.confidenceLabel, '관찰 중');
+  assert.ok(report.measurement.percentile >= 1 && report.measurement.percentile <= 99);
   assert.strictEqual(report.weakSkills[0].skill, 'DIRECTION_REASONING');
   assert.strictEqual(report.skillEvidence.find(item => item.skill === 'EQUAL_SHARING').correctRate, 100);
   assert.strictEqual(report.skillEvidence.find(item => item.skill === 'EQUAL_SHARING').averageHintLevel, 0);
@@ -1492,6 +1493,10 @@ function testMathAbilityReportSummarizesIrtEvidenceForParents() {
   assert.strictEqual(report.parentSummary.overview.value, report.measurement.band);
   assert.ok(report.parentSummary.overview.scorePercent >= 1 && report.parentSummary.overview.scorePercent <= 99);
   assert.ok(report.parentSummary.overview.comment.includes('관찰') || report.parentSummary.overview.comment.includes('기록'));
+  assert.strictEqual(report.parentSummary.normPosition.title, '앱 내부 위치');
+  assert.ok(report.parentSummary.normPosition.value.includes('상위') || report.parentSummary.normPosition.value.includes('하위') || report.parentSummary.normPosition.value.includes('중간'));
+  assert.ok(report.parentSummary.normPosition.referenceText.includes('앱 내부'));
+  assert.ok(report.parentSummary.normPosition.comment.includes('전국 표준화') || report.parentSummary.normPosition.comment.includes('누적'));
   assert.strictEqual(
     report.parentSummary.statusCards.map(card => card.title).join('|'),
     '누적 문항|정답률|스스로 푼 비율|도움 사용'
@@ -1504,6 +1509,7 @@ function testMathAbilityReportSummarizesIrtEvidenceForParents() {
   assert.ok(report.parentSummary.parentComments.some(comment => comment.includes('약점') || comment.includes('보완')));
   assert.ok(!/theta|표준오차|IRT|Rasch|skill| b /.test([
     report.parentSummary.overview.comment,
+    report.parentSummary.normPosition.comment,
     ...report.parentSummary.parentComments,
     ...report.parentSummary.strengthRows.map(row => row.comment),
     ...report.parentSummary.weaknessRows.map(row => row.comment)
@@ -1512,6 +1518,57 @@ function testMathAbilityReportSummarizesIrtEvidenceForParents() {
   assert.ok(report.quality.validity.gaps.length > 0);
   assert.strictEqual(report.learningPolicy.phase, 'diagnostic');
   assert.ok(report.learningPolicy.description.includes('진단'));
+}
+
+function testParentReportUsesKoreanLabelsForAllProblemTags() {
+  const context = createContext();
+  runScript(context, 'js/mathAbilityReport.js');
+  const bank = JSON.parse(fs.readFileSync(path.join(root, 'data/elementary_word_problem_seed_bank.json'), 'utf8'));
+  const tags = new Set();
+  (bank.items || []).forEach(item => {
+    (item.skill_tags || []).forEach(tag => tags.add(tag));
+    (item.problem_types || []).forEach(tag => tags.add(tag));
+    if (item.type_family) tags.add(item.type_family);
+  });
+
+  assert.ok(tags.size > 100);
+  for (const tag of tags) {
+    const label = context.window.MathAbilityReport.getSkillLabel(tag);
+    assert.ok(label && typeof label === 'string', tag);
+    assert.ok(!/[A-Z_]{2,}/.test(label), `${tag} rendered as ${label}`);
+  }
+
+  const report = context.window.MathAbilityReport.buildParentReport({
+    attempts: [
+      {
+        local_id: 'english-tag-1',
+        item_id: 'ADD_JOIN_CHANGE_UNKNOWN',
+        skill_tags: ['ADDITION', 'UNKNOWN_CHANGE', 'ADD_JOIN_CHANGE_UNKNOWN'],
+        correct: false,
+        hint_level: 4,
+        response_score: 0.12,
+        theta_after: -0.4,
+        standard_error_after: 0.7
+      }
+    ],
+    irtState: {
+      theta: -0.4,
+      standardError: 0.7,
+      attemptCount: 1,
+      skillStates: {
+        ADDITION: { attempts: 1, mastery: 0.12 },
+        UNKNOWN_CHANGE: { attempts: 1, mastery: 0.12 }
+      }
+    }
+  });
+  const reportText = [
+    ...report.parentSummary.strengthRows.map(row => row.label),
+    ...report.parentSummary.weaknessRows.map(row => row.label),
+    ...report.parentSummary.parentComments
+  ].join(' ');
+  assert.ok(report.parentSummary.normPosition.value.includes('하위'), report.parentSummary.normPosition.value);
+  assert.ok(report.parentSummary.parentComments.some(comment => comment.includes('앱 내부 누적 기준')));
+  assert.ok(!/[A-Z_]{2,}/.test(reportText), reportText);
 }
 
 async function runTests() {
@@ -1546,6 +1603,7 @@ async function runTests() {
   await testIrtSyncKeepsPendingWhenAnonymousAuthIsUnavailable();
   testMeasurementQualityRatesReliabilityAndValidityConservatively();
   testMathAbilityReportSummarizesIrtEvidenceForParents();
+  testParentReportUsesKoreanLabelsForAllProblemTags();
 }
 
 runTests()
