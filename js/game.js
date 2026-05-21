@@ -161,7 +161,7 @@ function getCollectionGridMetrics(width, gridY) {
 function getCollectionRequiredHeight(width) {
     const tabLayout = getCollectionTabLayout(width);
     if ((STATE.collectionTab || '전체') === '부모 리포트') {
-        return tabLayout.y + tabLayout.height + Math.round(780 * SCALE);
+        return tabLayout.y + tabLayout.height + Math.round(980 * SCALE);
     }
 
     const targetTab = STATE.collectionTab || '전체';
@@ -4495,68 +4495,268 @@ function drawParentReportPanel(W, H, startY) {
         return;
     }
 
-    const m = report.measurement;
-    const s = report.summary;
-    const q = report.quality;
     const plain = report.parentSummary;
-    const topY = cardY + Math.round(28 * SCALE);
-    const tileGap = Math.round(12 * SCALE);
-    const compactReport = cardW < Math.round(520 * SCALE);
-    const tileW = compactReport
-        ? cardW - Math.round(44 * SCALE)
-        : (cardW - Math.round(44 * SCALE) - tileGap * 2) / 3;
-    const tileH = compactReport ? Math.round(88 * SCALE) : Math.round(112 * SCALE);
-    const tileX = cardX + Math.round(22 * SCALE);
+    const innerX = cardX + Math.round(22 * SCALE);
+    const innerW = cardW - Math.round(44 * SCALE);
+    let y = cardY + Math.round(24 * SCALE);
 
-    const cards = plain?.metricCards || [
-        { title: '현재 단계', value: m.band, subtitle: m.confidenceLabel },
-        { title: '스스로 푼 비율', value: `${s.independentSolveRate}%`, subtitle: '힌트 거의 없이 맞힌 비율' },
-        { title: '정답률', value: `${s.correctRate}%`, subtitle: `${s.totalAttempts}문항 기준` }
-    ];
-    cards.forEach((tile, index) => {
-        const x = compactReport ? tileX : tileX + (tileW + tileGap) * index;
-        const y = compactReport ? topY + (tileH + tileGap) * index : topY;
-        drawReportMetricTile(x, y, tileW, tileH, tile.title, tile.value, tile.subtitle, ['#0f766e', '#2563eb', '#7c3aed'][index] || '#0f766e');
+    y = drawReportOverviewGauge(innerX, y, innerW, plain.overview);
+    y += Math.round(14 * SCALE);
+    y = drawReportStatusCards(innerX, y, innerW, plain.statusCards || []);
+    y += Math.round(16 * SCALE);
+
+    const twoColumn = innerW >= Math.round(610 * SCALE);
+    const panelGap = Math.round(14 * SCALE);
+    const panelW = twoColumn ? (innerW - panelGap) / 2 : innerW;
+    const panelH = twoColumn ? Math.round(286 * SCALE) : Math.round(236 * SCALE);
+    const strengthH = twoColumn ? panelH : Math.round(236 * SCALE);
+    const weaknessH = twoColumn ? panelH : Math.round(292 * SCALE);
+
+    if (twoColumn) {
+        drawReportSkillPanel(innerX, y, panelW, panelH, '강점', plain.strengthRows || [], '#0f766e', '아직 뚜렷한 강점 기록이 부족합니다.');
+        drawReportSkillPanel(innerX + panelW + panelGap, y, panelW, panelH, '약점', plain.weaknessRows || [], '#e11d48', '아직 반복되는 약점은 뚜렷하지 않습니다.');
+        y += panelH + Math.round(18 * SCALE);
+    } else {
+        drawReportSkillPanel(innerX, y, panelW, strengthH, '강점', plain.strengthRows || [], '#0f766e', '아직 뚜렷한 강점 기록이 부족합니다.');
+        y += strengthH + Math.round(14 * SCALE);
+        drawReportSkillPanel(innerX, y, panelW, weaknessH, '약점', plain.weaknessRows || [], '#e11d48', '아직 반복되는 약점은 뚜렷하지 않습니다.');
+        y += weaknessH + Math.round(18 * SCALE);
+    }
+
+    y = drawReportCommentSection(innerX, y, innerW, '부모 코멘트', plain.parentComments || [report.parentNarrative]);
+    y += Math.round(16 * SCALE);
+    y = drawReportListSection(innerX, y, innerW, '해석할 때 주의할 점', plain.cautionItems || []);
+    y += Math.round(14 * SCALE);
+    drawReportListSection(innerX, y, innerW, '다음 추천 학습', report.recommendations.map(item => (
+        item.replace(/^측정 품질:\s*/, '').replace(/^기록 해석:\s*/, '')
+    )));
+}
+
+function drawReportOverviewGauge(x, y, w, overview = {}) {
+    const h = Math.round(150 * SCALE);
+    CTX.save();
+    roundRect(CTX, x, y, w, h, Math.round(18 * SCALE));
+    const g = CTX.createLinearGradient(x, y, x + w, y + h);
+    g.addColorStop(0, '#ecfeff');
+    g.addColorStop(1, '#f8fafc');
+    CTX.fillStyle = g;
+    CTX.fill();
+    CTX.strokeStyle = '#ccfbf1';
+    CTX.lineWidth = 2;
+    CTX.stroke();
+    CTX.restore();
+
+    const gaugeX = x + Math.round(20 * SCALE);
+    const gaugeY = y + Math.round(88 * SCALE);
+    const gaugeW = w - Math.round(40 * SCALE);
+    const gaugeH = Math.round(18 * SCALE);
+    const score = Math.max(1, Math.min(99, Number(overview.scorePercent || 1)));
+
+    CTX.fillStyle = '#0f766e';
+    CTX.font = `bold ${Math.round(20 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'left';
+    CTX.fillText(overview.title || '전체 수준', x + Math.round(20 * SCALE), y + Math.round(32 * SCALE));
+
+    CTX.fillStyle = '#111827';
+    drawFittedCanvasText(overview.value || '관찰 중', x + Math.round(20 * SCALE), y + Math.round(64 * SCALE), w * 0.42, {
+        initialSize: Math.round(31 * SCALE),
+        minSize: Math.round(20 * SCALE),
+        weight: 'bold',
+        align: 'left',
+        baseline: 'middle'
     });
 
-    let y = topY + (compactReport ? (tileH + tileGap) * cards.length : tileH) + Math.round(30 * SCALE);
-    CTX.fillStyle = '#111827';
-    CTX.font = `bold ${Math.round(27 * SCALE)}px Jua, sans-serif`;
-    CTX.textAlign = 'left';
-    CTX.fillText('이번 기록을 쉽게 보면', cardX + Math.round(24 * SCALE), y);
-    y += Math.round(34 * SCALE);
+    CTX.fillStyle = '#475569';
+    drawFittedCanvasText(overview.confidenceText || '기록을 모으는 중', x + w - Math.round(20 * SCALE), y + Math.round(35 * SCALE), w * 0.44, {
+        initialSize: Math.round(18 * SCALE),
+        minSize: Math.round(12 * SCALE),
+        weight: 'bold',
+        align: 'right',
+        baseline: 'middle'
+    });
 
-    CTX.fillStyle = '#374151';
-    CTX.font = `${Math.round(22 * SCALE)}px Jua, sans-serif`;
-    [
-        `풀이 기록 ${s.totalAttempts}문항 · 정답률 ${s.correctRate}% · 스스로 푼 비율 ${s.independentSolveRate}%`,
-        plain?.coreMessage || report.parentNarrative,
-        plain?.strengthText,
-        plain?.concernText,
-        plain?.nextAction ? `다음 행동: ${plain.nextAction}` : null
-    ].filter(Boolean).forEach(line => {
-        getLines(CTX, line, cardW - Math.round(48 * SCALE)).forEach(wrapped => {
-            CTX.fillText(wrapped, cardX + Math.round(24 * SCALE), y);
-            y += Math.round(29 * SCALE);
+    roundRect(CTX, gaugeX, gaugeY, gaugeW, gaugeH, Math.round(9 * SCALE));
+    CTX.fillStyle = '#dbeafe';
+    CTX.fill();
+    roundRect(CTX, gaugeX, gaugeY, gaugeW * (score / 100), gaugeH, Math.round(9 * SCALE));
+    const fillG = CTX.createLinearGradient(gaugeX, gaugeY, gaugeX + gaugeW, gaugeY);
+    fillG.addColorStop(0, '#14b8a6');
+    fillG.addColorStop(1, '#2563eb');
+    CTX.fillStyle = fillG;
+    CTX.fill();
+
+    CTX.fillStyle = '#334155';
+    CTX.font = `${Math.round(18 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'left';
+    CTX.textBaseline = 'alphabetic';
+    getLines(CTX, overview.comment || '', w - Math.round(40 * SCALE)).slice(0, 2).forEach((line, index) => {
+        CTX.fillText(line, x + Math.round(20 * SCALE), y + Math.round(128 * SCALE) + index * Math.round(24 * SCALE));
+    });
+
+    return y + h;
+}
+
+function drawReportStatusCards(x, y, w, cards) {
+    const gap = Math.round(10 * SCALE);
+    const cols = w >= Math.round(600 * SCALE) ? 4 : 2;
+    const cardW = (w - gap * (cols - 1)) / cols;
+    const cardH = Math.round(82 * SCALE);
+    const rows = Math.ceil((cards.length || 1) / cols);
+
+    cards.slice(0, 4).forEach((card, index) => {
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+        const cx = x + col * (cardW + gap);
+        const cy = y + row * (cardH + gap);
+
+        CTX.save();
+        roundRect(CTX, cx, cy, cardW, cardH, Math.round(14 * SCALE));
+        CTX.fillStyle = '#f8fafc';
+        CTX.fill();
+        CTX.strokeStyle = '#e2e8f0';
+        CTX.stroke();
+        CTX.restore();
+
+        CTX.fillStyle = '#64748b';
+        drawFittedCanvasText(card.title, cx + Math.round(14 * SCALE), cy + Math.round(21 * SCALE), cardW - Math.round(28 * SCALE), {
+            initialSize: Math.round(17 * SCALE),
+            minSize: Math.round(12 * SCALE),
+            weight: 'bold',
+            align: 'left',
+            baseline: 'middle'
+        });
+        CTX.fillStyle = '#2563eb';
+        drawFittedCanvasText(card.value, cx + Math.round(14 * SCALE), cy + Math.round(48 * SCALE), cardW - Math.round(28 * SCALE), {
+            initialSize: Math.round(24 * SCALE),
+            minSize: Math.round(15 * SCALE),
+            weight: 'bold',
+            align: 'left',
+            baseline: 'middle'
+        });
+        CTX.fillStyle = '#475569';
+        drawFittedCanvasText(card.subtitle, cx + Math.round(14 * SCALE), cy + Math.round(69 * SCALE), cardW - Math.round(28 * SCALE), {
+            initialSize: Math.round(14 * SCALE),
+            minSize: Math.round(10 * SCALE),
+            weight: 'bold',
+            align: 'left',
+            baseline: 'middle'
         });
     });
 
-    y += Math.round(14 * SCALE);
-    y = drawReportListSection(cardX + Math.round(24 * SCALE), y, cardW - Math.round(48 * SCALE), '해석할 때 주의할 점', plain?.cautionItems || [
-        q?.reliability?.level ? '아직 조심해서 참고해야 하는 기록입니다.' : null,
-        ...(q?.reliability.warnings || []),
-        ...(q?.validity.gaps || [])
-    ].filter(Boolean).slice(0, 3));
+    return y + rows * cardH + (rows - 1) * gap;
+}
 
-    y += Math.round(14 * SCALE);
-    y = drawReportListSection(cardX + Math.round(24 * SCALE), y, cardW - Math.round(48 * SCALE), '보완할 사고 단계', report.weakSkills.map(item => (
-        `${item.label}: 이 유형은 문제의 조건을 먼저 말로 정리하고 풀어보세요.`
-    )));
+function drawReportSkillPanel(x, y, w, h, title, rows, color, emptyText) {
+    CTX.save();
+    roundRect(CTX, x, y, w, h, Math.round(16 * SCALE));
+    CTX.fillStyle = '#ffffff';
+    CTX.fill();
+    CTX.strokeStyle = '#e5e7eb';
+    CTX.lineWidth = 1.5;
+    CTX.stroke();
+    CTX.restore();
 
-    y += Math.round(14 * SCALE);
-    drawReportListSection(cardX + Math.round(24 * SCALE), y, cardW - Math.round(48 * SCALE), '다음 추천 학습', report.recommendations.map(item => (
-        item.replace(/^측정 품질:\s*/, '').replace(/^기록 해석:\s*/, '')
-    )));
+    CTX.fillStyle = color;
+    CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'left';
+    CTX.fillText(title, x + Math.round(16 * SCALE), y + Math.round(32 * SCALE));
+
+    const list = rows && rows.length ? rows : [];
+    if (!list.length) {
+        CTX.fillStyle = '#64748b';
+        CTX.font = `${Math.round(18 * SCALE)}px Jua, sans-serif`;
+        CTX.fillText(emptyText, x + Math.round(16 * SCALE), y + Math.round(70 * SCALE));
+        return;
+    }
+
+    const maxRows = Math.min(list.length, title === '약점' ? 4 : 3);
+    const rowTop = y + Math.round(50 * SCALE);
+    const rowGap = Math.round(8 * SCALE);
+    const rowH = Math.floor((h - Math.round(62 * SCALE) - rowGap * (maxRows - 1)) / maxRows);
+    list.slice(0, maxRows).forEach((row, index) => {
+        drawReportSkillBarRow(
+            x + Math.round(16 * SCALE),
+            rowTop + index * (rowH + rowGap),
+            w - Math.round(32 * SCALE),
+            rowH,
+            row,
+            color
+        );
+    });
+}
+
+function drawReportSkillBarRow(x, y, w, h, row, color) {
+    CTX.fillStyle = '#111827';
+    drawFittedCanvasText(row.label, x, y + Math.round(15 * SCALE), w * 0.62, {
+        initialSize: Math.round(18 * SCALE),
+        minSize: Math.round(12 * SCALE),
+        weight: 'bold',
+        align: 'left',
+        baseline: 'middle'
+    });
+
+    CTX.fillStyle = '#64748b';
+    drawFittedCanvasText(`정답 ${row.correctRate}% · 힌트 ${row.averageHintLevel}`, x + w, y + Math.round(15 * SCALE), w * 0.38, {
+        initialSize: Math.round(13 * SCALE),
+        minSize: Math.round(9 * SCALE),
+        weight: 'bold',
+        align: 'right',
+        baseline: 'middle'
+    });
+
+    const barY = y + Math.round(30 * SCALE);
+    const barH = Math.max(8, Math.round(10 * SCALE));
+    roundRect(CTX, x, barY, w, barH, Math.round(5 * SCALE));
+    CTX.fillStyle = '#e5e7eb';
+    CTX.fill();
+    roundRect(CTX, x, barY, w * Math.max(0.03, Math.min(1, (row.scorePercent || 0) / 100)), barH, Math.round(5 * SCALE));
+    CTX.fillStyle = color;
+    CTX.fill();
+
+    CTX.fillStyle = '#475569';
+    drawFittedCanvasText(`시도 ${row.attempts}문항 · 이해도 ${row.scorePercent}%`, x, barY + Math.round(25 * SCALE), w, {
+        initialSize: Math.round(13 * SCALE),
+        minSize: Math.round(9 * SCALE),
+        weight: 'bold',
+        align: 'left',
+        baseline: 'middle'
+    });
+}
+
+function drawReportCommentSection(x, y, w, title, comments) {
+    const usable = (comments || []).slice(0, 4);
+    const lineH = Math.round(25 * SCALE);
+    CTX.font = `${Math.round(19 * SCALE)}px Jua, sans-serif`;
+    let totalLines = 0;
+    usable.forEach(comment => {
+        totalLines += getLines(CTX, comment, w - Math.round(36 * SCALE)).slice(0, 2).length;
+    });
+    const h = Math.max(Math.round(120 * SCALE), Math.round(58 * SCALE) + totalLines * lineH);
+
+    CTX.save();
+    roundRect(CTX, x, y, w, h, Math.round(16 * SCALE));
+    CTX.fillStyle = '#fffbeb';
+    CTX.fill();
+    CTX.strokeStyle = '#fde68a';
+    CTX.stroke();
+    CTX.restore();
+
+    CTX.fillStyle = '#92400e';
+    CTX.font = `bold ${Math.round(23 * SCALE)}px Jua, sans-serif`;
+    CTX.textAlign = 'left';
+    CTX.fillText(title, x + Math.round(18 * SCALE), y + Math.round(32 * SCALE));
+
+    let cy = y + Math.round(62 * SCALE);
+    CTX.fillStyle = '#374151';
+    CTX.font = `${Math.round(19 * SCALE)}px Jua, sans-serif`;
+    usable.forEach(comment => {
+        getLines(CTX, `- ${comment}`, w - Math.round(36 * SCALE)).slice(0, 2).forEach(line => {
+            CTX.fillText(line, x + Math.round(18 * SCALE), cy);
+            cy += lineH;
+        });
+    });
+
+    return y + h;
 }
 
 function drawReportMetricTile(x, y, w, h, title, value, subtitle, color) {

@@ -1477,6 +1477,9 @@ function testMathAbilityReportSummarizesIrtEvidenceForParents() {
   assert.ok(report.measurement.abilityIndex > 50);
   assert.strictEqual(report.measurement.confidenceLabel, '관찰 중');
   assert.strictEqual(report.weakSkills[0].skill, 'DIRECTION_REASONING');
+  assert.strictEqual(report.skillEvidence.find(item => item.skill === 'EQUAL_SHARING').correctRate, 100);
+  assert.strictEqual(report.skillEvidence.find(item => item.skill === 'EQUAL_SHARING').averageHintLevel, 0);
+  assert.strictEqual(report.skillEvidence.find(item => item.skill === 'FRACTION_RELATION').correctRate, 100);
   assert.ok(report.parentNarrative.includes('추정'));
   assert.ok(report.recommendations.length >= 2);
   assert.ok(report.parentSummary.headline.includes('성장') || report.parentSummary.headline.includes('단계'));
@@ -1485,6 +1488,26 @@ function testMathAbilityReportSummarizesIrtEvidenceForParents() {
   assert.ok(!/theta|표준오차|IRT/.test(report.parentSummary.coreMessage));
   assert.ok(report.parentSummary.cautionItems.length > 0);
   assert.ok(!/theta|표준오차|IRT|Rasch|skill| b /.test(report.parentSummary.cautionItems.join(' ')));
+  assert.strictEqual(report.parentSummary.overview.title, '전체 수준');
+  assert.strictEqual(report.parentSummary.overview.value, report.measurement.band);
+  assert.ok(report.parentSummary.overview.scorePercent >= 1 && report.parentSummary.overview.scorePercent <= 99);
+  assert.ok(report.parentSummary.overview.comment.includes('관찰') || report.parentSummary.overview.comment.includes('기록'));
+  assert.strictEqual(
+    report.parentSummary.statusCards.map(card => card.title).join('|'),
+    '누적 문항|정답률|스스로 푼 비율|도움 사용'
+  );
+  assert.ok(report.parentSummary.strengthRows.length > 0);
+  assert.ok(report.parentSummary.weaknessRows.length > 0);
+  assert.strictEqual(report.parentSummary.weaknessRows[0].label, '관계 방향');
+  assert.ok(report.parentSummary.weaknessRows[0].comment.includes('오답') || report.parentSummary.weaknessRows[0].comment.includes('힌트'));
+  assert.ok(report.parentSummary.parentComments.some(comment => comment.includes('강점')));
+  assert.ok(report.parentSummary.parentComments.some(comment => comment.includes('약점') || comment.includes('보완')));
+  assert.ok(!/theta|표준오차|IRT|Rasch|skill| b /.test([
+    report.parentSummary.overview.comment,
+    ...report.parentSummary.parentComments,
+    ...report.parentSummary.strengthRows.map(row => row.comment),
+    ...report.parentSummary.weaknessRows.map(row => row.comment)
+  ].join(' ')));
   assert.strictEqual(report.quality.reliability.level, '관찰 단계');
   assert.ok(report.quality.validity.gaps.length > 0);
   assert.strictEqual(report.learningPolicy.phase, 'diagnostic');

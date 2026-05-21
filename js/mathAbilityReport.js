@@ -100,7 +100,8 @@ function buildSkillEvidence(attempts, skillStates = {}) {
         evidence.set(skill, {
             skill,
             label: getSkillLabel(skill),
-            attempts: state.attempts || 0,
+            attempts: 0,
+            stateAttempts: state.attempts || 0,
             mastery: roundAbility(state.mastery || 0, 2),
             correctRate: 0,
             averageHintLevel: 0,
@@ -132,17 +133,20 @@ function buildSkillEvidence(attempts, skillStates = {}) {
     });
 
     return Array.from(evidence.values()).map(item => {
-        const attempts = item.attempts || 0;
-        const averageResponseScore = attempts && typeof item.responseTotal === 'number'
-            ? item.responseTotal / attempts
+        const responseAttempts = item.attempts || 0;
+        const displayAttempts = responseAttempts || item.stateAttempts || 0;
+        const averageResponseScore = responseAttempts && typeof item.responseTotal === 'number'
+            ? item.responseTotal / responseAttempts
             : item.averageResponseScore;
         return {
             skill: item.skill,
             label: item.label,
-            attempts,
+            attempts: displayAttempts,
             mastery: roundAbility(item.mastery || averageResponseScore || 0, 2),
-            correctRate: attempts ? Math.round(((item.correctCount || 0) / attempts) * 100) : 0,
-            averageHintLevel: attempts ? roundAbility((item.hintTotal || 0) / attempts, 1) : 0,
+            correctRate: responseAttempts
+                ? Math.round(((item.correctCount || 0) / responseAttempts) * 100)
+                : Math.round((item.mastery || averageResponseScore || 0) * 100),
+            averageHintLevel: responseAttempts ? roundAbility((item.hintTotal || 0) / responseAttempts, 1) : 0,
             averageResponseScore: roundAbility(averageResponseScore || 0, 2),
             errorCount: item.errorCount || 0
         };
@@ -219,6 +223,126 @@ function simplifyParentFacingText(text) {
         .replace(/타당도/g, '구성 근거');
 }
 
+function toDisplayPercent(value, fallback = 0) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return fallback;
+    return Math.round(clampAbility(number, 0, 1) * 100);
+}
+
+function getHintUseLabel(averageHintLevel) {
+    const level = Number(averageHintLevel || 0);
+    if (level <= 0.5) return '거의 없음';
+    if (level <= 1.5) return '낮음';
+    if (level <= 3) return '보통';
+    return '높음';
+}
+
+function buildOverview(measurement, summary, confidenceText, quality) {
+    const qualityText = quality?.reliability?.level
+        ? getPlainQualityLevel(quality.reliability.level)
+        : confidenceText;
+    const comment = summary.totalAttempts < 8
+        ? `현재 ${summary.totalAttempts}문항 기록이라 관찰 단계입니다. 문제를 더 풀면 전체 수준 판단이 안정됩니다.`
+        : `${measurement.band} 단계로 볼 수 있습니다. ${qualityText}`;
+
+    return {
+        title: '전체 수준',
+        value: measurement.band,
+        scorePercent: clampAbility(Number(measurement.abilityIndex || 0), 1, 99),
+        confidenceText,
+        comment: simplifyParentFacingText(comment)
+    };
+}
+
+function buildStatusCards(summary) {
+    return [
+        {
+            title: '누적 문항',
+            value: `${summary.totalAttempts}문항`,
+            subtitle: summary.totalAttempts < 8 ? '관찰 시작' : '기록 누적',
+            percent: clampAbility(summary.totalAttempts / 30, 0, 1)
+        },
+        {
+            title: '정답률',
+            value: `${summary.correctRate}%`,
+            subtitle: summary.correctRate >= 70 ? '잘 맞히는 편' : '추가 연습 필요',
+            percent: clampAbility(summary.correctRate / 100, 0, 1)
+        },
+        {
+            title: '스스로 푼 비율',
+            value: `${summary.independentSolveRate}%`,
+            subtitle: summary.independentSolveRate >= 60 ? '독립 풀이 양호' : '도움 줄이기 필요',
+            percent: clampAbility(summary.independentSolveRate / 100, 0, 1)
+        },
+        {
+            title: '도움 사용',
+            value: getHintUseLabel(summary.averageHintLevel),
+            subtitle: `평균 힌트 ${summary.averageHintLevel}단계`,
+            percent: clampAbility(1 - (summary.averageHintLevel || 0) / 7, 0, 1)
+        }
+    ];
+}
+
+function buildSkillRowComment(item, mode) {
+    if (!item || !item.attempts) return '아직 판단할 기록이 부족합니다.';
+    if (mode === 'strength') {
+        if (item.correctRate >= 80 && item.averageHintLevel <= 1) {
+            return `${item.label}은 스스로 해결한 비율이 높아 안정적인 강점으로 볼 수 있습니다.`;
+        }
+        if (item.correctRate >= 60) {
+            return `${item.label}은 대체로 맞히지만, 힌트를 줄이며 유지 연습을 하면 좋습니다.`;
+        }
+        return `${item.label}은 상대적으로 나은 편이지만 기록이 더 필요합니다.`;
+    }
+
+    if (item.correctRate < 50 && item.averageHintLevel >= 2) {
+        return `${item.label}은 오답과 힌트 사용이 함께 나타나 먼저 보완할 약점입니다.`;
+    }
+    if (item.correctRate < 50) {
+        return `${item.label}은 오답이 반복되어 문제 조건을 천천히 확인하는 연습이 필요합니다.`;
+    }
+    if (item.averageHintLevel >= 2) {
+        return `${item.label}은 맞히더라도 힌트 의존이 있어 스스로 설명하는 연습이 필요합니다.`;
+    }
+    return `${item.label}은 정답률보다 관계를 설명하는 과정 확인이 더 필요합니다.`;
+}
+
+function buildSkillVisualRows(items, mode, limit) {
+    return (items || []).slice(0, limit).map(item => ({
+        skill: item.skill,
+        label: item.label,
+        attempts: item.attempts || 0,
+        correctRate: item.correctRate || 0,
+        averageHintLevel: item.averageHintLevel || 0,
+        scorePercent: toDisplayPercent(item.averageResponseScore),
+        comment: buildSkillRowComment(item, mode)
+    }));
+}
+
+function buildParentComments(measurement, summary, strengthRows, weaknessRows, confidenceText) {
+    const comments = [
+        `전체 수준은 ${measurement.band} 단계입니다. ${confidenceText}.`
+    ];
+
+    if (strengthRows.length) {
+        comments.push(`강점은 ${strengthRows[0].label}입니다. ${strengthRows[0].comment}`);
+    } else {
+        comments.push('강점은 아직 충분히 분리되지 않았습니다. 여러 유형을 조금 더 풀어보면 뚜렷해집니다.');
+    }
+
+    if (weaknessRows.length) {
+        comments.push(`보완할 약점은 ${weaknessRows[0].label}입니다. ${weaknessRows[0].comment}`);
+    } else {
+        comments.push('반복되는 약점은 아직 뚜렷하지 않습니다. 새로운 유형으로 범위를 넓혀보세요.');
+    }
+
+    if (summary.independentSolveRate < 50 && summary.totalAttempts >= 3) {
+        comments.push('스스로 푼 비율이 아직 낮습니다. 정답을 누르기 전에 기준량과 관계 방향을 말로 설명하게 해주세요.');
+    }
+
+    return comments.map(simplifyParentFacingText).slice(0, 4);
+}
+
 function buildParentSummary(measurement, summary, weakSkills, strengths, recommendations, quality) {
     const topWeak = weakSkills[0];
     const topStrength = strengths[0];
@@ -238,6 +362,8 @@ function buildParentSummary(measurement, summary, weakSkills, strengths, recomme
         ...(quality?.reliability?.warnings || []),
         ...(quality?.validity?.gaps || [])
     ].filter(Boolean).map(simplifyParentFacingText).slice(0, 3);
+    const strengthRows = buildSkillVisualRows(strengths, 'strength', 3);
+    const weaknessRows = buildSkillVisualRows(weakSkills, 'weakness', 4);
 
     return {
         headline,
@@ -246,6 +372,11 @@ function buildParentSummary(measurement, summary, weakSkills, strengths, recomme
         strengthText,
         nextAction: recommendations[0] || '오늘은 관계형 문장제 5문항을 천천히 풀어보세요.',
         cautionItems,
+        overview: buildOverview(measurement, summary, confidenceText, quality),
+        statusCards: buildStatusCards(summary),
+        strengthRows,
+        weaknessRows,
+        parentComments: buildParentComments(measurement, summary, strengthRows, weaknessRows, confidenceText),
         metricCards: [
             {
                 title: '현재 단계',
