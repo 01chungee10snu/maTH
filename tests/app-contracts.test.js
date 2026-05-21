@@ -127,15 +127,19 @@ function testSupabasePublicConfigContract() {
   runScript(context, 'js/supabasePublicConfig.js');
   runScript(context, 'js/config.js');
   vm.runInNewContext(
-    'globalThis.__supabaseConfigForTest = { url: SUPABASE_URL, key: SUPABASE_KEY, enabled: SUPABASE_CONFIG.enabled };',
+    'globalThis.__supabaseConfigForTest = { url: SUPABASE_URL, key: SUPABASE_KEY, enabled: SUPABASE_CONFIG.enabled, syncLearningAttempts: SUPABASE_CONFIG.syncLearningAttempts, autoAnonymousAuth: SUPABASE_CONFIG.autoAnonymousAuth };',
     context
   );
 
   assert.strictEqual(context.window.MATH_APP_SUPABASE.url, 'https://gegwjdcxcarmopiaknwj.supabase.co');
   assert.strictEqual(context.window.MATH_APP_SUPABASE.publishableKey, 'sb_publishable_jRV8luDjS0JB46ZSDT3-6g_HXM-SUtM');
+  assert.strictEqual(context.window.MATH_APP_SUPABASE.syncLearningAttempts, true);
+  assert.strictEqual(context.window.MATH_APP_SUPABASE.autoAnonymousAuth, true);
   assert.strictEqual(context.__supabaseConfigForTest.url, context.window.MATH_APP_SUPABASE.url);
   assert.strictEqual(context.__supabaseConfigForTest.key, context.window.MATH_APP_SUPABASE.publishableKey);
   assert.strictEqual(context.__supabaseConfigForTest.enabled, true);
+  assert.strictEqual(context.__supabaseConfigForTest.syncLearningAttempts, true);
+  assert.strictEqual(context.__supabaseConfigForTest.autoAnonymousAuth, true);
 }
 
 function testSupabaseClientUsesPublicConfig() {
@@ -1118,6 +1122,7 @@ function testIrtAttemptLogCreatesSupabaseReadyPendingRecords() {
   assert.strictEqual(record.theta_before, stateBefore.theta);
   assert.strictEqual(record.theta_after, stateAfter.theta);
   assert.strictEqual(record.skill_tags.join('|'), 'UNIT_COMPARE|INVERSE_RELATION');
+  assert.strictEqual(record.local_profile_id, 'local-child');
   assert.strictEqual(record.sync_status, 'pending');
   assert.strictEqual(record.error_type, 'DIRECTION_CONFUSION');
 
@@ -1157,6 +1162,7 @@ async function testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners() {
   runScript(context, 'js/irtSync.js');
 
   const record = context.window.IrtLog.createAttemptRecord({
+    localProfileId: 'taehee',
     problem: {
       problem_id: 'REL_MATH_SYNC',
       problem_types: ['UNIT_COMPARE'],
@@ -1177,11 +1183,124 @@ async function testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners() {
   assert.strictEqual(inserted.length, 1);
   assert.strictEqual(inserted[0].table, 'learning_attempts');
   assert.strictEqual(inserted[0].rows[0].learner_id, '00000000-0000-4000-8000-000000000001');
+  assert.strictEqual(inserted[0].rows[0].local_profile_id, 'taehee');
   assert.strictEqual(inserted[0].rows[0].local_attempt_id, record.local_id);
   assert.strictEqual(inserted[0].rows[0].item_id, 'REL_MATH_SYNC');
   assert.strictEqual(inserted[0].rows[0].skill_tags.join('|'), 'UNIT_COMPARE|DIRECTION_REASONING');
   assert.strictEqual(inserted[0].rows[0].standard_error_after, 0.9);
   assert.strictEqual(context.window.IrtLog.getPendingAttempts().length, 0);
+}
+
+async function testIrtSyncUsesAnonymousAuthWhenNoSessionExists() {
+  const context = createStorageContext();
+  const inserted = [];
+  let anonymousSignInCount = 0;
+  context.window.MathAppSupabase = {
+    getConfig: () => ({ autoAnonymousAuth: true, syncLearningAttempts: true }),
+    getClient() {
+      return {
+        auth: {
+          getUser: async () => ({ data: { user: null }, error: null }),
+          signInAnonymously: async () => {
+            anonymousSignInCount += 1;
+            return { data: { user: { id: '00000000-0000-4000-8000-000000000099' } }, error: null };
+          }
+        },
+        from(table) {
+          return {
+            insert: async rows => {
+              inserted.push({ table, rows });
+              return { data: rows, error: null };
+            }
+          };
+        }
+      };
+    }
+  };
+
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLog.js');
+  runScript(context, 'js/irtSync.js');
+
+  const record = context.window.IrtLog.createAttemptRecord({
+    localProfileId: 'bomi',
+    problem: {
+      problem_id: 'REL_MATH_ANON',
+      problem_types: ['UNIT_COMPARE'],
+      skill_tags: ['UNIT_COMPARE']
+    },
+    result: { correct: true, hintLevel: 0, stepSuccessRate: 1 },
+    stateBefore: { topic: 'relationship_math', theta: 0, standardError: 1 },
+    stateAfter: { topic: 'relationship_math', theta: 0.25, standardError: 0.72 },
+    selectedAnswer: 'C',
+    elapsedSeconds: 19
+  });
+  context.window.IrtLog.appendAttempt(record);
+
+  const result = await context.window.IrtSync.syncPendingAttempts();
+  const status = context.window.IrtSync.getStatus();
+
+  assert.strictEqual(result.ok, true);
+  assert.strictEqual(result.synced, 1);
+  assert.strictEqual(anonymousSignInCount, 1);
+  assert.strictEqual(inserted[0].rows[0].learner_id, '00000000-0000-4000-8000-000000000099');
+  assert.strictEqual(inserted[0].rows[0].local_profile_id, 'bomi');
+  assert.strictEqual(context.window.IrtLog.getPendingAttempts().length, 0);
+  assert.strictEqual(status.lastResult.ok, true);
+  assert.strictEqual(status.pending, 0);
+}
+
+async function testIrtSyncKeepsPendingWhenAnonymousAuthIsUnavailable() {
+  const context = createStorageContext();
+  let insertCalled = false;
+  context.window.MathAppSupabase = {
+    getConfig: () => ({ autoAnonymousAuth: true, syncLearningAttempts: true }),
+    getClient() {
+      return {
+        auth: {
+          getUser: async () => ({ data: { user: null }, error: null }),
+          signInAnonymously: async () => ({ data: { user: null }, error: { status: 422, message: 'Anonymous sign-ins are disabled' } })
+        },
+        from() {
+          return {
+            insert: async () => {
+              insertCalled = true;
+              return { data: [], error: null };
+            }
+          };
+        }
+      };
+    }
+  };
+
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLog.js');
+  runScript(context, 'js/irtSync.js');
+
+  const record = context.window.IrtLog.createAttemptRecord({
+    localProfileId: 'sehee',
+    problem: {
+      problem_id: 'REL_MATH_ANON_BLOCKED',
+      problem_types: ['UNIT_COMPARE'],
+      skill_tags: ['UNIT_COMPARE']
+    },
+    result: { correct: true, hintLevel: 0, stepSuccessRate: 1 },
+    stateBefore: { topic: 'relationship_math', theta: 0, standardError: 1 },
+    stateAfter: { topic: 'relationship_math', theta: 0.2, standardError: 0.8 },
+    selectedAnswer: 'A',
+    elapsedSeconds: 21
+  });
+  context.window.IrtLog.appendAttempt(record);
+
+  const result = await context.window.IrtSync.syncPendingAttempts();
+  const status = context.window.IrtSync.getStatus();
+
+  assert.strictEqual(result.ok, false);
+  assert.strictEqual(result.reason, 'anonymous_auth_unavailable');
+  assert.strictEqual(insertCalled, false);
+  assert.strictEqual(context.window.IrtLog.getPendingAttempts().length, 1);
+  assert.strictEqual(status.lastResult.reason, 'anonymous_auth_unavailable');
+  assert.strictEqual(status.pending, 1);
 }
 
 function testMeasurementQualityRatesReliabilityAndValidityConservatively() {
@@ -1353,6 +1472,8 @@ async function runTests() {
   testRelationshipCoachBankHasIrtMetadata();
   testIrtAttemptLogCreatesSupabaseReadyPendingRecords();
   await testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners();
+  await testIrtSyncUsesAnonymousAuthWhenNoSessionExists();
+  await testIrtSyncKeepsPendingWhenAnonymousAuthIsUnavailable();
   testMeasurementQualityRatesReliabilityAndValidityConservatively();
   testMathAbilityReportSummarizesIrtEvidenceForParents();
 }

@@ -19,8 +19,9 @@ create table if not exists public.math_items (
 create table if not exists public.learning_attempts (
   id uuid primary key default gen_random_uuid(),
   learner_id uuid not null,
+  local_profile_id text not null default 'local-child',
   local_attempt_id text,
-  item_id text not null references public.math_items(item_id),
+  item_id text not null,
   topic text not null,
   problem_types text[] not null default '{}',
   skill_tags text[] not null default '{}',
@@ -37,12 +38,24 @@ create table if not exists public.learning_attempts (
   created_at timestamptz not null default now()
 );
 
-create unique index if not exists learning_attempts_learner_local_attempt_idx
-on public.learning_attempts(learner_id, local_attempt_id)
+alter table public.learning_attempts
+add column if not exists local_profile_id text not null default 'local-child';
+
+alter table public.learning_attempts
+drop constraint if exists learning_attempts_item_id_fkey;
+
+alter table public.learning_attempts
+alter column item_id type text;
+
+drop index if exists public.learning_attempts_learner_local_attempt_idx;
+
+create unique index learning_attempts_learner_local_attempt_idx
+on public.learning_attempts(learner_id, local_profile_id, local_attempt_id)
 where local_attempt_id is not null;
 
 create table if not exists public.learner_skill_states (
   learner_id uuid not null,
+  local_profile_id text not null default 'local-child',
   topic text not null,
   theta numeric not null default 0,
   standard_error numeric not null default 1,
@@ -50,8 +63,17 @@ create table if not exists public.learner_skill_states (
   skill_states jsonb not null default '{}'::jsonb,
   last_item_ids text[] not null default '{}',
   updated_at timestamptz not null default now(),
-  primary key (learner_id, topic)
+  primary key (learner_id, local_profile_id, topic)
 );
+
+alter table public.learner_skill_states
+add column if not exists local_profile_id text not null default 'local-child';
+
+alter table public.learner_skill_states
+drop constraint if exists learner_skill_states_pkey;
+
+alter table public.learner_skill_states
+add primary key (learner_id, local_profile_id, topic);
 
 alter table public.math_items enable row level security;
 alter table public.learning_attempts enable row level security;

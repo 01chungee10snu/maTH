@@ -7,6 +7,8 @@ const SUPABASE_CONFIG = Object.freeze({
   environment: SUPABASE_PUBLIC_CONFIG.environment || 'local',
   url: SUPABASE_PUBLIC_CONFIG.url || '',
   publishableKey: SUPABASE_PUBLIC_CONFIG.publishableKey || '',
+  syncLearningAttempts: SUPABASE_PUBLIC_CONFIG.syncLearningAttempts === true,
+  autoAnonymousAuth: SUPABASE_PUBLIC_CONFIG.autoAnonymousAuth === true,
   enabled: Boolean(SUPABASE_PUBLIC_CONFIG.url && SUPABASE_PUBLIC_CONFIG.publishableKey)
 });
 const SUPABASE_URL = SUPABASE_CONFIG.url;

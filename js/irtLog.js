@@ -30,6 +30,12 @@ function getActiveIrtLearnerId() {
         || 'local-child';
 }
 
+function getActiveIrtProfileId() {
+    return window.LearnerProfiles?.getActiveId?.()
+        || globalThis.LearnerProfiles?.getActiveId?.()
+        || 'local-child';
+}
+
 function safeJsonParseIrtLog(raw, fallback) {
     if (!raw) return fallback;
     try {
@@ -71,6 +77,7 @@ function createIrtAttemptRecord(input = {}) {
     return {
         local_id: `irt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         learner_id: input.learnerId || getActiveIrtLearnerId(),
+        local_profile_id: input.localProfileId || input.local_profile_id || getActiveIrtProfileId(),
         item_id: problem.problem_id || problem.problemKey || 'unknown',
         topic: stateAfter.topic || stateBefore.topic || 'relationship_math',
         problem_types: problem.problem_types || [],

@@ -633,6 +633,9 @@ function updateIrtAfterAnswer(correct) {
             elapsedSeconds
         });
         window.IrtLog.appendAttempt(record);
+        if (window.IrtSync?.requestSync) {
+            window.IrtSync.requestSync('attempt_saved');
+        }
     }
 }
 
@@ -2503,6 +2506,17 @@ function drawHeader(W, H) {
     CTX.textAlign = 'left';
 }
 
+function getIrtSyncSummaryText() {
+    const status = window.IrtSync?.getStatus?.();
+    if (!status) return '서버 동기화 준비 중';
+    const pending = Number(status.pending || 0);
+    if (status.state === 'running') return `서버 동기화 중 · 대기 ${pending}개`;
+    if (status.lastResult?.ok && pending === 0) return '서버 동기화 완료';
+    if (status.state === 'blocked') return `서버 동기화 대기 · 로컬 ${pending}개`;
+    if (status.state === 'error') return `서버 동기화 재시도 예정 · 로컬 ${pending}개`;
+    return pending ? `서버 동기화 대기 · 로컬 ${pending}개` : '서버 동기화 준비됨';
+}
+
 function drawCollectionButton(W, H) {
     const bw = 140, bh = 50;
     const bx = W - bw - 20;
@@ -2788,6 +2802,7 @@ function drawMap() {
     const logCount = logSummary?.total || attempts;
     const thetaLabel = irtSummary ? `수준 추정 ${irtSummary.theta}` : '수준 추정 준비중';
     const confidence = irtSummary ? `오차 ${irtSummary.standardError}` : '문제 풀이 후 갱신';
+    const syncLabel = getIrtSyncSummaryText();
 
     CTX.save();
     roundRect(CTX, cardX, summaryY, cardW, summaryH, Math.round(22 * SCALE));
@@ -2813,7 +2828,7 @@ function drawMap() {
         weight: 'bold'
     });
     CTX.fillStyle = '#6b7280';
-    drawFittedCanvasText('학교급을 고르지 않고 현재 기록과 약점에 맞춰 바로 출제합니다.', W / 2, summaryY + Math.round(108 * SCALE), cardW - Math.round(36 * SCALE), {
+    drawFittedCanvasText(syncLabel, W / 2, summaryY + Math.round(108 * SCALE), cardW - Math.round(36 * SCALE), {
         initialSize: Math.round(18 * SCALE),
         minSize: Math.round(13 * SCALE),
         weight: 'bold'

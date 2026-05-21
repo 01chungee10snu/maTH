@@ -9,6 +9,8 @@
         projectName: 'maTH-adventure',
         environment: 'production',
         url: 'https://gegwjdcxcarmopiaknwj.supabase.co',
-        publishableKey: 'sb_publishable_jRV8luDjS0JB46ZSDT3-6g_HXM-SUtM'
+        publishableKey: 'sb_publishable_jRV8luDjS0JB46ZSDT3-6g_HXM-SUtM',
+        syncLearningAttempts: true,
+        autoAnonymousAuth: true
     });
 })(window);
