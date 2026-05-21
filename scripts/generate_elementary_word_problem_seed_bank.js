@@ -127,6 +127,36 @@ const COMPLEX_REASONING_TAGS = new Set([
   'UNIT_COMPARE'
 ]);
 
+const REASONING_FRAMES = [
+  { key: 'find-first', text: '먼저 무엇을 구해야 하는지 표시한 뒤 답해 보세요.' },
+  { key: 'table', text: '조건을 표로 정리하면 중간 계산을 놓치지 않을 수 있어요.' },
+  { key: 'bar-model', text: '전체와 부분을 바 모델로 나누어 생각해 보세요.' },
+  { key: 'compare-base', text: '비교의 기준이 되는 양을 먼저 찾고 계산해 보세요.' },
+  { key: 'operation-order', text: '계산 순서를 두 단계로 나누어 확인해 보세요.' },
+  { key: 'unit-check', text: '답의 단위가 무엇인지 끝에서 다시 확인해 보세요.' },
+  { key: 'reverse-check', text: '구한 값이 문제의 조건에 맞는지 거꾸로 확인해 보세요.' },
+  { key: 'diagram', text: '관계가 헷갈리면 화살표로 조건을 연결해 보세요.' },
+  { key: 'hidden-value', text: '문장 속에 직접 나오지 않은 값을 먼저 찾아야 합니다.' },
+  { key: 'rank-gap', text: '순서와 차이를 따로 확인한 뒤 답을 고르세요.' },
+  { key: 'transfer', text: '같은 규칙이 다른 수에도 그대로 적용되는지 살펴보세요.' },
+  { key: 'irrelevant-guard', text: '필요한 조건과 필요하지 않은 조건을 구분해 보세요.' },
+  { key: 'estimate-first', text: '계산 전에 답이 커질지 작아질지 먼저 예상해 보세요.' },
+  { key: 'multiple-relation', text: '한 문장에 들어 있는 두 관계를 순서대로 풀어 보세요.' },
+  { key: 'representation-choice', text: '표, 그림, 식 중 어떤 정리가 가장 알맞은지 생각해 보세요.' },
+  { key: 'explain', text: '마지막에는 왜 그런 답인지 한 문장으로 설명해 보세요.' }
+];
+
+function canonicalTemplateFamily(family) {
+  return String(family || '')
+    .replace(/^COMPLEX_D\d+_/, 'COMPLEX_DXX_')
+    .replace(/_V\d+$/, '_VX');
+}
+
+function getReasoningFrame(variant, difficulty) {
+  const index = Math.abs((variant - 1) * 7 + difficulty * 3) % REASONING_FRAMES.length;
+  return { ...REASONING_FRAMES[index], index };
+}
+
 function inferReasoningTags(family, skillTags, problem) {
   const tags = new Set();
   const text = `${family} ${skillTags.join(' ')} ${problem}`.toUpperCase();
@@ -168,6 +198,14 @@ function makeItem(gradeBand, topic, family, variant, difficulty, skillTags, prob
   const reasoningTags = options.reasoningTags || inferReasoningTags(family, skillTags, normalizedProblem);
   if (!reasoningTags.length) reasoningTags.push('DIRECT_REASONING');
   const reasoningDepth = options.reasoningDepth || inferReasoningDepth(difficulty, skillTags, reasoningTags);
+  const requiresMultiStep = Boolean(options.requiresMultiStep ?? reasoningDepth >= 2);
+  const frame = getReasoningFrame(variant, difficulty);
+  const problemWithFrame = requiresMultiStep
+    ? `${normalizedProblem} ${frame.text}`
+    : normalizedProblem;
+  const structureSignature = options.structureSignature || canonicalTemplateFamily(family);
+  const templateSignature = options.templateSignature
+    || `${structureSignature}:${requiresMultiStep ? frame.key : 'direct'}`;
   return {
     id: `EWP_${gradeBand.replace(/_/g, '')}_${family}_${String(variant).padStart(3, '0')}`,
     grade_band: gradeBand,
@@ -180,9 +218,11 @@ function makeItem(gradeBand, topic, family, variant, difficulty, skillTags, prob
     level_label: level(difficulty),
     reasoning_depth: reasoningDepth,
     reasoning_tags: reasoningTags,
-    requires_multi_step_reasoning: Boolean(options.requiresMultiStep ?? reasoningDepth >= 2),
+    requires_multi_step_reasoning: requiresMultiStep,
     representation_hint: options.representationHint || inferRepresentationHint(reasoningTags, skillTags),
-    problem: normalizedProblem,
+    structure_signature: structureSignature,
+    template_signature: templateSignature,
+    problem: problemWithFrame,
     answer,
     solution: normalizedSolution
   };
@@ -521,8 +561,9 @@ const baseFamilies = [
     difficulty: 3,
     skillTags: ['FRACTION_RELATION', 'PART_WHOLE'],
     build(i) {
-      const den = 4 + (i % 8);
-      const num = 1 + (i % (den - 1));
+      const tier = Math.floor(i / 8);
+      const den = 4 + (i % 8) + tier;
+      const num = 1 + ((i * 2 + tier) % Math.max(1, den - 1));
       return [
         `피자 한 판을 똑같이 ${den}조각으로 나누었어요. 그중 ${num}조각을 먹었다면 먹은 양은 한 판의 얼마일까요?`,
         `${num}/${den}`,
@@ -537,8 +578,9 @@ const baseFamilies = [
     difficulty: 4,
     skillTags: ['FRACTION_RELATION', 'COMPARE'],
     build(i) {
-      const a = 3 + (i % 4);
-      const b = a + 2 + (i % 3);
+      const tier = Math.floor(i / 8);
+      const a = 3 + (i % 4) + tier;
+      const b = a + 2 + ((i + tier) % 4);
       const first = pick(names, i);
       const second = pick(names, i + 1);
       return [
@@ -555,8 +597,9 @@ const baseFamilies = [
     difficulty: 5,
     skillTags: ['FRACTION_RELATION', 'EQUIVALENCE'],
     build(i) {
-      const den = 2 + (i % 5);
-      const k = 2 + (i % 4);
+      const tier = Math.floor(i / 10);
+      const den = 2 + (i % 5) + tier;
+      const k = 2 + ((i + tier) % 5);
       return [
         `같은 크기의 초콜릿에서 한 조각은 1/${den}, 다른 조각은 ${k}/${den * k}이라고 표시했어요. 두 양은 같을까요?`,
         `같다`,
@@ -766,9 +809,10 @@ const baseFamilies = [
     difficulty: 7,
     skillTags: ['FRACTION_MULTIPLICATION', 'PART_OF_QUANTITY'],
     build(i) {
-      const den = 5 + (i % 4);
-      const unit = 4 + (i % 5);
-      const num = 2 + (i % Math.max(2, den - 2));
+      const tier = Math.floor(i / 10);
+      const den = 5 + (i % 4) + tier;
+      const unit = 4 + ((i + tier) % 6);
+      const num = 1 + ((i * 2 + tier) % Math.max(1, den - 2));
       const total = den * unit;
       return [
         `색종이 ${total}장의 ${num}/${den}를 사용했어요. 사용한 색종이는 몇 장일까요?`,
@@ -784,8 +828,9 @@ const baseFamilies = [
     difficulty: 8,
     skillTags: ['FRACTION_DIVISION', 'EQUAL_SHARING'],
     build(i) {
-      const den = 4 + (i % 5);
-      const people = 2 + (i % 4);
+      const tier = Math.floor(i / 10);
+      const den = 4 + (i % 5) + tier;
+      const people = 2 + ((i + tier) % 4);
       const num = people;
       return [
         `물 ${num}/${den}L를 컵 ${people}개에 똑같이 나누어 담으려고 해요. 한 컵에는 몇 L씩 담을 수 있을까요?`,
@@ -1113,8 +1158,9 @@ const baseFamilies = [
     difficulty: 11,
     skillTags: ['FRACTION_DIVISION', 'RATIO', 'COMPOSITE_RELATION'],
     build(i) {
-      const den = 4 + (i % 5);
-      const bottle = 2 + (i % 4);
+      const tier = Math.floor(i / 10);
+      const den = 4 + (i % 5) + tier;
+      const bottle = 2 + ((i + tier) % 4);
       const totalNum = bottle * den;
       return [
         `물 ${bottle}L를 한 컵에 1/${den}L씩 담고, 담은 컵의 절반을 친구들에게 나누어 주었어요. 친구들에게 준 컵은 몇 컵일까요?`,
@@ -1149,9 +1195,10 @@ const baseFamilies = [
     difficulty: 12,
     skillTags: ['VOLUME', 'SCALE_FACTOR', 'TRANSFER'],
     build(i) {
-      const a = 3 + (i % 4);
-      const b = 4 + (i % 4);
-      const h = 5 + (i % 4);
+      const tier = Math.floor(i / 8);
+      const a = 3 + (i % 4) + tier;
+      const b = 4 + ((i + tier) % 5);
+      const h = 5 + ((i + tier * 2) % 6);
       const scale = 2;
       const original = a * b * h;
       const scaled = original * scale * scale * scale;
@@ -1214,11 +1261,12 @@ function buildComplexCompare(difficulty, i) {
 }
 
 function buildComplexDivision(difficulty, i) {
+  const tier = Math.floor(i / 20);
   const obj = pick(objects, i + 2);
   const container = pick(containers, i + 3);
-  const people = 3 + (i % 5);
-  const extra = 1 + (i % 3);
-  const each = Math.max(2, difficulty + 1 + (i % 4));
+  const people = 3 + (i % 5) + (tier % 3);
+  const extra = 1 + ((i + tier) % Math.max(2, Math.min(people, 5)));
+  const each = Math.max(2, difficulty + 1 + ((i + tier) % 5));
   const total = people * each + extra;
   return [
     `${obj} ${total}개를 ${people}명에게 똑같이 나누어 주고 남는 것은 ${container}에 넣으려고 해요. 한 명이 몇 개씩 받고 ${container}에는 몇 개가 남을까요?`,
@@ -1242,10 +1290,11 @@ function buildComplexUnitRate(difficulty, i) {
 }
 
 function buildComplexFractionRatio(difficulty, i) {
-  const den = 4 + (i % 5) + Math.floor(difficulty / 6);
-  const unit = 3 + (i % 5);
+  const tier = Math.floor(i / 12);
+  const den = 4 + (i % 5) + Math.floor(difficulty / 6) + (tier % 4);
+  const unit = 3 + ((i + tier + difficulty) % 6);
   const total = den * unit;
-  const num = 2 + (i % Math.max(2, den - 2));
+  const num = 1 + ((i * 2 + tier) % Math.max(1, den - 2));
   const used = unit * num;
   const left = total - used;
   return [
@@ -1388,10 +1437,11 @@ function buildEarlyMeasurementCompare(difficulty, i) {
 }
 
 function buildEarlyEqualGroupsLeftover(difficulty, i) {
+  const tier = Math.floor(i / 18);
   const obj = pick(objects, i + 8);
-  const groups = 2 + (i % 4);
-  const size = 2 + ((i + difficulty) % 5);
-  const used = 1 + (i % 4);
+  const groups = 2 + (i % 4) + (tier % 2);
+  const size = 2 + ((i + difficulty + tier) % 6);
+  const used = 1 + ((i + tier) % Math.max(2, size));
   const total = groups * size;
   const left = total - used;
   return [
@@ -1539,16 +1589,20 @@ function variantsForFamily(family) {
 
 function generate() {
   const items = [];
+  const seenProblems = new Set();
 
   for (const family of families) {
     const variantsPerFamily = variantsForFamily(family);
-    for (let i = 0; i < variantsPerFamily; i += 1) {
-      const [problem, answer, solution] = family.build(i);
-      items.push(makeItem(
+    let generatedForFamily = 0;
+    let attemptIndex = 0;
+    while (generatedForFamily < variantsPerFamily && attemptIndex < variantsPerFamily * 20) {
+      const [problem, answer, solution] = family.build(attemptIndex);
+      attemptIndex += 1;
+      const item = makeItem(
         family.gradeBand,
         family.topic,
         family.family,
-        i + 1,
+        generatedForFamily + 1,
         family.difficulty,
         family.skillTags,
         problem,
@@ -1560,7 +1614,11 @@ function generate() {
           requiresMultiStep: family.requiresMultiStep,
           representationHint: family.representationHint
         }
-      ));
+      );
+      if (seenProblems.has(item.problem)) continue;
+      seenProblems.add(item.problem);
+      generatedForFamily += 1;
+      items.push(item);
     }
   }
 

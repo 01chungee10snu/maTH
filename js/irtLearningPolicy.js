@@ -70,6 +70,24 @@ function getPolicyFamily(item) {
     return null;
 }
 
+function getPolicyTemplate(item) {
+    if (window.IrtEngine?.getItemTemplate) return window.IrtEngine.getItemTemplate(item);
+    if (item?.template_signature) return item.template_signature;
+    const family = getPolicyFamily(item);
+    if (!family) return item?.problem_id || null;
+    return String(family)
+        .replace(/^COMPLEX_D\d+_/, 'COMPLEX_DXX_')
+        .replace(/_V\d+$/, '_VX');
+}
+
+function getPolicyStructure(item) {
+    if (window.IrtEngine?.getItemStructure) return window.IrtEngine.getItemStructure(item);
+    if (item?.structure_signature) return item.structure_signature;
+    const template = getPolicyTemplate(item);
+    if (template) return String(template).split(':')[0];
+    return null;
+}
+
 function getPolicyReasoningDepth(item) {
     const depth = Number(item?.reasoning_depth);
     if (Number.isFinite(depth)) return clampPolicy(depth, 1, 4);
@@ -174,6 +192,32 @@ function getRecentFamilyPenalty(item, state = {}) {
     return 1.4 - Math.min(index, 8) * 0.12;
 }
 
+function getRecentTemplatePenalty(item, state = {}) {
+    const template = getPolicyTemplate(item);
+    if (!template) return 0;
+    const recentTemplates = [
+        ...(state.lastItemTemplates || []),
+        ...(state.presentedItemTemplates || [])
+    ];
+    const index = recentTemplates.indexOf(template);
+    if (index < 0) return 0;
+    return 3.2 - Math.min(index, 10) * 0.18;
+}
+
+function getRecentStructurePenalty(item, state = {}) {
+    const structure = getPolicyStructure(item);
+    if (!structure) return 0;
+    const recentStructures = [
+        ...(state.lastItemStructures || []),
+        ...(state.presentedItemStructures || []),
+        ...(state.lastItemTemplates || []).map(value => String(value).split(':')[0]),
+        ...(state.presentedItemTemplates || []).map(value => String(value).split(':')[0])
+    ];
+    const index = recentStructures.indexOf(structure);
+    if (index < 0) return 0;
+    return 1.8 - Math.min(index, 10) * 0.1;
+}
+
 function scorePolicyItem(item, state = {}, context = {}) {
     const theta = Number.isFinite(state.theta) ? state.theta : 0;
     const phase = context.phase || getLearningPhase(context.items || [], state);
@@ -208,6 +252,8 @@ function scorePolicyItem(item, state = {}, context = {}) {
         + complexReasoningBonus
         - getRecentPenalty(item, state)
         - getRecentFamilyPenalty(item, state)
+        - getRecentStructurePenalty(item, state)
+        - getRecentTemplatePenalty(item, state)
         - shallowWordProblemPenalty
         - tooHardPenalty
         - tooEasyPenalty

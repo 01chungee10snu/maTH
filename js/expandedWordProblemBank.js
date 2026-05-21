@@ -5,7 +5,7 @@
    있는 relationshipCoach 호환 문항으로 변환합니다.
    ========================================================================= */
 
-const EXPANDED_WORD_BANK_URL = 'data/elementary_word_problem_seed_bank.json?v=20260521-quality-v2';
+const EXPANDED_WORD_BANK_URL = 'data/elementary_word_problem_seed_bank.json?v=20260521-diversity-v3';
 
 function clampExpandedBank(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -248,6 +248,8 @@ function convertSeedItem(item) {
         curriculum_domain: item.curriculum_domain,
         topic: item.topic,
         type_family: item.type_family,
+        structure_signature: item.structure_signature || item.template_signature || item.type_family || item.type,
+        template_signature: item.template_signature || item.type_family || item.type,
         level_label: item.level_label,
         reasoning_depth: Number(item.reasoning_depth || 1),
         reasoning_tags: uniqueExpandedList(item.reasoning_tags || []),

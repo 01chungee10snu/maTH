@@ -67,8 +67,12 @@ function createInitialIrtState(topic = 'relationship_math', options = {}) {
         attemptCount: 0,
         lastItemIds: [],
         lastItemFamilies: [],
+        lastItemStructures: [],
+        lastItemTemplates: [],
         presentedItemIds: [],
         presentedItemFamilies: [],
+        presentedItemStructures: [],
+        presentedItemTemplates: [],
         skillStates: {},
         updatedAt: new Date().toISOString()
     };
@@ -119,6 +123,22 @@ function getItemFamily(item) {
     return null;
 }
 
+function getItemTemplate(item) {
+    if (item?.template_signature) return item.template_signature;
+    const family = getItemFamily(item);
+    if (!family) return item?.problem_id || item?.problemKey || null;
+    return String(family)
+        .replace(/^COMPLEX_D\d+_/, 'COMPLEX_DXX_')
+        .replace(/_V\d+$/, '_VX');
+}
+
+function getItemStructure(item) {
+    if (item?.structure_signature) return item.structure_signature;
+    const template = getItemTemplate(item);
+    if (template) return String(template).split(':')[0];
+    return null;
+}
+
 function updateSkillState(previous, score) {
     const state = previous || { attempts: 0, mastery: 0, lastScore: 0 };
     const attempts = state.attempts + 1;
@@ -146,6 +166,12 @@ function updateIrtState(previousState, item, result = {}) {
     const lastItemFamilies = [getItemFamily(item), ...(state.lastItemFamilies || [])]
         .filter(Boolean)
         .slice(0, 50);
+    const lastItemStructures = [getItemStructure(item), ...(state.lastItemStructures || [])]
+        .filter(Boolean)
+        .slice(0, 50);
+    const lastItemTemplates = [getItemTemplate(item), ...(state.lastItemTemplates || [])]
+        .filter(Boolean)
+        .slice(0, 50);
     const skillStates = { ...(state.skillStates || {}) };
 
     getItemSkills(item).forEach(skill => {
@@ -159,8 +185,12 @@ function updateIrtState(previousState, item, result = {}) {
         attemptCount,
         lastItemIds,
         lastItemFamilies,
+        lastItemStructures,
+        lastItemTemplates,
         presentedItemIds: state.presentedItemIds || [],
         presentedItemFamilies: state.presentedItemFamilies || [],
+        presentedItemStructures: state.presentedItemStructures || [],
+        presentedItemTemplates: state.presentedItemTemplates || [],
         skillStates,
         updatedAt: new Date().toISOString()
     };
@@ -171,13 +201,19 @@ function registerIrtExposure(previousState, item) {
     const itemId = item?.problem_id || item?.problemKey;
     if (!itemId) return state;
     const family = getItemFamily(item);
+    const structure = getItemStructure(item);
+    const template = getItemTemplate(item);
     const withoutSameItem = (state.presentedItemIds || []).filter(id => id !== itemId);
     const withoutSameFamily = (state.presentedItemFamilies || []).filter(value => value !== family);
+    const withoutSameStructure = (state.presentedItemStructures || []).filter(value => value !== structure);
+    const withoutSameTemplate = (state.presentedItemTemplates || []).filter(value => value !== template);
 
     return {
         ...state,
         presentedItemIds: [itemId, ...withoutSameItem].slice(0, 80),
         presentedItemFamilies: [family, ...withoutSameFamily].filter(Boolean).slice(0, 80),
+        presentedItemStructures: [structure, ...withoutSameStructure].filter(Boolean).slice(0, 80),
+        presentedItemTemplates: [template, ...withoutSameTemplate].filter(Boolean).slice(0, 80),
         lastPresentedAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     };
@@ -244,6 +280,8 @@ window.IrtEngine = {
     information: getItemInformation,
     responseScore: getResponseScore,
     getItemFamily,
+    getItemStructure,
+    getItemTemplate,
     registerExposure: registerIrtExposure,
     updateState: updateIrtState,
     selectNextItem: selectNextIrtItem,

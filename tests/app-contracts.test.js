@@ -103,6 +103,29 @@ function assertComplexRatio(label, items, minimumRatio) {
   );
 }
 
+function normalizeProblemTemplate(text) {
+  return String(text || '')
+    .replace(/[0-9]+(?:\.[0-9]+)?\/[0-9]+(?:\.[0-9]+)?/g, 'F')
+    .replace(/[0-9]+(?:\.[0-9]+)?/g, 'N')
+    .replace(/[A-D]/g, 'X')
+    .replace(/[㉮㉯㉰㉱]/g, 'X')
+    .replace(/태희|민지|하준|서아|지우|도윤|수빈|연우|지민|유나/g, 'NAME')
+    .replace(/스티커|구슬|색종이|연필|사탕|공책|리본|물병|상자|기차|막대|컵|그릇|공|끈|바구니|삽|책|카드|초콜릿|쿠키|딱지/g, 'OBJ')
+    .replace(/월요일|화요일|수요일|목요일|금요일|토요일|일요일/g, 'DAY')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getDuplicateGroups(items, keyFn) {
+  const groups = new Map();
+  items.forEach(item => {
+    const key = keyFn(item);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(item);
+  });
+  return Array.from(groups.values()).filter(group => group.length > 1);
+}
+
 function getAnswerOptionShape(value) {
   const text = String(value || '').trim();
   const commaParts = text.split(',').map(part => part.trim());
@@ -1636,6 +1659,117 @@ function testParentReportUsesKoreanLabelsForAllProblemTags() {
   assert.ok(!/[A-Z_]{2,}/.test(reportText), reportText);
 }
 
+function testWordProblemBankHasRealTemplateDiversity() {
+  const bank = JSON.parse(fs.readFileSync(path.join(root, 'data/elementary_word_problem_seed_bank.json'), 'utf8'));
+  const items = bank.items || [];
+  const exactDuplicateGroups = getDuplicateGroups(items, item => item.problem || '');
+  const templateDuplicateGroups = getDuplicateGroups(items, item => normalizeProblemTemplate(item.problem || ''));
+  const normalizedTemplateCount = new Set(items.map(item => normalizeProblemTemplate(item.problem || ''))).size;
+  const maxTemplateReuse = Math.max(...templateDuplicateGroups.map(group => group.length), 0);
+
+  assert.strictEqual(exactDuplicateGroups.length, 0, `exact duplicate question groups remain: ${exactDuplicateGroups[0]?.[0]?.problem}`);
+  assert.ok(
+    normalizedTemplateCount >= 420,
+    `normalized template diversity too low: ${normalizedTemplateCount}`
+  );
+  assert.ok(
+    maxTemplateReuse <= 120,
+    `one normalized template is reused ${maxTemplateReuse} times`
+  );
+}
+
+function testIrtPolicyAvoidsRecentlyRepeatedTemplateSignatures() {
+  const context = createContext();
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLearningPolicy.js');
+
+  const repeatedTemplate = {
+    problem_id: 'same_structure_harder',
+    type_family: 'COMPLEX_D10_UNIT_RATE_TRANSFER',
+    template_signature: 'UNIT_RATE_TRANSFER:price-discount',
+    skill_tags: ['UNIT_COMPARE', 'PROPORTION', 'COMPOSITE_RELATION'],
+    problem_types: ['UNIT_RATE_TRANSFER', 'UNIT_COMPARE', 'PROPORTION'],
+    reasoning_depth: 4,
+    requires_multi_step_reasoning: true,
+    question: '공책 가격을 구한 뒤 할인 금액을 빼는 문제입니다. 얼마를 내야 할까요?',
+    irt: { model: 'rasch', b: 0.95 }
+  };
+  const freshTemplate = {
+    problem_id: 'fresh_structure_harder',
+    type_family: 'COMPLEX_D10_DATA_RANKING_COMPARE',
+    template_signature: 'DATA_RANKING_COMPARE:rank-gap',
+    skill_tags: ['DATA_REASONING', 'RANKING', 'COMPOSITE_RELATION'],
+    problem_types: ['DATA_RANKING_COMPARE', 'RANKING', 'COMPARE_RELATION'],
+    reasoning_depth: 4,
+    requires_multi_step_reasoning: true,
+    question: '기록을 큰 순서로 정리하고 두 번째 값을 찾는 문제입니다. 차이는 얼마일까요?',
+    irt: { model: 'rasch', b: 0.96 }
+  };
+  const state = {
+    ...context.window.IrtEngine.createInitialState('relationship_math'),
+    theta: 0.9,
+    standardError: 0.35,
+    attemptCount: 22,
+    lastItemTemplates: ['UNIT_RATE_TRANSFER:price-discount'],
+    presentedItemTemplates: ['UNIT_RATE_TRANSFER:price-discount'],
+    skillStates: {
+      UNIT_COMPARE: { attempts: 5, mastery: 0.82 },
+      DATA_REASONING: { attempts: 5, mastery: 0.82 }
+    }
+  };
+
+  const selected = context.window.IrtLearningPolicy.selectNextItem([repeatedTemplate, freshTemplate], state);
+  assert.strictEqual(selected.item.problem_id, 'fresh_structure_harder');
+}
+
+function testIrtPolicyAvoidsRecentlyRepeatedStructureSignatures() {
+  const context = createContext();
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLearningPolicy.js');
+
+  const sameStructureDifferentFrame = {
+    problem_id: 'same_structure_new_frame',
+    type_family: 'COMPLEX_D11_UNIT_RATE_TRANSFER',
+    structure_signature: 'COMPLEX_DXX_UNIT_RATE_TRANSFER',
+    template_signature: 'COMPLEX_DXX_UNIT_RATE_TRANSFER:diagram',
+    skill_tags: ['UNIT_COMPARE', 'PROPORTION', 'COMPOSITE_RELATION'],
+    problem_types: ['UNIT_RATE_TRANSFER', 'UNIT_COMPARE', 'PROPORTION'],
+    reasoning_depth: 4,
+    requires_multi_step_reasoning: true,
+    question: '공책 가격을 구한 뒤 할인 금액을 빼는 문제입니다. 관계를 화살표로 정리해 보세요.',
+    irt: { model: 'rasch', b: 0.95 }
+  };
+  const freshStructure = {
+    problem_id: 'fresh_structure_same_fit',
+    type_family: 'COMPLEX_D11_DATA_RANKING_COMPARE',
+    structure_signature: 'COMPLEX_DXX_DATA_RANKING_COMPARE',
+    template_signature: 'COMPLEX_DXX_DATA_RANKING_COMPARE:rank-gap',
+    skill_tags: ['DATA_REASONING', 'RANKING', 'COMPOSITE_RELATION'],
+    problem_types: ['DATA_RANKING_COMPARE', 'RANKING', 'COMPARE_RELATION'],
+    reasoning_depth: 4,
+    requires_multi_step_reasoning: true,
+    question: '기록을 큰 순서로 정리하고 두 번째 값을 찾는 문제입니다. 차이를 함께 구하세요.',
+    irt: { model: 'rasch', b: 0.96 }
+  };
+  const state = {
+    ...context.window.IrtEngine.createInitialState('relationship_math'),
+    theta: 0.9,
+    standardError: 0.35,
+    attemptCount: 24,
+    lastItemStructures: ['COMPLEX_DXX_UNIT_RATE_TRANSFER'],
+    presentedItemStructures: ['COMPLEX_DXX_UNIT_RATE_TRANSFER'],
+    lastItemTemplates: ['COMPLEX_DXX_UNIT_RATE_TRANSFER:bar-model'],
+    presentedItemTemplates: ['COMPLEX_DXX_UNIT_RATE_TRANSFER:bar-model'],
+    skillStates: {
+      UNIT_COMPARE: { attempts: 5, mastery: 0.82 },
+      DATA_REASONING: { attempts: 5, mastery: 0.82 }
+    }
+  };
+
+  const selected = context.window.IrtLearningPolicy.selectNextItem([sameStructureDifferentFrame, freshStructure], state);
+  assert.strictEqual(selected.item.problem_id, 'fresh_structure_same_fit');
+}
+
 async function runTests() {
   testCurriculumTopicSections();
   testProblemOptionsStayUniqueAndComplete();
@@ -1670,6 +1804,9 @@ async function runTests() {
   testMeasurementQualityRatesReliabilityAndValidityConservatively();
   testMathAbilityReportSummarizesIrtEvidenceForParents();
   testParentReportUsesKoreanLabelsForAllProblemTags();
+  testWordProblemBankHasRealTemplateDiversity();
+  testIrtPolicyAvoidsRecentlyRepeatedTemplateSignatures();
+  testIrtPolicyAvoidsRecentlyRepeatedStructureSignatures();
 }
 
 runTests()
