@@ -6,12 +6,66 @@
    ========================================================================= */
 
 const EXPANDED_WORD_BANK_URL = 'data/elementary_word_problem_seed_bank.json?v=20260521-diversity-v3';
+const K12_MATH_BANK_URL = 'data/k12_math_problem_seed_bank.json?v=20260521-k12-v1';
+const EXPANDED_WORD_BANK_URLS = [EXPANDED_WORD_BANK_URL, K12_MATH_BANK_URL];
 
 function clampExpandedBank(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
 
-function seedDifficultyToTheta(difficulty) {
+function seedDifficultyToTheta(item, rawBank = {}) {
+    const directB = Number(item?.irt_b);
+    if (Number.isFinite(directB)) {
+        return Math.round(clampExpandedBank(directB, -3, 3) * 100) / 100;
+    }
+
+    const maxDifficulty = rawBank?.metadata?.difficulty_scale === '1-30' ? 30 : 12;
+    const minTheta = rawBank?.metadata?.difficulty_scale === '1-30' ? -3 : -2;
+    const maxTheta = rawBank?.metadata?.difficulty_scale === '1-30' ? 3 : 2;
+    const d = clampExpandedBank(Number(item?.difficulty || 6), 1, maxDifficulty);
+    return Math.round((minTheta + ((d - 1) / (maxDifficulty - 1)) * (maxTheta - minTheta)) * 100) / 100;
+}
+
+function getSeedBankSource(rawBank = {}) {
+    if (rawBank?.metadata?.scope === 'k12_to_csat_math') return 'k12_math_seed_bank';
+    return 'elementary_seed_bank';
+}
+
+function getSeedBaseUnit(item, rawBank = {}) {
+    if (rawBank?.metadata?.scope === 'k12_to_csat_math') return '문제에서 구하라는 값';
+    return '문제에서 묻는 값';
+}
+
+function getSeedDifficultyLevel(item) {
+    const difficulty = Number(item?.difficulty || 6);
+    if (!Number.isFinite(difficulty)) return 6;
+    return difficulty;
+}
+
+function getSeedGradeBand(item) {
+    return item.grade_band || item.school_band || 'G3_G4';
+}
+
+function getSeedSchoolBand(item) {
+    return item.school_band || item.grade_band || null;
+}
+
+function getSeedReasoningDepth(item) {
+    const depth = Number(item?.reasoning_depth || 1);
+    if (!Number.isFinite(depth)) return 1;
+    return clampExpandedBank(depth, 1, 4);
+}
+
+function getSeedProblemTypes(item, skillTags) {
+    return uniqueExpandedList([
+        item.type_family,
+        item.type,
+        ...skillTags,
+        ...(item.reasoning_tags || [])
+    ]);
+}
+
+function seedDifficultyToLegacyTheta(difficulty) {
     const d = clampExpandedBank(Number(difficulty || 6), 1, 12);
     return Math.round((-2 + ((d - 1) / 11) * 4) * 100) / 100;
 }
@@ -209,7 +263,7 @@ function buildSeedDistractors(item) {
 
     return getExpandedOffsets(parsed.value)
         .map(offset => parsed.value + offset)
-        .filter(value => Number.isFinite(value) && value >= 0 && value !== parsed.value)
+        .filter(value => Number.isFinite(value) && (value >= 0 || parsed.value < 0) && value !== parsed.value)
         .map(value => formatExpandedNumberPart(parsed, value))
         .filter(value => value !== answer)
         .slice(0, 5);
@@ -227,31 +281,35 @@ function buildSeedEntities(item) {
     }));
 }
 
-function convertSeedItem(item) {
+function convertSeedItem(item, rawBank = {}) {
     const skillTags = uniqueExpandedList(item.skill_tags || []);
     const operation = inferSeedOperation(item);
+    const source = getSeedBankSource(rawBank);
     return {
         problem_id: item.id,
-        grade_band: item.grade_band,
-        level: Number(item.difficulty || 6),
+        grade_band: getSeedGradeBand(item),
+        school_band: getSeedSchoolBand(item),
+        level: getSeedDifficultyLevel(item),
         skill_tags: skillTags,
-        irt: { model: 'rasch', b: seedDifficultyToTheta(item.difficulty) },
-        problem_types: uniqueExpandedList([item.type_family, item.type, ...skillTags, ...(item.reasoning_tags || [])]),
+        prerequisite_tags: uniqueExpandedList(item.prerequisite_tags || []),
+        irt: { model: 'rasch', b: seedDifficultyToTheta(item, rawBank) },
+        problem_types: getSeedProblemTypes(item, skillTags),
         question: item.problem,
-        base_unit: '문제에서 묻는 값',
+        base_unit: getSeedBaseUnit(item, rawBank),
         entities: buildSeedEntities(item),
         question_type: inferSeedQuestionType(item),
         operation,
         answer: item.answer,
         explanation: item.solution,
-        source: 'elementary_seed_bank',
+        source,
         curriculum_domain: item.curriculum_domain,
+        course: item.course || item.topic,
         topic: item.topic,
         type_family: item.type_family,
         structure_signature: item.structure_signature || item.template_signature || item.type_family || item.type,
         template_signature: item.template_signature || item.type_family || item.type,
         level_label: item.level_label,
-        reasoning_depth: Number(item.reasoning_depth || 1),
+        reasoning_depth: getSeedReasoningDepth(item),
         reasoning_tags: uniqueExpandedList(item.reasoning_tags || []),
         requires_multi_step_reasoning: Boolean(item.requires_multi_step_reasoning),
         representation_hint: item.representation_hint || 'bar_model'
@@ -262,7 +320,7 @@ function convertSeedBank(rawBank) {
     const items = Array.isArray(rawBank?.items) ? rawBank.items : [];
     return items
         .filter(item => item && item.id && item.problem && item.answer && item.solution)
-        .map(convertSeedItem);
+        .map(item => convertSeedItem(item, rawBank));
 }
 
 function mergeSeedBank(rawBank) {
@@ -280,23 +338,40 @@ function mergeSeedBank(rawBank) {
     };
 }
 
-async function loadExpandedSeedBank(url = EXPANDED_WORD_BANK_URL) {
+async function loadExpandedSeedBank(urls = EXPANDED_WORD_BANK_URLS) {
     if (typeof fetch !== 'function') {
         return { ok: false, reason: 'fetch_unavailable', added: 0 };
     }
-    const response = await fetch(url);
-    if (!response.ok) {
-        return { ok: false, reason: `http_${response.status}`, added: 0 };
+    const urlList = Array.isArray(urls) ? urls : [urls];
+    const loaded = [];
+    let added = 0;
+    let total = window.RelationshipCoachProblems?.bank?.length || 0;
+    const items = [];
+
+    for (const url of urlList) {
+        const response = await fetch(url);
+        if (!response.ok) {
+            return { ok: false, reason: `http_${response.status}`, added, total, loaded, failedUrl: url };
+        }
+        const rawBank = await response.json();
+        const merged = mergeSeedBank(rawBank);
+        added += merged.added;
+        total = merged.total;
+        items.push(...merged.items);
+        loaded.push(url);
     }
-    const rawBank = await response.json();
-    const merged = mergeSeedBank(rawBank);
-    return { ok: true, ...merged };
+
+    return { ok: true, added, total, items, loaded };
 }
 
 window.ExpandedWordProblemBank = {
     url: EXPANDED_WORD_BANK_URL,
+    k12Url: K12_MATH_BANK_URL,
+    urls: EXPANDED_WORD_BANK_URLS,
     convert: convertSeedBank,
     convertItem: convertSeedItem,
+    seedDifficultyToTheta,
+    seedDifficultyToLegacyTheta,
     merge: mergeSeedBank,
     load: loadExpandedSeedBank
 };

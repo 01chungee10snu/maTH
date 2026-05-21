@@ -2,6 +2,8 @@
    게임 로직 및 렌더링
    ========================================================================= */
 
+const IRT_ACTIVE_TOPIC = 'k12_math';
+
 if (ERROR_BOX) {
     ERROR_BOX.setAttribute('aria-hidden', 'true');
 }
@@ -372,7 +374,7 @@ function createBaseStateForLearner(profile) {
         collectionTab: '전체',
         symbolAnswers: { square: null, circle: null, triangle: null },
         relationCoach: null,
-        irt: activeProfile && window.IrtEngine ? window.IrtEngine.createInitialState('relationship_math') : null,
+        irt: activeProfile && window.IrtEngine ? window.IrtEngine.createInitialState(IRT_ACTIVE_TOPIC) : null,
         learningEntry: null,
         lastIrtUpdate: null
     };
@@ -568,13 +570,17 @@ function shouldUseRelationThinkingProblem(topic) {
 function ensureIrtState() {
     if (!window.IrtEngine) return null;
     const expectedSeed = getActiveLearnerProfileFromState()?.seed || null;
+    const canCarryThetaForward = STATE.irt
+        && Number.isFinite(STATE.irt.theta)
+        && (STATE.irt.attemptCount || 0) > 0;
+    const initialOptions = canCarryThetaForward ? { initialTheta: STATE.irt.theta } : {};
     if (
         !STATE.irt
         || STATE.irt.version !== 1
-        || STATE.irt.topic !== 'relationship_math'
+        || STATE.irt.topic !== IRT_ACTIVE_TOPIC
         || (expectedSeed && STATE.irt.learnerSeed !== expectedSeed)
     ) {
-        STATE.irt = window.IrtEngine.createInitialState('relationship_math');
+        STATE.irt = window.IrtEngine.createInitialState(IRT_ACTIVE_TOPIC, initialOptions);
     }
     return STATE.irt;
 }

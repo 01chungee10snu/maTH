@@ -169,6 +169,17 @@ function runAudit() {
     failures.push(...auditProblem(problem, `expanded:${item.problem_id}`));
   });
 
+  let convertedK12 = [];
+  const k12Path = path.join(root, 'data', 'k12_math_problem_seed_bank.json');
+  if (fs.existsSync(k12Path)) {
+    const rawK12Bank = JSON.parse(fs.readFileSync(k12Path, 'utf8'));
+    convertedK12 = context.window.ExpandedWordProblemBank.convert(rawK12Bank);
+    convertedK12.forEach(item => {
+      const problem = context.window.RelationshipCoachProblems.generateForItem(item);
+      failures.push(...auditProblem(problem, `k12-expanded:${item.problem_id}`));
+    });
+  }
+
   const topics = [
     '덧셈', '뺄셈', '곱셈', '나눗셈', '분수', '도형', '시각', '규칙', '길이',
     '자료', '수', '창의 사고력', '들이', '무게', '부피', '미지수'
@@ -184,6 +195,7 @@ function runAudit() {
 
   const report = {
     checkedExpandedItems: converted.length,
+    checkedK12ExpandedItems: convertedK12.length,
     checkedModuleSamples: topics.length * 12 * 20,
     failureCount: failures.length,
     issueCounts: failures.reduce((counts, failure) => {

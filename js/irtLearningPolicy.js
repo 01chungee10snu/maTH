@@ -102,6 +102,16 @@ function getPolicyReasoningDepth(item) {
     return 1;
 }
 
+function isK12MathState(state = {}) {
+    return state?.topic === 'k12_math';
+}
+
+function isFoundationalK12Item(item) {
+    return item?.source === 'k12_math_seed_bank'
+        && item?.school_band === 'elementary'
+        && Number(item?.level || 0) <= 4;
+}
+
 function isPolicyComplexWordProblem(item) {
     const tags = [
         ...(Array.isArray(item?.skill_tags) ? item.skill_tags : []),
@@ -134,7 +144,12 @@ function getWeakSkills(state = {}) {
 
 function getUnderMeasuredSkill(items, state = {}) {
     const complexItems = (items || []).filter(isPolicyComplexWordProblem);
-    const sourceItems = complexItems.length >= Math.min(30, Math.ceil((items || []).length * 0.2))
+    const foundationalK12Items = isK12MathState(state)
+        ? (items || []).filter(item => isFoundationalK12Item(item) && Number(item?.level || 0) <= 4)
+        : [];
+    const sourceItems = foundationalK12Items.length && Number(state.theta || 0) < -1.8
+        ? foundationalK12Items
+        : complexItems.length >= Math.min(30, Math.ceil((items || []).length * 0.2))
         ? complexItems
         : (items || []);
     const counts = new Map();
@@ -231,6 +246,12 @@ function scorePolicyItem(item, state = {}, context = {}) {
     const minSkillAttempts = skillAttempts.length ? Math.min(...skillAttempts) : 0;
     const skillMastery = skillMasteryValues.length ? Math.min(...skillMasteryValues) : 0;
     const reasoningDepth = getPolicyReasoningDepth(item);
+    const foundationalK12 = isK12MathState(state) && isFoundationalK12Item(item);
+    const earlyPlacementBonus = isK12MathState(state)
+        && theta < -1.8
+        && Number(item?.level || 0) <= 4
+        ? 2.4
+        : 0;
 
     const probabilityFit = clampPolicy(1 - Math.abs(p - targetProbability) / 0.5, 0, 1);
     const targetSkillBonus = targetSkill && skills.includes(targetSkill) ? 4.5 : 0;
@@ -238,7 +259,7 @@ function scorePolicyItem(item, state = {}, context = {}) {
     const weakSkillBonus = phase === 'targeted_practice' ? clampPolicy((IRT_POLICY_WEAK_MASTERY - skillMastery) / IRT_POLICY_WEAK_MASTERY, 0, 1) * 1.5 : 0;
     const masteryChallengeBonus = phase === 'mastery_check' ? clampPolicy((getPolicyDifficulty(item) - theta + 0.6) / 1.2, 0, 1) * 1.4 : 0;
     const complexReasoningBonus = clampPolicy((reasoningDepth - 1) / 3, 0, 1) * 1.25;
-    const shallowWordProblemPenalty = reasoningDepth <= 1 ? 0.9 : 0;
+    const shallowWordProblemPenalty = !foundationalK12 && reasoningDepth <= 1 ? 0.9 : 0;
     const tooHardPenalty = phase === 'targeted_practice' && p < 0.35 ? 2.5 : 0;
     const tooEasyPenalty = phase === 'mastery_check' && p > 0.8 ? 1.5 : 0;
 
@@ -250,6 +271,7 @@ function scorePolicyItem(item, state = {}, context = {}) {
         + weakSkillBonus
         + masteryChallengeBonus
         + complexReasoningBonus
+        + earlyPlacementBonus
         - getRecentPenalty(item, state)
         - getRecentFamilyPenalty(item, state)
         - getRecentStructurePenalty(item, state)
@@ -293,7 +315,11 @@ function selectPolicyNextItem(items, state = {}) {
             : targetPool;
     } else {
         const complexCandidatePool = broadCandidatePool.filter(isPolicyComplexWordProblem);
-        candidatePool = complexCandidatePool.length >= Math.min(20, Math.ceil(broadCandidatePool.length * 0.15))
+        const shouldPreferComplex = !(isK12MathState(state)
+            && Number.isFinite(state.theta)
+            && state.theta < -1.8
+            && phase === 'diagnostic');
+        candidatePool = shouldPreferComplex && complexCandidatePool.length >= Math.min(20, Math.ceil(broadCandidatePool.length * 0.15))
             ? complexCandidatePool
             : broadCandidatePool;
     }

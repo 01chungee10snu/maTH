@@ -327,6 +327,7 @@ function auditSeedItem(item) {
 
 function auditBankItemMetadata(item, labelPrefix) {
   const issues = [];
+  const isK12Item = item?.source === 'k12_math_seed_bank';
   const combined = [
     item?.grade_band,
     item?.operation,
@@ -337,8 +338,12 @@ function auditBankItemMetadata(item, labelPrefix) {
     ...(item?.problem_types || [])
   ].map(normalizeText).join(' ');
 
-  if (!['G1_G2', 'G3_G4', 'G5_G6'].includes(item?.grade_band)) issues.push('bank_invalid_grade_band');
-  if (item?.grade_band === 'G1_G2' && ADVANCED_G1G2_PATTERNS.some(pattern => pattern.test(combined))) {
+  const validGradeBands = isK12Item
+    ? ['G1_G2', 'G3_G4', 'G5_G6', 'M1', 'M2', 'M3', 'M2_M3', 'H1', 'H2', 'CSAT']
+    : ['G1_G2', 'G3_G4', 'G5_G6'];
+
+  if (!validGradeBands.includes(item?.grade_band)) issues.push('bank_invalid_grade_band');
+  if (!isK12Item && item?.grade_band === 'G1_G2' && ADVANCED_G1G2_PATTERNS.some(pattern => pattern.test(combined))) {
     issues.push('bank_g1g2_advanced_leak');
   }
   if ([...(item?.skill_tags || []), ...(item?.reasoning_tags || []), ...(item?.problem_types || [])].some(tag => ERROR_TAGS.has(tag))) {
@@ -460,6 +465,21 @@ function runAudit() {
     failures.push(...auditProblem(problem, `expanded:${item.problem_id}`));
   });
 
+  let k12SeedItems = [];
+  let convertedK12 = [];
+  const k12Path = path.join(root, 'data', 'k12_math_problem_seed_bank.json');
+  if (fs.existsSync(k12Path)) {
+    const rawK12Bank = JSON.parse(fs.readFileSync(k12Path, 'utf8'));
+    k12SeedItems = Array.isArray(rawK12Bank.items) ? rawK12Bank.items : [];
+    convertedK12 = context.window.ExpandedWordProblemBank.convert(rawK12Bank);
+    convertedK12.forEach(item => {
+      const metadataFailure = auditBankItemMetadata(item, 'k12-expanded-metadata');
+      if (metadataFailure) failures.push(metadataFailure);
+      const problem = context.window.RelationshipCoachProblems.generateForItem(item);
+      failures.push(...auditProblem(problem, `k12-expanded:${item.problem_id}`));
+    });
+  }
+
   MODULE_TOPICS.forEach(topic => {
     for (let difficulty = 1; difficulty <= 12; difficulty += 1) {
       for (let sample = 0; sample < 30; sample += 1) {
@@ -472,6 +492,8 @@ function runAudit() {
   const report = {
     checkedSeedItems: seedItems.length,
     checkedExpandedItems: converted.length,
+    checkedK12SeedItems: k12SeedItems.length,
+    checkedK12ExpandedItems: convertedK12.length,
     checkedModuleSamples: MODULE_TOPICS.length * 12 * 30,
     failureCount: failures.length,
     issueCounts: summarizeCounts(failures),

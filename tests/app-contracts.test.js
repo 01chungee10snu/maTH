@@ -508,6 +508,147 @@ function testExpandedSeedBankConvertsIntoIrtRuntimeItems() {
   });
 }
 
+function testK12MathProblemSeedBankContract() {
+  const bankPath = path.join(root, 'data/k12_math_problem_seed_bank.json');
+  assert.ok(fs.existsSync(bankPath), 'K-12 math problem seed bank must exist');
+
+  const bank = JSON.parse(fs.readFileSync(bankPath, 'utf8'));
+  assert.strictEqual(bank.metadata.scope, 'k12_to_csat_math');
+  assert.strictEqual(bank.metadata.item_count, bank.items.length);
+  assert.ok(bank.items.length >= 900, `K-12 bank too small: ${bank.items.length}`);
+  assert.strictEqual(bank.metadata.difficulty_scale, '1-30');
+  assert.strictEqual(bank.metadata.schema_version, 1);
+
+  const expectedSchoolBands = new Set(['elementary', 'middle_school', 'high_school', 'csat']);
+  const expectedDomains = new Set(['수와 연산', '변화와 관계', '도형과 측정', '자료와 가능성', '해석(미적분)']);
+  const expectedCourses = new Set([
+    '초등 기초 연산',
+    '초등 수와 연산',
+    '초등 관계 문장제',
+    '중학 수와 식',
+    '중학 함수',
+    '중학 기하',
+    '중학 확률과 통계',
+    '공통수학1',
+    '공통수학2',
+    '대수',
+    '미적분I',
+    '확률과 통계',
+    '수능형 통합'
+  ]);
+  const levels = new Map();
+  const schoolBands = new Set();
+  const domains = new Set();
+  const courses = new Set();
+  const ids = new Set();
+
+  for (const item of bank.items) {
+    assert.ok(item.id);
+    assert.ok(!ids.has(item.id), `duplicate K-12 seed id: ${item.id}`);
+    ids.add(item.id);
+    assert.ok(expectedSchoolBands.has(item.school_band), `${item.id} invalid school_band ${item.school_band}`);
+    assert.ok(expectedDomains.has(item.curriculum_domain), `${item.id} invalid domain ${item.curriculum_domain}`);
+    assert.ok(expectedCourses.has(item.course), `${item.id} invalid course ${item.course}`);
+    assert.ok(Number.isInteger(item.difficulty), `${item.id} needs integer difficulty`);
+    assert.ok(item.difficulty >= 1 && item.difficulty <= 30, `${item.id} difficulty out of 1-30`);
+    assert.strictEqual(typeof item.irt_b, 'number', `${item.id} needs calibrated irt_b`);
+    assert.ok(item.irt_b >= -3 && item.irt_b <= 3, `${item.id} irt_b out of range`);
+    assert.ok(item.problem && item.problem.length >= 5, `${item.id} needs problem text`);
+    assert.ok(item.answer, `${item.id} needs answer`);
+    assert.ok(item.solution && item.solution.replace(/\s/g, '').includes(String(item.answer).replace(/\s/g, '')), `${item.id} solution must reflect answer`);
+    assert.ok(Array.isArray(item.skill_tags) && item.skill_tags.length > 0, `${item.id} needs skill tags`);
+    assert.ok(Array.isArray(item.prerequisite_tags), `${item.id} needs prerequisite tags`);
+    assert.ok(item.structure_signature, `${item.id} needs structure signature`);
+    assert.ok(item.template_signature, `${item.id} needs template signature`);
+    levels.set(item.difficulty, [...(levels.get(item.difficulty) || []), item]);
+    schoolBands.add(item.school_band);
+    domains.add(item.curriculum_domain);
+    courses.add(item.course);
+  }
+
+  for (let level = 1; level <= 30; level += 1) {
+    assert.ok((levels.get(level) || []).length >= 12, `level ${level} needs at least 12 K-12 items`);
+  }
+  expectedSchoolBands.forEach(value => assert.ok(schoolBands.has(value), `missing school band ${value}`));
+  expectedDomains.forEach(value => assert.ok(domains.has(value), `missing domain ${value}`));
+  expectedCourses.forEach(value => assert.ok(courses.has(value), `missing course ${value}`));
+
+  const level1 = levels.get(1) || [];
+  assert.ok(level1.some(item => item.skill_tags.includes('ADD_SINGLE_DIGIT')), 'level 1 must include one-digit addition');
+  assert.ok(level1.some(item => item.skill_tags.includes('SUB_SINGLE_DIGIT')), 'level 1 must include one-digit subtraction');
+  assert.ok(level1.every(item => item.irt_b <= -2.8), 'level 1 items must anchor the easiest IRT band');
+
+  const topLevel = levels.get(30) || [];
+  assert.ok(topLevel.some(item => item.skill_tags.includes('CSAT_TOP_TIER')), 'level 30 must include CSAT top-tier items');
+  assert.ok(topLevel.every(item => item.school_band === 'csat'), 'level 30 must be reserved for CSAT-style items');
+  assert.ok(topLevel.every(item => item.irt_b >= 2.8), 'level 30 items must anchor the hardest IRT band');
+}
+
+function testK12SeedBankConvertsAndMergesIntoRuntimeScale() {
+  const context = createContext();
+  runScript(context, 'js/problems/problemBase.js');
+  runScript(context, 'js/problems/relationshipCoachProblems.js');
+  runScript(context, 'js/expandedWordProblemBank.js');
+
+  const rawBank = JSON.parse(fs.readFileSync(path.join(root, 'data/k12_math_problem_seed_bank.json'), 'utf8'));
+  const converted = context.window.ExpandedWordProblemBank.convert(rawBank);
+
+  assert.ok(converted.length >= 900);
+  assert.ok(converted.every(item => item.source === 'k12_math_seed_bank'));
+  assert.ok(converted.some(item => item.level === 1 && item.irt.b <= -2.8 && item.skill_tags.includes('ADD_SINGLE_DIGIT')));
+  assert.ok(converted.some(item => item.level === 1 && item.irt.b <= -2.8 && item.skill_tags.includes('SUB_SINGLE_DIGIT')));
+  assert.ok(converted.some(item => item.level === 30 && item.irt.b >= 2.8 && item.skill_tags.includes('CSAT_TOP_TIER')));
+  assert.ok(converted.every(item => item.school_band && item.course && Array.isArray(item.prerequisite_tags)));
+
+  const easiest = converted.find(item => item.level === 1 && item.skill_tags.includes('ADD_SINGLE_DIGIT'));
+  const hardest = converted.find(item => item.level === 30 && item.skill_tags.includes('CSAT_TOP_TIER'));
+  const easiestProblem = context.window.RelationshipCoachProblems.generateForItem(easiest);
+  const hardestProblem = context.window.RelationshipCoachProblems.generateForItem(hardest);
+  assert.ok(easiestProblem.options.includes(easiestProblem.answer));
+  assert.ok(hardestProblem.options.includes(hardestProblem.answer));
+  assert.strictEqual(new Set(easiestProblem.options.map(getAnswerOptionShape)).size, 1);
+  assert.strictEqual(new Set(hardestProblem.options.map(getAnswerOptionShape)).size, 1);
+}
+
+function testK12AdaptivePlacementStartsEasyAndCanClimbToCsatBand() {
+  const context = createContext();
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtLearningPolicy.js');
+  runScript(context, 'js/problems/problemBase.js');
+  runScript(context, 'js/problems/relationshipCoachProblems.js');
+  runScript(context, 'js/expandedWordProblemBank.js');
+
+  const rawBank = JSON.parse(fs.readFileSync(path.join(root, 'data/k12_math_problem_seed_bank.json'), 'utf8'));
+  const items = context.window.ExpandedWordProblemBank.convert(rawBank);
+  let state = context.window.IrtEngine.createInitialState('k12_math', {
+    learnerSeed: 'k12-placement-test',
+    dailySeed: 'k12-placement-test:2026-05-21'
+  });
+  const selected = [];
+
+  for (let index = 0; index < 45; index += 1) {
+    const selection = context.window.IrtLearningPolicy.selectNextItem(items, state);
+    assert.ok(selection?.item, `missing selection at attempt ${index + 1}`);
+    const item = selection.item;
+    state = context.window.IrtEngine.registerExposure(state, item);
+    state = context.window.IrtEngine.updateState(state, item, {
+      correct: true,
+      hintLevel: 0,
+      stepSuccessRate: 1
+    });
+    selected.push(item);
+  }
+
+  const firstFiveMax = Math.max(...selected.slice(0, 5).map(item => item.level));
+  const lastTenMax = Math.max(...selected.slice(-10).map(item => item.level));
+  const uniqueSchoolBands = new Set(selected.map(item => item.school_band));
+
+  assert.ok(firstFiveMax <= 4, `placement should start from easy arithmetic, got levels ${selected.slice(0, 5).map(item => item.level).join(',')}`);
+  assert.ok(lastTenMax >= 24, `sustained correct answers should climb into high-school/CSAT bands, got max ${lastTenMax}`);
+  assert.ok(state.theta > 1.8, `theta should rise on sustained correct answers: ${state.theta}`);
+  assert.ok(uniqueSchoolBands.has('elementary') && uniqueSchoolBands.has('middle_school') && uniqueSchoolBands.has('high_school'));
+}
+
 function testTinipingAssetPolicyDoesNotUseWrongCharacterFallbacks() {
   const context = createContext();
   runScript(context, 'js/data.js');
@@ -1618,6 +1759,17 @@ function testParentReportUsesKoreanLabelsForAllProblemTags() {
     (item.problem_types || []).forEach(tag => tags.add(tag));
     if (item.type_family) tags.add(item.type_family);
   });
+  const k12BankPath = path.join(root, 'data/k12_math_problem_seed_bank.json');
+  if (fs.existsSync(k12BankPath)) {
+    const k12Bank = JSON.parse(fs.readFileSync(k12BankPath, 'utf8'));
+    (k12Bank.items || []).forEach(item => {
+      (item.skill_tags || []).forEach(tag => tags.add(tag));
+      (item.problem_types || []).forEach(tag => tags.add(tag));
+      (item.prerequisite_tags || []).forEach(tag => tags.add(tag));
+      (item.reasoning_tags || []).forEach(tag => tags.add(tag));
+      if (item.type_family) tags.add(item.type_family);
+    });
+  }
 
   assert.ok(tags.size > 100);
   for (const tag of tags) {
@@ -1779,6 +1931,9 @@ async function runTests() {
   testLearnerProfilesSeparateStateAndAttemptLogs();
   testElementaryWordProblemSeedBankContract();
   testExpandedSeedBankConvertsIntoIrtRuntimeItems();
+  testK12MathProblemSeedBankContract();
+  testK12SeedBankConvertsAndMergesIntoRuntimeScale();
+  testK12AdaptivePlacementStartsEasyAndCanClimbToCsatBand();
   testTinipingAssetPolicyDoesNotUseWrongCharacterFallbacks();
   testTinipingImageManifestCoversMostCharactersWithLocalFiles();
   testCanvasTextHelpersFitKoreanLabelsAndWrapTabs();

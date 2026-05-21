@@ -10,6 +10,10 @@ const IRT_STATE_VERSION = 1;
 const IRT_THETA_MIN = -3;
 const IRT_THETA_MAX = 3;
 const IRT_STORAGE_SEED_KEY = 'taehee-irt-learner-seed';
+const IRT_INITIAL_THETA_BY_TOPIC = {
+    relationship_math: 0,
+    k12_math: -2.85
+};
 const IRT_ERROR_TAGS = new Set([
     'NUMBER_SIZE_BIAS',
     'DIRECTION_CONFUSION',
@@ -57,12 +61,18 @@ function getStoredLearnerSeed(topic) {
 function createInitialIrtState(topic = 'relationship_math', options = {}) {
     const learnerSeed = options.learnerSeed || getStoredLearnerSeed(topic);
     const dailySeed = options.dailySeed || `${learnerSeed}:${getLocalDateKey()}`;
+    const defaultTheta = Object.prototype.hasOwnProperty.call(IRT_INITIAL_THETA_BY_TOPIC, topic)
+        ? IRT_INITIAL_THETA_BY_TOPIC[topic]
+        : 0;
+    const initialTheta = Number.isFinite(options.initialTheta)
+        ? clampIrt(options.initialTheta, IRT_THETA_MIN, IRT_THETA_MAX)
+        : defaultTheta;
     return {
         version: IRT_STATE_VERSION,
         topic,
         learnerSeed,
         dailySeed,
-        theta: 0,
+        theta: initialTheta,
         standardError: 1,
         attemptCount: 0,
         lastItemIds: [],
@@ -155,7 +165,8 @@ function updateIrtState(previousState, item, result = {}) {
     const b = getIrtDifficulty(item);
     const p = raschProbability(state.theta, b);
     const score = getResponseScore(result);
-    const learningRate = Math.max(0.18, 0.55 / Math.sqrt((state.attemptCount || 0) + 1));
+    const minimumLearningRate = state.topic === 'k12_math' ? 0.24 : 0.18;
+    const learningRate = Math.max(minimumLearningRate, 0.55 / Math.sqrt((state.attemptCount || 0) + 1));
     const theta = clampIrt(state.theta + learningRate * (score - p), IRT_THETA_MIN, IRT_THETA_MAX);
     const attemptCount = (state.attemptCount || 0) + 1;
     const information = getItemInformation(theta, item);

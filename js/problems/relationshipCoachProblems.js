@@ -979,7 +979,7 @@ function getRelationAnswerOptions(problem) {
 }
 
 function buildCoachSteps(problem) {
-    if (problem.source === 'elementary_seed_bank') {
+    if (problem.source === 'elementary_seed_bank' || problem.source === 'k12_math_seed_bank') {
         return buildSeedCoachSteps(problem);
     }
 
