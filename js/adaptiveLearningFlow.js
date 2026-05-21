@@ -65,6 +65,10 @@ function createStartPatch(state = {}) {
 
 function getCandidateItems(items, state = {}) {
     const allItems = Array.isArray(items) ? items.filter(item => item && item.problem_id) : [];
+    if (state.learningEntry === 'adaptive' && state.irt?.topic === 'k12_math') {
+        const k12Items = allItems.filter(item => item.source === 'k12_math_seed_bank');
+        if (k12Items.length) return k12Items;
+    }
     if (state.learningEntry === 'adaptive') return allItems;
     if (window.RelationCurriculum?.filterItemsForTopic) {
         return window.RelationCurriculum.filterItemsForTopic(allItems, state.currentCurriculum);

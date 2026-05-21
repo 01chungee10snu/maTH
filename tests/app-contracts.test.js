@@ -604,6 +604,12 @@ function testK12SeedBankConvertsAndMergesIntoRuntimeScale() {
   const hardest = converted.find(item => item.level === 30 && item.skill_tags.includes('CSAT_TOP_TIER'));
   const easiestProblem = context.window.RelationshipCoachProblems.generateForItem(easiest);
   const hardestProblem = context.window.RelationshipCoachProblems.generateForItem(hardest);
+  assert.strictEqual(easiestProblem.type, 'adaptiveMath');
+  assert.strictEqual(easiestProblem.relationCoach, false);
+  assert.strictEqual(easiestProblem.coachSteps.length, 0);
+  assert.strictEqual(hardestProblem.type, 'adaptiveMath');
+  assert.strictEqual(hardestProblem.relationCoach, false);
+  assert.strictEqual(hardestProblem.coachSteps.length, 0);
   assert.ok(easiestProblem.options.includes(easiestProblem.answer));
   assert.ok(hardestProblem.options.includes(hardestProblem.answer));
   assert.strictEqual(new Set(easiestProblem.options.map(getAnswerOptionShape)).size, 1);
@@ -617,9 +623,12 @@ function testK12AdaptivePlacementStartsEasyAndCanClimbToCsatBand() {
   runScript(context, 'js/problems/problemBase.js');
   runScript(context, 'js/problems/relationshipCoachProblems.js');
   runScript(context, 'js/expandedWordProblemBank.js');
+  runScript(context, 'js/adaptiveLearningFlow.js');
 
+  const elementaryBank = JSON.parse(fs.readFileSync(path.join(root, 'data/elementary_word_problem_seed_bank.json'), 'utf8'));
   const rawBank = JSON.parse(fs.readFileSync(path.join(root, 'data/k12_math_problem_seed_bank.json'), 'utf8'));
-  const items = context.window.ExpandedWordProblemBank.convert(rawBank);
+  context.window.ExpandedWordProblemBank.merge(elementaryBank);
+  context.window.ExpandedWordProblemBank.merge(rawBank);
   let state = context.window.IrtEngine.createInitialState('k12_math', {
     learnerSeed: 'k12-placement-test',
     dailySeed: 'k12-placement-test:2026-05-21'
@@ -627,6 +636,12 @@ function testK12AdaptivePlacementStartsEasyAndCanClimbToCsatBand() {
   const selected = [];
 
   for (let index = 0; index < 45; index += 1) {
+    const items = context.window.AdaptiveLearningFlow.getCandidateItems(
+      context.window.RelationshipCoachProblems.bank,
+      { learningEntry: 'adaptive', irt: state }
+    );
+    assert.ok(items.length >= 900);
+    assert.ok(items.every(item => item.source === 'k12_math_seed_bank'), 'k12 adaptive placement must use the k12 scale, not the elementary-only bank');
     const selection = context.window.IrtLearningPolicy.selectNextItem(items, state);
     assert.ok(selection?.item, `missing selection at attempt ${index + 1}`);
     const item = selection.item;

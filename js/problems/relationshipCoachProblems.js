@@ -1143,14 +1143,20 @@ function buildSeedCoachSteps(problem) {
     ];
 }
 
+function shouldUseRelationshipCoach(problem) {
+    if (problem?.source === 'k12_math_seed_bank') return false;
+    return true;
+}
+
 function cloneRelationProblem(template, difficulty) {
     const problem = JSON.parse(JSON.stringify(template));
-    problem.type = 'relationshipCoach';
-    problem.relationCoach = true;
+    const useCoach = shouldUseRelationshipCoach(problem);
+    problem.type = useCoach ? 'relationshipCoach' : 'adaptiveMath';
+    problem.relationCoach = useCoach;
     problem.taxonomy = RELATION_COACH_TAXONOMY;
     problem.errorCodes = RELATION_COACH_ERROR_CODES;
     problem.options = getRelationAnswerOptions(problem);
-    problem.coachSteps = buildCoachSteps(problem);
+    problem.coachSteps = useCoach ? buildCoachSteps(problem) : [];
     problem.problemKey = `${problem.problem_id}-${difficulty}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
     return problem;
 }
