@@ -77,6 +77,39 @@ function buildIrtHeaderStatus(input = {}) {
     };
 }
 
+function buildLearnerHeaderStatus(input = {}) {
+    const learnerName = input.learnerName || '나';
+    const hasAdaptiveItem = Boolean(input.problem?.irt || input.irtState?.attemptCount);
+    if (!hasAdaptiveItem) {
+        return {
+            title: input.fallbackTitle || `${learnerName}의 수학 문제`,
+            badge: input.fallbackBadge || '',
+            detail: null
+        };
+    }
+
+    return {
+        title: `${learnerName}의 맞춤 문제`,
+        badge: '맞춤',
+        detail: null
+    };
+}
+
+function buildLearnerRoutineSummary(input = {}) {
+    const attempts = Number(input.irtState?.attemptCount || 0);
+    const syncText = input.syncText || '서버 동기화 준비됨';
+    const progressText = attempts > 0
+        ? `지금까지 ${attempts}문항을 풀었어요 · 오늘도 맞춤 문제로 이어가요`
+        : '아직 푼 문제가 없어요 · 첫 문제부터 시작해요';
+
+    return {
+        title: '매일 풀수록 더 맞춰지는 수학 루틴',
+        progressText,
+        syncText,
+        startSubtitle: '내 수준에 맞춰 출제돼요'
+    };
+}
+
 function createIrtProgressUpdate(input = {}) {
     const problem = input.problem || {};
     const stateBefore = input.stateBefore || {};
@@ -115,6 +148,8 @@ function buildIrtUpdateStatus(update) {
 
 window.IrtProgressView = {
     buildHeaderStatus: buildIrtHeaderStatus,
+    buildLearnerHeaderStatus,
+    buildLearnerRoutineSummary,
     createUpdate: createIrtProgressUpdate,
     buildUpdateStatus: buildIrtUpdateStatus,
     getItemLevel: getIrtDisplayLevel,

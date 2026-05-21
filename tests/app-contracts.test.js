@@ -1039,6 +1039,46 @@ function testAdaptiveIrtProgressIsVisibleAndLocallyAccumulated() {
   assert.ok(header.detail.includes('θ'));
 }
 
+function testLearnerHeaderHidesIrtTechnicalDetails() {
+  const context = createContext();
+  runScript(context, 'js/irtEngine.js');
+  runScript(context, 'js/irtProgressView.js');
+
+  const status = context.window.IrtProgressView.buildLearnerHeaderStatus({
+    learnerName: '태희',
+    problem: {
+      level: 10,
+      irt: { model: 'rasch', b: 1.27 },
+      selection_policy: { phase: 'adaptive_practice' }
+    },
+    irtState: {
+      theta: 1.81,
+      standardError: 0.25,
+      attemptCount: 20
+    },
+    fallbackTitle: '수학꾸러기'
+  });
+
+  const visibleText = [status.title, status.badge, status.detail].filter(Boolean).join(' ');
+  assert.ok(status.title.includes('맞춤 문제'));
+  assert.ok(!/theta|IRT|θ|b\s*1\.27|20문항/.test(visibleText), visibleText);
+
+  const routine = context.window.IrtProgressView.buildLearnerRoutineSummary({
+    learnerName: '태희',
+    irtState: {
+      theta: 1.81,
+      standardError: 0.25,
+      attemptCount: 20
+    },
+    logSummary: { total: 24 },
+    syncText: '서버 동기화 준비됨'
+  });
+  const routineText = [routine.title, routine.progressText, routine.syncText, routine.startSubtitle].filter(Boolean).join(' ');
+  assert.ok(routine.title.includes('수학 루틴'));
+  assert.ok(routine.progressText.includes('20문항'));
+  assert.ok(!/theta|IRT|θ|오차|수준 추정|로컬기록/.test(routineText), routineText);
+}
+
 function testRelationshipCoachBankHasIrtMetadata() {
   const context = createContext();
   runScript(context, 'js/problems/problemBase.js');
@@ -1439,6 +1479,12 @@ function testMathAbilityReportSummarizesIrtEvidenceForParents() {
   assert.strictEqual(report.weakSkills[0].skill, 'DIRECTION_REASONING');
   assert.ok(report.parentNarrative.includes('추정'));
   assert.ok(report.recommendations.length >= 2);
+  assert.ok(report.parentSummary.headline.includes('성장') || report.parentSummary.headline.includes('단계'));
+  assert.ok(report.parentSummary.coreMessage.includes('관찰'));
+  assert.ok(report.parentSummary.nextAction);
+  assert.ok(!/theta|표준오차|IRT/.test(report.parentSummary.coreMessage));
+  assert.ok(report.parentSummary.cautionItems.length > 0);
+  assert.ok(!/theta|표준오차|IRT|Rasch|skill| b /.test(report.parentSummary.cautionItems.join(' ')));
   assert.strictEqual(report.quality.reliability.level, '관찰 단계');
   assert.ok(report.quality.validity.gaps.length > 0);
   assert.strictEqual(report.learningPolicy.phase, 'diagnostic');
@@ -1469,6 +1515,7 @@ async function runTests() {
   testIrtPolicyDiversifiesFamiliesWithinTargetSkill();
   testExpandedIrtPolicyKeepsLongRunVarietyAndPhaseProgression();
   testAdaptiveIrtProgressIsVisibleAndLocallyAccumulated();
+  testLearnerHeaderHidesIrtTechnicalDetails();
   testRelationshipCoachBankHasIrtMetadata();
   testIrtAttemptLogCreatesSupabaseReadyPendingRecords();
   await testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners();

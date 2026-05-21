@@ -161,7 +161,7 @@ function getCollectionGridMetrics(width, gridY) {
 function getCollectionRequiredHeight(width) {
     const tabLayout = getCollectionTabLayout(width);
     if ((STATE.collectionTab || '전체') === '부모 리포트') {
-        return tabLayout.y + tabLayout.height + Math.round(430 * SCALE);
+        return tabLayout.y + tabLayout.height + Math.round(780 * SCALE);
     }
 
     const targetTab = STATE.collectionTab || '전체';
@@ -2451,10 +2451,12 @@ function clear() {
 
 function drawHeader(W, H) {
     const learnerName = getActiveLearnerName('나');
-    const irtHeader = window.IrtProgressView?.buildHeaderStatus?.({
+    const adaptiveHeader = window.IrtProgressView?.buildLearnerHeaderStatus?.({
+        learnerName,
         problem: STATE.problem,
         irtState: STATE.irt,
-        fallbackDifficulty: STATE.difficulty
+        fallbackTitle: STATE.currentCurriculum === 'division' ? `${learnerName}의 도전! 수학꾸러기` : `${learnerName}의 ${STATE.currentCurriculum} 도전!`,
+        fallbackBadge: `${STATE.difficulty}단`
     });
     CTX.save();
     // Soft White Card Background
@@ -2468,35 +2470,26 @@ function drawHeader(W, H) {
 
     // Title
     CTX.fillStyle = '#EC4899'; // Accent Pink
-    const title = irtHeader
-        ? `${learnerName}의 ${irtHeader.title}`
-        : (STATE.currentCurriculum === 'division' ? `${learnerName}의 도전! 수학꾸러기` : `${learnerName}의 ${STATE.currentCurriculum} 도전!`);
-    drawFittedCanvasText(title, W / 2, irtHeader ? 38 : 48, W - 190, {
-        initialSize: irtHeader ? 27 : 32,
-        minSize: irtHeader ? 18 : 20,
+    const title = adaptiveHeader?.title || (STATE.currentCurriculum === 'division' ? `${learnerName}의 도전! 수학꾸러기` : `${learnerName}의 ${STATE.currentCurriculum} 도전!`);
+    drawFittedCanvasText(title, W / 2, 44, W - 190, {
+        initialSize: 33,
+        minSize: 22,
         weight: 'bold'
     });
-    if (irtHeader) {
-        CTX.fillStyle = '#4f46e5';
-        drawFittedCanvasText(irtHeader.detail, W / 2, 64, W - 205, {
-            initialSize: 17,
-            minSize: 12,
-            weight: 'bold'
-        });
-    }
     CTX.textAlign = 'left';
 
     // Subtitle / Info
     CTX.fillStyle = '#6B7280'; // Soft Dark Grey
-    CTX.font = '20px Jua, sans-serif';
+    CTX.font = 'bold 22px Jua, sans-serif';
     CTX.fillText(`문제 ${STATE.totalQuestions + 1}/100`, 36, 76);
 
     const scoreTxt = `💎 ${STATE.score}`;
-    const diffTxt = irtHeader ? irtHeader.badge : `${STATE.difficulty}단`;
+    const diffTxt = adaptiveHeader?.badge || `${STATE.difficulty}단`;
     CTX.textAlign = 'right';
     
     // Difficulty Badge
     CTX.fillStyle = '#A78BFA'; // Soft Purple
+    CTX.font = 'bold 22px Jua, sans-serif';
     CTX.fillText(diffTxt, W - 36, 48);
     
     // Score
@@ -2512,9 +2505,9 @@ function getIrtSyncSummaryText() {
     const pending = Number(status.pending || 0);
     if (status.state === 'running') return `서버 동기화 중 · 대기 ${pending}개`;
     if (status.lastResult?.ok && pending === 0) return '서버 동기화 완료';
-    if (status.state === 'blocked') return `서버 동기화 대기 · 로컬 ${pending}개`;
-    if (status.state === 'error') return `서버 동기화 재시도 예정 · 로컬 ${pending}개`;
-    return pending ? `서버 동기화 대기 · 로컬 ${pending}개` : '서버 동기화 준비됨';
+    if (status.state === 'blocked') return `서버 저장 대기 중 · 기록 ${pending}개`;
+    if (status.state === 'error') return `서버 저장 재시도 예정 · 기록 ${pending}개`;
+    return pending ? `서버 저장 대기 중 · 기록 ${pending}개` : '서버 동기화 준비됨';
 }
 
 function drawCollectionButton(W, H) {
@@ -2531,7 +2524,7 @@ function drawCollectionButton(W, H) {
     CTX.restore();
 
     CTX.fillStyle = '#ffffff';
-    CTX.font = 'bold 18px Jua, sans-serif';
+    CTX.font = 'bold 21px Jua, sans-serif';
     CTX.textAlign = 'center';
     CTX.textBaseline = 'middle';
     CTX.fillText('📊 리포트', bx + bw / 2, by + bh / 2);
@@ -2799,10 +2792,17 @@ function drawMap() {
     const irtSummary = window.IrtEngine?.summarize ? window.IrtEngine.summarize(STATE.irt) : null;
     const logSummary = window.IrtLog?.summarize ? window.IrtLog.summarize() : null;
     const attempts = irtSummary?.attemptCount || 0;
-    const logCount = logSummary?.total || attempts;
-    const thetaLabel = irtSummary ? `수준 추정 ${irtSummary.theta}` : '수준 추정 준비중';
-    const confidence = irtSummary ? `오차 ${irtSummary.standardError}` : '문제 풀이 후 갱신';
-    const syncLabel = getIrtSyncSummaryText();
+    const routineSummary = window.IrtProgressView?.buildLearnerRoutineSummary?.({
+        learnerName,
+        irtState: STATE.irt,
+        logSummary,
+        syncText: getIrtSyncSummaryText()
+    }) || {
+        title: '매일 풀수록 더 맞춰지는 수학 루틴',
+        progressText: attempts > 0 ? `지금까지 ${attempts}문항을 풀었어요` : '첫 문제부터 시작해요',
+        syncText: getIrtSyncSummaryText(),
+        startSubtitle: '내 수준에 맞춰 출제돼요'
+    };
 
     CTX.save();
     roundRect(CTX, cardX, summaryY, cardW, summaryH, Math.round(22 * SCALE));
@@ -2816,19 +2816,19 @@ function drawMap() {
     CTX.restore();
 
     CTX.fillStyle = '#111827';
-    drawFittedCanvasText('매일 풀수록 더 맞춰지는 수학 루틴', W / 2, summaryY + Math.round(36 * SCALE), cardW - Math.round(36 * SCALE), {
+    drawFittedCanvasText(routineSummary.title, W / 2, summaryY + Math.round(36 * SCALE), cardW - Math.round(36 * SCALE), {
         initialSize: Math.round(27 * SCALE),
         minSize: Math.round(18 * SCALE),
         weight: 'bold'
     });
     CTX.fillStyle = '#4b5563';
-    drawFittedCanvasText(`풀이 ${attempts}문항 · 로컬기록 ${logCount}개 · ${thetaLabel} · ${confidence}`, W / 2, summaryY + Math.round(72 * SCALE), cardW - Math.round(36 * SCALE), {
+    drawFittedCanvasText(routineSummary.progressText, W / 2, summaryY + Math.round(72 * SCALE), cardW - Math.round(36 * SCALE), {
         initialSize: Math.round(20 * SCALE),
         minSize: Math.round(14 * SCALE),
         weight: 'bold'
     });
     CTX.fillStyle = '#6b7280';
-    drawFittedCanvasText(syncLabel, W / 2, summaryY + Math.round(108 * SCALE), cardW - Math.round(36 * SCALE), {
+    drawFittedCanvasText(routineSummary.syncText, W / 2, summaryY + Math.round(108 * SCALE), cardW - Math.round(36 * SCALE), {
         initialSize: Math.round(18 * SCALE),
         minSize: Math.round(13 * SCALE),
         weight: 'bold'
@@ -2856,7 +2856,7 @@ function drawMap() {
     CTX.textBaseline = 'middle';
     CTX.fillText('오늘의 문제 시작', adaptiveBtnX + adaptiveBtnW / 2, adaptiveBtnY + adaptiveBtnH * 0.38);
     CTX.font = `${Math.round(20 * SCALE)}px Jua, sans-serif`;
-    CTX.fillText('IRT 맞춤 출제', adaptiveBtnX + adaptiveBtnW / 2, adaptiveBtnY + adaptiveBtnH * 0.72);
+    CTX.fillText(routineSummary.startSubtitle, adaptiveBtnX + adaptiveBtnW / 2, adaptiveBtnY + adaptiveBtnH * 0.72);
     STATE.hitboxes.push({ id: 'btn_adaptive_start', x: adaptiveBtnX, y: adaptiveBtnY, w: adaptiveBtnW, h: adaptiveBtnH });
 
     const secondaryY = adaptiveBtnY + adaptiveBtnH + Math.round(28 * SCALE);
@@ -3320,12 +3320,15 @@ function drawCoachOptionButtons(options, selectedValue, x, y, w, buttonH, prefix
         CTX.restore();
 
         CTX.fillStyle = selected ? '#ffffff' : '#1e3a8a';
-        CTX.font = `bold ${Math.round(17 * SCALE)}px Jua, sans-serif`;
         CTX.textAlign = 'center';
         CTX.textBaseline = 'middle';
         const label = coachOptionLabel(option);
         const display = label.length > 22 ? label.slice(0, 21) + '..' : label;
-        CTX.fillText(display, bx + buttonW / 2, by + buttonH / 2);
+        drawFittedCanvasText(display, bx + buttonW / 2, by + buttonH / 2, buttonW - Math.round(18 * SCALE), {
+            initialSize: Math.round(20 * SCALE),
+            minSize: Math.round(13 * SCALE),
+            weight: 'bold'
+        });
         CTX.textBaseline = 'alphabetic';
 
         STATE.hitboxes.push({ id: `${prefix}_${idx}`, x: bx, y: by, w: buttonW, h: buttonH, value });
@@ -3349,12 +3352,12 @@ function drawRelationshipCoachQuiz(W, H, cardX, cardY, cardW, cardH) {
     CTX.fillText(guideActive ? '풀이 도움' : '문제 풀이', cardX + cardW / 2, cardY + Math.round(38 * SCALE));
 
     CTX.fillStyle = '#111827';
-    CTX.font = `bold ${Math.round(20 * SCALE)}px Jua, sans-serif`;
+    CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif`;
     const questionLines = getLines(CTX, problem.question, cardW - 42);
     let currentY = cardY + Math.round(72 * SCALE);
     questionLines.slice(0, 5).forEach(line => {
         CTX.fillText(line, cardX + cardW / 2, currentY);
-        currentY += Math.round(27 * SCALE);
+        currentY += Math.round(31 * SCALE);
     });
 
     currentY += Math.round(10 * SCALE);
@@ -3417,7 +3420,7 @@ function drawRelationshipCoachQuiz(W, H, cardX, cardY, cardW, cardH) {
         CTX.restore();
 
         CTX.fillStyle = '#0f766e';
-        CTX.font = `bold ${Math.round(20 * SCALE)}px Jua, sans-serif`;
+        CTX.font = `bold ${Math.round(23 * SCALE)}px Jua, sans-serif`;
         CTX.textAlign = 'left';
         CTX.textBaseline = 'middle';
         CTX.fillText(`${stepNumber}/${steps.length} ${step.label}`, panelX + 16, currentY + Math.round(27 * SCALE));
@@ -3438,7 +3441,7 @@ function drawRelationshipCoachQuiz(W, H, cardX, cardY, cardW, cardH) {
         currentY += Math.round(76 * SCALE);
 
         CTX.fillStyle = '#111827';
-        CTX.font = `bold ${Math.round(22 * SCALE)}px Jua, sans-serif`;
+        CTX.font = `bold ${Math.round(25 * SCALE)}px Jua, sans-serif`;
         CTX.textAlign = 'center';
         getLines(CTX, step.prompt, panelW).forEach(line => {
             CTX.fillText(line, cardX + cardW / 2, currentY);
@@ -3447,7 +3450,7 @@ function drawRelationshipCoachQuiz(W, H, cardX, cardY, cardW, cardH) {
 
         if ((coachState?.hintLevel || 0) > 0) {
             CTX.fillStyle = '#92400e';
-            CTX.font = `${Math.round(17 * SCALE)}px Jua, sans-serif`;
+            CTX.font = `${Math.round(20 * SCALE)}px Jua, sans-serif`;
             getLines(CTX, step.hint, panelW).forEach(line => {
                 CTX.fillText(line, cardX + cardW / 2, currentY);
                 currentY += Math.round(24 * SCALE);
@@ -3473,7 +3476,7 @@ function drawRelationshipCoachQuiz(W, H, cardX, cardY, cardW, cardH) {
 
         if (coachState?.feedback) {
             CTX.fillStyle = coachState.feedback.includes('좋아요') ? '#047857' : '#dc2626';
-            CTX.font = `${Math.round(18 * SCALE)}px Jua, sans-serif`;
+            CTX.font = `${Math.round(20 * SCALE)}px Jua, sans-serif`;
             CTX.textAlign = 'center';
             CTX.fillText(coachState.feedback, cardX + cardW / 2, currentY);
             currentY += Math.round(26 * SCALE);
@@ -3499,7 +3502,7 @@ function drawRelationshipCoachQuiz(W, H, cardX, cardY, cardW, cardH) {
     }
 
     CTX.fillStyle = '#0f766e';
-    CTX.font = `bold ${Math.round(21 * SCALE)}px Jua, sans-serif`;
+    CTX.font = `bold ${Math.round(25 * SCALE)}px Jua, sans-serif`;
     CTX.textAlign = 'center';
     CTX.fillText('이제 답을 골라볼까요?', cardX + cardW / 2, currentY);
     currentY += Math.round(32 * SCALE);
@@ -4348,7 +4351,7 @@ function drawCollection() {
 
     CTX.fillStyle = '#6b7280';
     CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif`;
-    CTX.fillText(isParentReport ? 'IRT 기반 추정과 다음 학습 권장' : `수집: ${caughtCount} / ${TINIPINGS.length}`, Math.round(24 * SCALE), Math.round(80 * SCALE));
+    CTX.fillText(isParentReport ? '어디가 잘 되고, 무엇을 다음에 할지 쉽게 보여줘요' : `수집: ${caughtCount} / ${TINIPINGS.length}`, Math.round(24 * SCALE), Math.round(80 * SCALE));
 
     // 닫기 버튼
     const bw = Math.max(100, Math.round(120 * SCALE));
@@ -4495,51 +4498,65 @@ function drawParentReportPanel(W, H, startY) {
     const m = report.measurement;
     const s = report.summary;
     const q = report.quality;
+    const plain = report.parentSummary;
     const topY = cardY + Math.round(28 * SCALE);
     const tileGap = Math.round(12 * SCALE);
-    const tileW = (cardW - Math.round(44 * SCALE) - tileGap * 2) / 3;
-    const tileH = Math.round(104 * SCALE);
+    const compactReport = cardW < Math.round(520 * SCALE);
+    const tileW = compactReport
+        ? cardW - Math.round(44 * SCALE)
+        : (cardW - Math.round(44 * SCALE) - tileGap * 2) / 3;
+    const tileH = compactReport ? Math.round(88 * SCALE) : Math.round(112 * SCALE);
     const tileX = cardX + Math.round(22 * SCALE);
 
-    drawReportMetricTile(tileX, topY, tileW, tileH, '수리능력 지수', `${m.abilityIndex}`, m.band, '#0f766e');
-    drawReportMetricTile(tileX + tileW + tileGap, topY, tileW, tileH, '추정치 theta', `${m.theta}`, `오차 ${m.standardError}`, '#2563eb');
-    drawReportMetricTile(tileX + (tileW + tileGap) * 2, topY, tileW, tileH, '측정 신뢰도', m.confidenceLabel, m.interval, '#7c3aed');
+    const cards = plain?.metricCards || [
+        { title: '현재 단계', value: m.band, subtitle: m.confidenceLabel },
+        { title: '스스로 푼 비율', value: `${s.independentSolveRate}%`, subtitle: '힌트 거의 없이 맞힌 비율' },
+        { title: '정답률', value: `${s.correctRate}%`, subtitle: `${s.totalAttempts}문항 기준` }
+    ];
+    cards.forEach((tile, index) => {
+        const x = compactReport ? tileX : tileX + (tileW + tileGap) * index;
+        const y = compactReport ? topY + (tileH + tileGap) * index : topY;
+        drawReportMetricTile(x, y, tileW, tileH, tile.title, tile.value, tile.subtitle, ['#0f766e', '#2563eb', '#7c3aed'][index] || '#0f766e');
+    });
 
-    let y = topY + tileH + Math.round(30 * SCALE);
+    let y = topY + (compactReport ? (tileH + tileGap) * cards.length : tileH) + Math.round(30 * SCALE);
     CTX.fillStyle = '#111827';
-    CTX.font = `bold ${Math.round(23 * SCALE)}px Jua, sans-serif`;
+    CTX.font = `bold ${Math.round(27 * SCALE)}px Jua, sans-serif`;
     CTX.textAlign = 'left';
-    CTX.fillText('학습 요약', cardX + Math.round(24 * SCALE), y);
-    y += Math.round(28 * SCALE);
+    CTX.fillText('이번 기록을 쉽게 보면', cardX + Math.round(24 * SCALE), y);
+    y += Math.round(34 * SCALE);
 
     CTX.fillStyle = '#374151';
-    CTX.font = `${Math.round(18 * SCALE)}px Jua, sans-serif`;
+    CTX.font = `${Math.round(22 * SCALE)}px Jua, sans-serif`;
     [
-        `풀이 기록 ${s.totalAttempts}문항 · 정답률 ${s.correctRate}% · 독립 풀이율 ${s.independentSolveRate}%`,
-        `평균 힌트 단계 ${s.averageHintLevel} · 평균 IRT 응답 점수 ${s.averageResponseScore}`,
-        q ? `측정 품질: 신뢰도 ${q.reliability.level}(${q.reliability.score}) · 타당도 ${q.validity.level}(${q.validity.score})` : '측정 품질: 평가 기준을 불러오지 못했습니다.',
-        report.learningPolicy ? `학습 정책: ${report.learningPolicy.description}` : '학습 정책: 기본 적응형 출제를 사용합니다.',
-        report.parentNarrative
-    ].forEach(line => {
+        `풀이 기록 ${s.totalAttempts}문항 · 정답률 ${s.correctRate}% · 스스로 푼 비율 ${s.independentSolveRate}%`,
+        plain?.coreMessage || report.parentNarrative,
+        plain?.strengthText,
+        plain?.concernText,
+        plain?.nextAction ? `다음 행동: ${plain.nextAction}` : null
+    ].filter(Boolean).forEach(line => {
         getLines(CTX, line, cardW - Math.round(48 * SCALE)).forEach(wrapped => {
             CTX.fillText(wrapped, cardX + Math.round(24 * SCALE), y);
-            y += Math.round(24 * SCALE);
+            y += Math.round(29 * SCALE);
         });
     });
 
-    y += Math.round(12 * SCALE);
-    y = drawReportListSection(cardX + Math.round(24 * SCALE), y, cardW - Math.round(48 * SCALE), '측정 품질 확인', [
+    y += Math.round(14 * SCALE);
+    y = drawReportListSection(cardX + Math.round(24 * SCALE), y, cardW - Math.round(48 * SCALE), '해석할 때 주의할 점', plain?.cautionItems || [
+        q?.reliability?.level ? '아직 조심해서 참고해야 하는 기록입니다.' : null,
         ...(q?.reliability.warnings || []),
         ...(q?.validity.gaps || [])
-    ].slice(0, 4));
+    ].filter(Boolean).slice(0, 3));
 
     y += Math.round(14 * SCALE);
     y = drawReportListSection(cardX + Math.round(24 * SCALE), y, cardW - Math.round(48 * SCALE), '보완할 사고 단계', report.weakSkills.map(item => (
-        `${item.label}: 응답점수 ${item.averageResponseScore}, 힌트 ${item.averageHintLevel}`
+        `${item.label}: 이 유형은 문제의 조건을 먼저 말로 정리하고 풀어보세요.`
     )));
 
     y += Math.round(14 * SCALE);
-    drawReportListSection(cardX + Math.round(24 * SCALE), y, cardW - Math.round(48 * SCALE), '다음 추천 학습', report.recommendations);
+    drawReportListSection(cardX + Math.round(24 * SCALE), y, cardW - Math.round(48 * SCALE), '다음 추천 학습', report.recommendations.map(item => (
+        item.replace(/^측정 품질:\s*/, '').replace(/^기록 해석:\s*/, '')
+    )));
 }
 
 function drawReportMetricTile(x, y, w, h, title, value, subtitle, color) {
@@ -4553,31 +4570,45 @@ function drawReportMetricTile(x, y, w, h, title, value, subtitle, color) {
     CTX.restore();
 
     CTX.fillStyle = '#6b7280';
-    CTX.font = `${Math.round(15 * SCALE)}px Jua, sans-serif`;
-    CTX.textAlign = 'left';
-    CTX.fillText(title, x + Math.round(14 * SCALE), y + Math.round(24 * SCALE));
+    drawFittedCanvasText(title, x + Math.round(16 * SCALE), y + Math.round(24 * SCALE), w - Math.round(32 * SCALE), {
+        initialSize: Math.round(19 * SCALE),
+        minSize: Math.round(14 * SCALE),
+        weight: 'bold',
+        align: 'left',
+        baseline: 'middle'
+    });
     CTX.fillStyle = color;
-    CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif`;
-    CTX.fillText(value, x + Math.round(14 * SCALE), y + Math.round(58 * SCALE));
+    drawFittedCanvasText(value, x + Math.round(16 * SCALE), y + Math.round(57 * SCALE), w - Math.round(32 * SCALE), {
+        initialSize: Math.round(28 * SCALE),
+        minSize: Math.round(19 * SCALE),
+        weight: 'bold',
+        align: 'left',
+        baseline: 'middle'
+    });
     CTX.fillStyle = '#4b5563';
-    CTX.font = `${Math.round(14 * SCALE)}px Jua, sans-serif`;
-    CTX.fillText(subtitle, x + Math.round(14 * SCALE), y + Math.round(84 * SCALE));
+    drawFittedCanvasText(subtitle, x + Math.round(16 * SCALE), y + h - Math.round(22 * SCALE), w - Math.round(32 * SCALE), {
+        initialSize: Math.round(17 * SCALE),
+        minSize: Math.round(12 * SCALE),
+        weight: 'bold',
+        align: 'left',
+        baseline: 'middle'
+    });
 }
 
 function drawReportListSection(x, y, w, title, items) {
     CTX.fillStyle = '#111827';
-    CTX.font = `bold ${Math.round(21 * SCALE)}px Jua, sans-serif`;
+    CTX.font = `bold ${Math.round(24 * SCALE)}px Jua, sans-serif`;
     CTX.textAlign = 'left';
     CTX.fillText(title, x, y);
-    y += Math.round(28 * SCALE);
+    y += Math.round(31 * SCALE);
 
     CTX.fillStyle = '#374151';
-    CTX.font = `${Math.round(17 * SCALE)}px Jua, sans-serif`;
+    CTX.font = `${Math.round(20 * SCALE)}px Jua, sans-serif`;
     const list = items && items.length ? items : ['아직 충분한 기록이 없어 더 관찰이 필요합니다.'];
     list.slice(0, 4).forEach(item => {
         getLines(CTX, `- ${item}`, w).forEach(line => {
             CTX.fillText(line, x, y);
-            y += Math.round(23 * SCALE);
+            y += Math.round(27 * SCALE);
         });
     });
     return y;

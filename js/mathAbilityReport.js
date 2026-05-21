@@ -186,9 +186,89 @@ function buildRecommendations(weakSkills, summary) {
     return Array.from(new Set(recommendations)).slice(0, 4);
 }
 
+function getPlainConfidenceText(confidenceLabel, totalAttempts) {
+    if (totalAttempts < 3 || confidenceLabel === '데이터 부족') return '아직 참고용으로만 보세요';
+    if (confidenceLabel === '관찰 중') return '조금 더 풀면 더 정확해져요';
+    if (confidenceLabel === '추정 안정화') return '대체로 방향을 볼 수 있어요';
+    return '비교적 안정적으로 볼 수 있어요';
+}
+
+function getPlainQualityLevel(level) {
+    if (level === '안정적') return '비교적 안정적으로 볼 수 있는 기록입니다.';
+    if (level === '운영 가능') return '다음 학습을 정하는 데 참고할 수 있는 기록입니다.';
+    if (level === '운영 주의') return '아직 조심해서 참고해야 하는 기록입니다.';
+    if (level === '관찰 단계') return '아직 관찰 중인 기록입니다.';
+    return '조금 더 기록이 쌓이면 더 정확해집니다.';
+}
+
+function simplifyParentFacingText(text) {
+    return String(text || '')
+        .replace(/IRT/g, '맞춤 출제 기록')
+        .replace(/theta 값/g, '세부 추정값')
+        .replace(/theta/g, '세부 추정값')
+        .replace(/표준오차/g, '추정 오차')
+        .replace(/Rasch 난이도 b 값/g, '문항 난이도 정보')
+        .replace(/skill_tags와 problem_types/g, '문항 유형 정보')
+        .replace(/skill별/g, '사고 유형별')
+        .replace(/skill에만/g, '사고 유형에만')
+        .replace(/skill을/g, '사고 유형을')
+        .replace(/skill/g, '사고 유형')
+        .replace(/내용타당도/g, '내용 구성')
+        .replace(/응답 과정 타당도/g, '풀이 과정 기록')
+        .replace(/과정타당도/g, '풀이 과정 기록')
+        .replace(/타당도/g, '구성 근거');
+}
+
+function buildParentSummary(measurement, summary, weakSkills, strengths, recommendations, quality) {
+    const topWeak = weakSkills[0];
+    const topStrength = strengths[0];
+    const headline = `${measurement.band} 단계`;
+    const confidenceText = getPlainConfidenceText(measurement.confidenceLabel, summary.totalAttempts);
+    const coreMessage = summary.totalAttempts < 8
+        ? `현재 ${summary.totalAttempts}문항 기록이라 아직 관찰 중입니다. 문제를 더 풀수록 아이에게 맞는 문제 선택이 더 좋아집니다.`
+        : `최근 ${summary.totalAttempts}문항 기록을 보면 ${measurement.band} 단계로 추정됩니다. ${confidenceText}.`;
+    const concernText = topWeak
+        ? `${topWeak.label}에서 도움이 더 필요합니다. 이 유형은 답보다 문제의 관계를 먼저 말하게 해주세요.`
+        : '아직 반복되는 약점은 뚜렷하지 않습니다. 다양한 문장제를 조금 더 풀어보세요.';
+    const strengthText = topStrength
+        ? `${topStrength.label} 유형은 비교적 잘 처리하고 있습니다.`
+        : '강점은 기록이 조금 더 쌓인 뒤 안정적으로 볼 수 있습니다.';
+    const cautionItems = [
+        quality?.reliability?.level ? getPlainQualityLevel(quality.reliability.level) : null,
+        ...(quality?.reliability?.warnings || []),
+        ...(quality?.validity?.gaps || [])
+    ].filter(Boolean).map(simplifyParentFacingText).slice(0, 3);
+
+    return {
+        headline,
+        coreMessage,
+        concernText,
+        strengthText,
+        nextAction: recommendations[0] || '오늘은 관계형 문장제 5문항을 천천히 풀어보세요.',
+        cautionItems,
+        metricCards: [
+            {
+                title: '현재 단계',
+                value: measurement.band,
+                subtitle: confidenceText
+            },
+            {
+                title: '스스로 푼 비율',
+                value: `${summary.independentSolveRate}%`,
+                subtitle: '힌트를 거의 쓰지 않고 맞힌 비율'
+            },
+            {
+                title: '정답률',
+                value: `${summary.correctRate}%`,
+                subtitle: `${summary.totalAttempts}문항 기록 기준`
+            }
+        ]
+    };
+}
+
 function buildQualityRecommendations(quality) {
     if (!quality?.minimumNextActions) return [];
-    return quality.minimumNextActions.map(action => `측정 품질: ${action}`);
+    return quality.minimumNextActions.map(action => `기록 해석: ${simplifyParentFacingText(action)}`);
 }
 
 function buildParentNarrative(measurement, summary, weakSkills, quality) {
@@ -200,10 +280,10 @@ function buildParentNarrative(measurement, summary, weakSkills, quality) {
         ? `보완이 필요한 영역은 ${weakSkills.map(item => item.label).join(', ')}입니다.`
         : '뚜렷하게 반복되는 약점은 아직 관찰되지 않았습니다.';
     const qualityText = quality
-        ? `신뢰도는 ${quality.reliability.level}, 타당도는 ${quality.validity.level}입니다.`
+        ? getPlainQualityLevel(quality.reliability.level)
         : '';
 
-    return `현재 수리능력은 ${measurement.band} 단계로 추정됩니다. 추정치는 ${measurement.theta}이고 표준오차는 ${measurement.standardError}이므로 ${measurement.confidenceLabel} 수준으로 해석해야 합니다. ${qualityText} ${weakText}`;
+    return `현재 수리능력은 ${measurement.band} 단계로 추정됩니다. ${getPlainConfidenceText(measurement.confidenceLabel, summary.totalAttempts)}. ${qualityText} ${weakText}`;
 }
 
 function buildParentReport(options = {}) {
@@ -244,6 +324,7 @@ function buildParentReport(options = {}) {
         ...buildRecommendations(weakSkills, summary),
         ...buildQualityRecommendations(quality)
     ];
+    const uniqueRecommendations = Array.from(new Set(recommendations)).slice(0, 5);
 
     return {
         generatedAt: new Date().toISOString(),
@@ -254,7 +335,8 @@ function buildParentReport(options = {}) {
         strengths,
         quality,
         learningPolicy,
-        recommendations: Array.from(new Set(recommendations)).slice(0, 5),
+        recommendations: uniqueRecommendations,
+        parentSummary: buildParentSummary(measurement, summary, weakSkills, strengths, uniqueRecommendations, quality),
         parentNarrative: buildParentNarrative(measurement, summary, weakSkills, quality)
     };
 }
