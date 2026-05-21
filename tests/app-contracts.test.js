@@ -190,10 +190,13 @@ function testSupabaseClientUsesPublicConfig() {
 function testItemCalibrationLoadsBeforeGameRuntime() {
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   const calibrationIndex = html.indexOf('js/itemCalibration.js');
+  const calibrationSyncIndex = html.indexOf('js/itemCalibrationSync.js');
   const gameIndex = html.indexOf('js/game.js');
 
   assert.ok(calibrationIndex > 0, 'index.html must load js/itemCalibration.js');
+  assert.ok(calibrationSyncIndex > calibrationIndex, 'index.html must load js/itemCalibrationSync.js after itemCalibration.js');
   assert.ok(gameIndex > calibrationIndex, 'item calibration must load before game runtime');
+  assert.ok(gameIndex > calibrationSyncIndex, 'remote item calibration sync must load before game runtime');
 }
 
 function testCurriculumTopicSections() {
@@ -425,6 +428,93 @@ function testItemCalibrationAdjustsDifficultyFromAccumulatedResponses() {
   assert.strictEqual(bank[2].irt.calibrated_b, undefined);
   assert.strictEqual(summary.usableCount, 2);
   assert.strictEqual(summary.insufficientCount, 1);
+}
+
+function testItemCalibrationAppliesRemoteAggregateStats() {
+  const context = createContext();
+  runScript(context, 'js/itemCalibration.js');
+
+  const bank = [
+    { problem_id: 'remote_easy', irt: { model: 'rasch', b: 0.8 } },
+    { problem_id: 'remote_hard', irt: { model: 'rasch', b: -0.6 } },
+    { problem_id: 'remote_thin', irt: { model: 'rasch', b: 0.2 } }
+  ];
+  const stats = [
+    {
+      item_id: 'remote_easy',
+      attempt_count: 60,
+      average_theta_before: 0,
+      average_response_score: 0.9,
+      correct_rate: 0.92
+    },
+    {
+      item_id: 'remote_hard',
+      attempt_count: 60,
+      average_theta_before: 0,
+      average_response_score: 0.12,
+      correct_rate: 0.1
+    },
+    {
+      item_id: 'remote_thin',
+      attempt_count: 4,
+      average_theta_before: 0,
+      average_response_score: 0.9,
+      correct_rate: 0.9
+    }
+  ];
+
+  const summary = context.window.ItemCalibration.applyStatsToBank(bank, stats, {
+    minAttempts: 20,
+    fullWeightAttempts: 60,
+    maxWeight: 0.85,
+    source: 'remote'
+  });
+
+  assert.ok(bank[0].irt.calibrated_b < 0.8, `remote easy item should become easier: ${bank[0].irt.calibrated_b}`);
+  assert.ok(bank[1].irt.calibrated_b > -0.6, `remote hard item should become harder: ${bank[1].irt.calibrated_b}`);
+  assert.strictEqual(bank[0].irt.calibration.source, 'remote');
+  assert.strictEqual(bank[0].irt.calibration.populationAttemptCount, 60);
+  assert.strictEqual(bank[2].irt.calibration.confidence, 'insufficient');
+  assert.strictEqual(summary.source, 'remote');
+  assert.strictEqual(summary.calibratedCount, 2);
+  assert.strictEqual(summary.insufficientCount, 1);
+}
+
+function testLocalCalibrationDoesNotOverwriteRemoteAggregateCalibration() {
+  const context = createContext();
+  runScript(context, 'js/itemCalibration.js');
+
+  const bank = [
+    {
+      problem_id: 'remote_preserved',
+      irt: {
+        model: 'rasch',
+        b: 0.6,
+        design_b: 0.6,
+        calibrated_b: -0.5,
+        calibration: {
+          confidence: 'stable',
+          source: 'remote',
+          attemptCount: 80,
+          populationAttemptCount: 80
+        }
+      }
+    }
+  ];
+  const localAttempts = makeCalibrationAttempts('remote_preserved', 12, {
+    correct: false,
+    responseScore: 0.1,
+    thetaBefore: 0
+  });
+
+  context.window.ItemCalibration.applyToBank(bank, localAttempts, {
+    minAttempts: 5,
+    fullWeightAttempts: 10
+  });
+
+  assert.strictEqual(bank[0].irt.calibrated_b, -0.5);
+  assert.strictEqual(bank[0].irt.calibration.source, 'remote');
+  assert.strictEqual(bank[0].irt.calibration.populationAttemptCount, 80);
 }
 
 function testIrtEngineUsesCalibratedDifficultyWhenUsable() {
@@ -1687,6 +1777,106 @@ async function testIrtSyncKeepsPendingWhenAnonymousAuthIsUnavailable() {
   assert.strictEqual(status.pending, 1);
 }
 
+async function testItemCalibrationSyncFetchesRemoteRpcAndAppliesStats() {
+  const context = createStorageContext();
+  const rpcCalls = [];
+  const bank = [
+    { problem_id: 'RPC_EASY', irt: { model: 'rasch', b: 0.9 } },
+    { problem_id: 'RPC_HARD', irt: { model: 'rasch', b: -0.4 } }
+  ];
+
+  context.window.MathAppSupabase = {
+    getClient() {
+      return {
+        rpc: async (name, args) => {
+          rpcCalls.push({ name, args });
+          return {
+            data: [
+              {
+                item_id: 'RPC_EASY',
+                attempt_count: 45,
+                average_theta_before: 0,
+                average_response_score: 0.9,
+                correct_rate: 0.91
+              },
+              {
+                item_id: 'RPC_HARD',
+                attempt_count: 45,
+                average_theta_before: 0,
+                average_response_score: 0.18,
+                correct_rate: 0.16
+              }
+            ],
+            error: null
+          };
+        }
+      };
+    }
+  };
+
+  runScript(context, 'js/itemCalibration.js');
+  runScript(context, 'js/itemCalibrationSync.js');
+
+  const result = await context.window.ItemCalibrationSync.refresh(bank, {
+    minAttempts: 20,
+    maxItems: 500,
+    fullWeightAttempts: 40
+  });
+
+  assert.strictEqual(result.ok, true);
+  assert.strictEqual(rpcCalls.length, 1);
+  assert.strictEqual(rpcCalls[0].name, 'get_item_calibration_stats');
+  assert.strictEqual(rpcCalls[0].args.min_attempts, 20);
+  assert.strictEqual(rpcCalls[0].args.max_items, 500);
+  assert.strictEqual(result.summary.calibratedCount, 2);
+  assert.strictEqual(bank[0].irt.calibration.source, 'remote');
+  assert.ok(bank[0].irt.calibrated_b < 0.9);
+  assert.ok(bank[1].irt.calibrated_b > -0.4);
+  assert.ok(context.localStorage.getItem('math-item-calibration-stats:v1').includes('RPC_EASY'));
+  assert.strictEqual(context.window.ItemCalibrationSync.getStatus().state, 'applied');
+}
+
+async function testItemCalibrationSyncFallsBackToCachedStats() {
+  const context = createStorageContext();
+  const bank = [
+    { problem_id: 'CACHED_ITEM', irt: { model: 'rasch', b: 0.7 } }
+  ];
+  context.localStorage.setItem('math-item-calibration-stats:v1', JSON.stringify({
+    savedAt: '2026-05-22T00:00:00.000Z',
+    stats: [
+      {
+        item_id: 'CACHED_ITEM',
+        attempt_count: 50,
+        average_theta_before: 0,
+        average_response_score: 0.9,
+        correct_rate: 0.92
+      }
+    ]
+  }));
+  context.window.MathAppSupabase = {
+    getClient() {
+      return {
+        rpc: async () => ({ data: null, error: { message: 'rpc missing' } })
+      };
+    }
+  };
+
+  runScript(context, 'js/itemCalibration.js');
+  runScript(context, 'js/itemCalibrationSync.js');
+
+  const result = await context.window.ItemCalibrationSync.refresh(bank, {
+    minAttempts: 20,
+    allowCacheFallback: true
+  });
+
+  assert.strictEqual(result.ok, true);
+  assert.strictEqual(result.source, 'cache');
+  assert.strictEqual(result.summary.calibratedCount, 1);
+  assert.strictEqual(bank[0].irt.calibration.source, 'remote');
+  assert.ok(bank[0].irt.calibrated_b < 0.7);
+  assert.strictEqual(context.window.ItemCalibrationSync.getStatus().state, 'cache_applied');
+}
+
 function testMeasurementQualityRatesReliabilityAndValidityConservatively() {
   const context = createContext();
   runScript(context, 'js/measurementQuality.js');
@@ -2121,6 +2311,8 @@ async function runTests() {
   testAdaptiveLearningFlowStartsWithoutManualSchoolSelection();
   testLearnerProfilesSeparateStateAndAttemptLogs();
   testItemCalibrationAdjustsDifficultyFromAccumulatedResponses();
+  testItemCalibrationAppliesRemoteAggregateStats();
+  testLocalCalibrationDoesNotOverwriteRemoteAggregateCalibration();
   testItemCalibrationLoadsBeforeGameRuntime();
   testElementaryWordProblemSeedBankContract();
   testExpandedSeedBankConvertsIntoIrtRuntimeItems();
@@ -2150,6 +2342,8 @@ async function runTests() {
   await testIrtSyncUploadsPendingAttemptsOnlyForAuthenticatedLearners();
   await testIrtSyncUsesAnonymousAuthWhenNoSessionExists();
   await testIrtSyncKeepsPendingWhenAnonymousAuthIsUnavailable();
+  await testItemCalibrationSyncFetchesRemoteRpcAndAppliesStats();
+  await testItemCalibrationSyncFallsBackToCachedStats();
   testMeasurementQualityRatesReliabilityAndValidityConservatively();
   testMathAbilityReportSummarizesIrtEvidenceForParents();
   testParentReportUsesKoreanLabelsForAllProblemTags();

@@ -481,6 +481,7 @@ function selectLearner(id) {
 
     STATE.mode = STATE.mode === 'learnerSelect' || STATE.mode === 'home' ? 'map' : STATE.mode;
     refreshItemCalibration();
+    refreshRemoteItemCalibration({ throttleMs: 0 });
     saveState();
     return profile;
 }
@@ -597,6 +598,18 @@ function refreshItemCalibration() {
     );
 }
 
+function refreshRemoteItemCalibration(options = {}) {
+    if (!window.ItemCalibrationSync?.refresh || !window.RelationshipCoachProblems?.bank) {
+        return Promise.resolve(null);
+    }
+
+    return window.ItemCalibrationSync.refresh(window.RelationshipCoachProblems.bank, {
+        minAttempts: 20,
+        allowCacheFallback: true,
+        ...options
+    });
+}
+
 function getRelationCoachStepSuccessRate() {
     if (!STATE.problem?.coachSteps?.length || !STATE.relationCoach) return undefined;
     const steps = window.RelationCoach?.getSteps?.(STATE.problem) || STATE.problem.coachSteps;
@@ -653,7 +666,11 @@ function updateIrtAfterAnswer(correct) {
         window.IrtLog.appendAttempt(record);
         refreshItemCalibration();
         if (window.IrtSync?.requestSync) {
-            window.IrtSync.requestSync('attempt_saved');
+            window.IrtSync.requestSync('attempt_saved').then(syncResult => {
+                if (syncResult?.ok) {
+                    refreshRemoteItemCalibration();
+                }
+            });
         }
     }
 }
@@ -4993,6 +5010,7 @@ function startAdaptiveLearning() {
     Object.assign(STATE, patch);
     ensureIrtState();
     refreshItemCalibration();
+    refreshRemoteItemCalibration();
     ensureProblem();
     saveState();
 }
@@ -5498,6 +5516,7 @@ Promise.all([
 ]).then(() => {
     console.log('모든 리소스 로드 완료');
     refreshItemCalibration();
+    refreshRemoteItemCalibration({ throttleMs: 0 });
     loadEncyclopedia();
     window.scrollTo(0, 0);
     requestAnimationFrame(frame);

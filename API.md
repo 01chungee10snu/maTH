@@ -11,4 +11,16 @@
 3. 이전에 노출된 `service_role` 키는 Supabase 콘솔에서 즉시 회전합니다.
 4. 아동 학습 데이터는 최소 수집, 삭제 기능, 보호자 동의 정책을 먼저 정합니다.
 5. 로컬 비공개 override가 필요하면 `.env` 또는 `js/supabaseLocalConfig.js`를 사용하고 커밋하지 않습니다.
-6. `docs/supabase/irt_schema.sql`을 Supabase SQL editor에서 적용해야 서버 저장이 정상 동작합니다.
+6. `docs/supabase/irt_schema.sql`을 Supabase SQL editor에서 적용해야 서버 저장과 문항별 집계 난이도 보정 RPC가 정상 동작합니다.
+
+## Supabase 문항 난이도 보정 적용 확인
+
+`docs/supabase/irt_schema.sql`을 적용하면 `get_item_calibration_stats(min_attempts, max_items)` RPC가 생성됩니다. 이 함수는 개별 아동 로그를 노출하지 않고 문항별 응답 수, 평균 응답점수, 정답률, 평균 풀이 전 능력값만 집계해 반환합니다.
+
+브라우저 콘솔에서 다음을 실행해 확인할 수 있습니다.
+
+```js
+await ItemCalibrationSync.fetchStats({ minAttempts: 20, maxItems: 10 })
+```
+
+`ok: true`와 `stats` 배열이 나오면 전체 운영 데이터 기반 보정이 켜진 상태입니다. `PGRST202`가 나오면 SQL 함수가 아직 Supabase 프로젝트에 적용되지 않은 상태이며, 앱은 로컬/캐시 기반 보정으로 계속 동작합니다.

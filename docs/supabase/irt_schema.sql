@@ -109,3 +109,43 @@ on public.learner_skill_states
 for all
 using (auth.uid() = learner_id)
 with check (auth.uid() = learner_id);
+
+create or replace function public.get_item_calibration_stats(
+  min_attempts integer default 20,
+  max_items integer default 5000
+)
+returns table (
+  item_id text,
+  attempt_count integer,
+  correct_count integer,
+  average_response_score numeric,
+  correct_rate numeric,
+  average_theta_before numeric,
+  average_theta_after numeric,
+  average_hint_level numeric,
+  last_attempt_at timestamptz
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    attempts.item_id,
+    count(*)::integer as attempt_count,
+    sum(case when attempts.correct then 1 else 0 end)::integer as correct_count,
+    avg(attempts.response_score)::numeric as average_response_score,
+    avg(case when attempts.correct then 1.0 else 0.0 end)::numeric as correct_rate,
+    avg(coalesce(attempts.theta_before, 0))::numeric as average_theta_before,
+    avg(coalesce(attempts.theta_after, attempts.theta_before, 0))::numeric as average_theta_after,
+    avg(attempts.hint_level)::numeric as average_hint_level,
+    max(attempts.created_at) as last_attempt_at
+  from public.learning_attempts attempts
+  where attempts.item_id is not null
+    and attempts.response_score is not null
+  group by attempts.item_id
+  having count(*) >= greatest(min_attempts, 1)
+  order by count(*) desc, max(attempts.created_at) desc
+  limit greatest(max_items, 1);
+$$;
+
+grant execute on function public.get_item_calibration_stats(integer, integer) to anon, authenticated;
