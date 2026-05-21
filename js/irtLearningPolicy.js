@@ -310,15 +310,14 @@ function selectPolicyNextItem(items, state = {}) {
     let candidatePool;
     if (phase === 'targeted_practice' && targetPool.length) {
         const targetComplexPool = targetPool.filter(isPolicyComplexWordProblem);
-        candidatePool = targetComplexPool.length >= Math.min(4, Math.ceil(targetPool.length * 0.3))
+        candidatePool = isK12MathState(state)
+            ? targetPool
+            : targetComplexPool.length >= Math.min(4, Math.ceil(targetPool.length * 0.3))
             ? targetComplexPool
             : targetPool;
     } else {
         const complexCandidatePool = broadCandidatePool.filter(isPolicyComplexWordProblem);
-        const shouldPreferComplex = !(isK12MathState(state)
-            && Number.isFinite(state.theta)
-            && state.theta < -1.8
-            && phase === 'diagnostic');
+        const shouldPreferComplex = !isK12MathState(state);
         candidatePool = shouldPreferComplex && complexCandidatePool.length >= Math.min(20, Math.ceil(broadCandidatePool.length * 0.15))
             ? complexCandidatePool
             : broadCandidatePool;

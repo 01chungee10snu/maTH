@@ -416,6 +416,60 @@ function summarizeExamples(failures) {
   }, {});
 }
 
+function normalizeK12Template(text) {
+  return normalizeText(text)
+    .replace(/[0-9]+(?:\.[0-9]+)?\/[0-9]+(?:\.[0-9]+)?/g, 'F')
+    .replace(/[0-9]+(?:\.[0-9]+)?/g, 'N')
+    .replace(/[A-D]/g, 'X')
+    .replace(/[㉮㉯㉰㉱]/g, 'X');
+}
+
+function auditK12Diversity(seedItems) {
+  const failures = [];
+  const questionGroups = new Map();
+  const levelItems = new Map();
+
+  seedItems.forEach(item => {
+    const question = normalizeText(item.problem);
+    if (!questionGroups.has(question)) questionGroups.set(question, []);
+    questionGroups.get(question).push(item);
+    if (!levelItems.has(item.difficulty)) levelItems.set(item.difficulty, []);
+    levelItems.get(item.difficulty).push(item);
+  });
+
+  Array.from(questionGroups.values())
+    .filter(group => group.length > 1)
+    .slice(0, 20)
+    .forEach(group => {
+      failures.push({
+        label: `k12-duplicate:${group[0]?.id || 'unknown'}`,
+        id: group[0]?.id,
+        question: normalizeText(group[0]?.problem),
+        answer: normalizeText(group[0]?.answer),
+        issues: ['k12_exact_duplicate_question']
+      });
+    });
+
+  Array.from(levelItems.entries()).forEach(([level, items]) => {
+    const uniqueQuestions = new Set(items.map(item => normalizeText(item.problem))).size;
+    const templateCount = new Set(items.map(item => normalizeK12Template(item.problem))).size;
+    if (uniqueQuestions < 30 || templateCount < 6) {
+      failures.push({
+        label: `k12-level-diversity:${level}`,
+        id: `level-${level}`,
+        question: `level ${level}`,
+        answer: '',
+        issues: [
+          uniqueQuestions < 30 ? 'k12_level_unique_question_low' : null,
+          templateCount < 6 ? 'k12_level_template_diversity_low' : null
+        ].filter(Boolean)
+      });
+    }
+  });
+
+  return failures;
+}
+
 function runAudit() {
   const failures = [];
   const context = loadProblemContext();
@@ -471,6 +525,7 @@ function runAudit() {
   if (fs.existsSync(k12Path)) {
     const rawK12Bank = JSON.parse(fs.readFileSync(k12Path, 'utf8'));
     k12SeedItems = Array.isArray(rawK12Bank.items) ? rawK12Bank.items : [];
+    failures.push(...auditK12Diversity(k12SeedItems));
     convertedK12 = context.window.ExpandedWordProblemBank.convert(rawK12Bank);
     convertedK12.forEach(item => {
       const metadataFailure = auditBankItemMetadata(item, 'k12-expanded-metadata');

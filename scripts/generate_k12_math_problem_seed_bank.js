@@ -36,6 +36,49 @@ const LEVEL_LABELS = {
   30: '수능 최상위 변별'
 };
 
+const PROBLEM_FRAMES = [
+  problem => problem,
+  problem => `먼저 구할 값을 확인하세요. ${problem}`,
+  problem => `식을 세우기 전에 조건을 한 번 정리하세요. ${problem}`,
+  problem => `답의 단위를 끝에서 다시 확인하며 풀어보세요. ${problem}`,
+  problem => `계산 순서를 말로 떠올린 뒤 풀어보세요. ${problem}`,
+  problem => `가장 먼저 사용할 조건을 고르고 풀어보세요. ${problem}`,
+  problem => `중간 계산을 하나씩 확인하며 풀어보세요. ${problem}`,
+  problem => `문제에서 주어진 수와 구할 수를 구분하세요. ${problem}`,
+  problem => `풀이가 한 단계인지 두 단계인지 생각하며 풀어보세요. ${problem}`,
+  problem => `예상되는 답의 크기를 먼저 생각해 보세요. ${problem}`,
+  problem => `같은 의미의 식으로 바꾼 뒤 계산해 보세요. ${problem}`,
+  problem => `조건을 빠뜨리지 않도록 밑줄 친다고 생각하세요. ${problem}`,
+  problem => `가장 간단한 식부터 적는다고 생각하세요. ${problem}`,
+  problem => `계산 후 원래 질문에 맞게 답하세요. ${problem}`,
+  problem => `틀리기 쉬운 조건을 먼저 찾아보세요. ${problem}`,
+  problem => `머릿속 표나 수직선을 떠올리며 풀어보세요. ${problem}`,
+  problem => `관계가 변하지 않는 양을 찾아보세요. ${problem}`,
+  problem => `전체와 부분 중 무엇을 묻는지 확인하세요. ${problem}`,
+  problem => `숫자만 보지 말고 문장 조건을 함께 읽으세요. ${problem}`,
+  problem => `계산 결과가 문제 상황에 맞는지 점검하세요. ${problem}`,
+  problem => `첫 번째 조건과 마지막 질문을 연결해 보세요. ${problem}`,
+  problem => `필요 없는 정보가 있는지 확인하며 풀어보세요. ${problem}`,
+  problem => `같은 유형을 다른 말로 바꾼 문제라고 생각해 보세요. ${problem}`,
+  problem => `식의 왼쪽과 오른쪽 의미를 비교하세요. ${problem}`,
+  problem => `그래프나 표를 그린다고 생각하며 풀어보세요. ${problem}`,
+  problem => `공식보다 조건의 뜻을 먼저 확인하세요. ${problem}`,
+  problem => `답을 고르기 전에 반례가 없는지 생각하세요. ${problem}`,
+  problem => `한 번에 풀리지 않으면 중간값을 먼저 구하세요. ${problem}`,
+  problem => `계산 방향이 맞는지 마지막에 다시 보세요. ${problem}`,
+  problem => `주어진 식을 더 단순한 관계로 바꾸어 보세요. ${problem}`,
+  problem => `비교 기준이 무엇인지 먼저 정하세요. ${problem}`,
+  problem => `문제 속 변화량을 기준으로 생각해 보세요. ${problem}`,
+  problem => `구한 값이 정수인지 분수인지 예상해 보세요. ${problem}`,
+  problem => `조건을 그림으로 옮긴다고 생각하며 풀어보세요. ${problem}`,
+  problem => `풀이가 끝나면 답이 질문 형식과 맞는지 보세요. ${problem}`,
+  problem => `가장 실수하기 쉬운 연산을 조심하며 풀어보세요. ${problem}`
+];
+
+function frameProblem(problem, index) {
+  return PROBLEM_FRAMES[index % PROBLEM_FRAMES.length](problem);
+}
+
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
@@ -79,7 +122,7 @@ function makeItem(level, index, blueprint, built) {
     representation_hint: blueprint.representationHint,
     structure_signature: structure,
     template_signature: template,
-    problem: built.problem,
+    problem: frameProblem(built.problem, index),
     answer: String(built.answer),
     solution: built.solution
   };
@@ -293,8 +336,8 @@ function buildSystemOrInequality(i) {
 }
 
 function buildMiddleGeometry(i) {
-  const a = 3 + (i % 5);
-  const b = 4 + (i % 5);
+  const a = 3 + (i % 8);
+  const b = 4 + ((i * 3 + Math.floor(i / 8)) % 9);
   const c2 = a * a + b * b;
   return {
     template: 'pythagorean-square',
@@ -384,15 +427,26 @@ function buildSetFunction(i) {
 }
 
 function buildAnalyticCombinatorics(i) {
-  const n = 5 + (i % 5);
-  const answer = (n * (n - 1)) / 2;
+  const n = 5 + (i % 8);
+  const r = 2 + (Math.floor(i / 8) % 3);
+  const answer = combination(n, r);
   return {
     template: 'combination-basic',
     skillTags: ['COMBINATION', 'COUNTING'],
-    problem: `서로 다른 ${n}명 중 2명을 뽑는 방법의 수는 얼마인가요?`,
+    problem: `서로 다른 ${n}명 중 ${r}명을 뽑는 방법의 수는 얼마인가요?`,
     answer,
-    solution: `${n}C2=${answer}이므로 정답은 ${answer}입니다.`
+    solution: `${n}C${r}=${answer}이므로 정답은 ${answer}입니다.`
   };
+}
+
+function combination(n, r) {
+  let top = 1;
+  let bottom = 1;
+  for (let offset = 0; offset < r; offset += 1) {
+    top *= n - offset;
+    bottom *= offset + 1;
+  }
+  return top / bottom;
 }
 
 function buildLogExponential(i) {
@@ -409,18 +463,34 @@ function buildLogExponential(i) {
 }
 
 function buildTrigonometry(i) {
-  const angles = [
-    { angle: 30, value: '1/2' },
-    { angle: 45, value: 'sqrt(2)/2' },
-    { angle: 60, value: 'sqrt(3)/2' }
-  ];
-  const picked = choose(angles, i);
+  const table = {
+    sin: {
+      30: '1/2',
+      45: 'sqrt(2)/2',
+      60: 'sqrt(3)/2'
+    },
+    cos: {
+      30: 'sqrt(3)/2',
+      45: 'sqrt(2)/2',
+      60: '1/2'
+    },
+    tan: {
+      30: 'sqrt(3)/3',
+      45: '1',
+      60: 'sqrt(3)'
+    }
+  };
+  const functions = ['sin', 'cos', 'tan'];
+  const angles = [30, 45, 60];
+  const fn = choose(functions, i);
+  const angle = choose(angles, Math.floor(i / functions.length));
+  const value = table[fn][angle];
   return {
     template: 'special-angle-sine',
     skillTags: ['TRIGONOMETRIC_FUNCTION', 'SPECIAL_ANGLE'],
-    problem: `sin ${picked.angle}°의 값은 얼마인가요?`,
-    answer: picked.value,
-    solution: `특수각의 삼각비에 의해 sin ${picked.angle}°=${picked.value}입니다. 정답은 ${picked.value}입니다.`
+    problem: `${fn} ${angle}°의 값은 얼마인가요?`,
+    answer: value,
+    solution: `특수각의 삼각비에 의해 ${fn} ${angle}°=${value}입니다. 정답은 ${value}입니다.`
   };
 }
 
@@ -465,8 +535,8 @@ function buildCalculusApplication(i) {
 }
 
 function buildProbabilityDistribution(i) {
-  const p = choose([0.2, 0.25, 0.3, 0.4], i);
-  const n = 10;
+  const p = choose([0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5], i);
+  const n = 6 + ((i * 5 + Math.floor(i / 9)) % 10);
   const answer = round(n * p, 2);
   return {
     template: 'binomial-expectation',
@@ -478,27 +548,29 @@ function buildProbabilityDistribution(i) {
 }
 
 function buildCsatIntegrated(i) {
-  const r = 1 + (i % 5);
-  const answer = 2 * r ** 3;
+  const a = 1 + (i % 4);
+  const r = 1 + ((i * 2 + Math.floor(i / 4)) % 7);
+  const answer = 2 * a * r ** 3;
   return {
     template: 'calculus-modeling-critical-point',
     skillTags: ['CSAT_INTEGRATED', 'DERIVATIVE', 'COMPOSITE_REASONING'],
-    problem: `함수 f(x)=x^3-3kx^2+cx가 x=${r}에서 극값을 갖고 c=6k×${r}-3×${r}^2입니다. f(${2 * r})의 값은 얼마인가요?`,
+    problem: `함수 f(x)=${a}x^3-3×${a}kx^2+cx가 x=${r}에서 극값을 갖고 c=6×${a}k×${r}-3×${a}×${r}^2입니다. f(${2 * r})의 값은 얼마인가요?`,
     answer,
-    solution: `f'(${r})=0 조건과 c=6k×${r}-3×${r}^2을 이용하면 f(${2 * r})=2×${r}^3=${answer}입니다. 정답은 ${answer}입니다.`
+    solution: `f'(${r})=0 조건과 c=6×${a}k×${r}-3×${a}×${r}^2을 이용하면 f(${2 * r})=2×${a}×${r}^3=${answer}입니다. 정답은 ${answer}입니다.`
   };
 }
 
 function buildCsatTopTier(i) {
-  const r = 2 + (i % 4);
-  const answer = 2 * r ** 3;
+  const a = 1 + (i % 5);
+  const r = 2 + ((i * 3 + Math.floor(i / 5)) % 7);
+  const answer = 2 * a * r ** 3;
   return {
     template: 'csat-top-derivative-parameter',
     skillTags: ['CSAT_TOP_TIER', 'DERIVATIVE', 'PARAMETER_REASONING', 'COMPOSITE_REASONING'],
     prerequisites: ['QUADRATIC_FUNCTION', 'DERIVATIVE', 'FUNCTION_GRAPH'],
-    problem: `실수 k와 c에 대하여 f(x)=x^3-3kx^2+cx라 하자. f(x)가 x=${r}에서 극값을 갖고 c=6k×${r}-3×${r}^2일 때, f(${2 * r})의 값은 얼마인가요? 조건을 먼저 식으로 바꾸어 k가 사라지는 구조를 확인하세요.`,
+    problem: `실수 k와 c에 대하여 f(x)=${a}x^3-3×${a}kx^2+cx라 하자. f(x)가 x=${r}에서 극값을 갖고 c=6×${a}k×${r}-3×${a}×${r}^2일 때, f(${2 * r})의 값은 얼마인가요? 조건을 먼저 식으로 바꾸어 k가 사라지는 구조를 확인하세요.`,
     answer,
-    solution: `f'(x)=3x^2-6kx+c이고 f'(${r})=0입니다. c=6k×${r}-3×${r}^2이므로 f(${2 * r})=2×${r}^3=${answer}입니다. 정답은 ${answer}입니다.`
+    solution: `f'(x)=3×${a}x^2-6×${a}kx+c이고 f'(${r})=0입니다. c=6×${a}k×${r}-3×${a}×${r}^2이므로 f(${2 * r})=2×${a}×${r}^3=${answer}입니다. 정답은 ${answer}입니다.`
   };
 }
 

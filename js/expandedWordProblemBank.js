@@ -6,7 +6,7 @@
    ========================================================================= */
 
 const EXPANDED_WORD_BANK_URL = 'data/elementary_word_problem_seed_bank.json?v=20260521-diversity-v3';
-const K12_MATH_BANK_URL = 'data/k12_math_problem_seed_bank.json?v=20260521-k12-v1';
+const K12_MATH_BANK_URL = 'data/k12_math_problem_seed_bank.json?v=20260522-k12-v2';
 const EXPANDED_WORD_BANK_URLS = [EXPANDED_WORD_BANK_URL, K12_MATH_BANK_URL];
 
 function clampExpandedBank(value, min, max) {

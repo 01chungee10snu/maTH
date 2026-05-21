@@ -541,6 +541,18 @@ function testK12MathProblemSeedBankContract() {
   const domains = new Set();
   const courses = new Set();
   const ids = new Set();
+  const exactQuestionGroups = getDuplicateGroups(bank.items, item => item.problem || '');
+  const normalizedTemplateCount = new Set(bank.items.map(item => normalizeProblemTemplate(item.problem || ''))).size;
+
+  assert.strictEqual(
+    exactQuestionGroups.length,
+    0,
+    `K-12 bank has exact duplicate questions, first duplicate: ${exactQuestionGroups[0]?.[0]?.problem}`
+  );
+  assert.ok(
+    normalizedTemplateCount >= 180,
+    `K-12 bank template diversity too low: ${normalizedTemplateCount}`
+  );
 
   for (const item of bank.items) {
     assert.ok(item.id);
@@ -567,7 +579,12 @@ function testK12MathProblemSeedBankContract() {
   }
 
   for (let level = 1; level <= 30; level += 1) {
-    assert.ok((levels.get(level) || []).length >= 12, `level ${level} needs at least 12 K-12 items`);
+    const levelItems = levels.get(level) || [];
+    const levelUniqueQuestions = new Set(levelItems.map(item => item.problem)).size;
+    const levelTemplateCount = new Set(levelItems.map(item => normalizeProblemTemplate(item.problem))).size;
+    assert.ok(levelItems.length >= 12, `level ${level} needs at least 12 K-12 items`);
+    assert.ok(levelUniqueQuestions >= 30, `level ${level} needs at least 30 unique questions, got ${levelUniqueQuestions}`);
+    assert.ok(levelTemplateCount >= 6, `level ${level} needs at least 6 normalized templates, got ${levelTemplateCount}`);
   }
   expectedSchoolBands.forEach(value => assert.ok(schoolBands.has(value), `missing school band ${value}`));
   expectedDomains.forEach(value => assert.ok(domains.has(value), `missing domain ${value}`));
